@@ -1,0 +1,64 @@
+# 스마트한 웹사이트 구축 방법론 정리 - The Smart Way to Build Websites
+
+> Original issue: shaun0927/stocktitan-crawler#521
+
+# 스마트한 웹사이트 구축 방법론 - Design System & Efficiency 관점
+
+> **출처**: "The Smart Way to Build Websites" 영상 트랜스크립트 분석  
+> **관점**: 디자인 시스템 효율성 및 실전 노하우
+
+---
+
+## 📌 핵심 철학
+
+### 1. 컴포넌트 기반 사고방식
+
+**"레고 블록처럼 생각하라"**
+
+- 매번 나무를 깎아서 새 블록을 만드는 대신, 미리 만들어진 레고 블록으로 조립
+- 디자인 시스템 = 재사용 가능한 UI 컴포넌트 + 글로벌 CSS 스타일 + 유틸리티 클래스의 집합
+- 처음부터 스타일을 다시 작성하지 않고, 사전 정의된 컴포넌트로 개발 속도 향상
+
+### 2. "Design First, Then Build"
+
+**Step 0: 반드시 디자인부터**
+
+1. **디자인 능력이 없다면**: 영상/튜토리얼로 기본기 습득
+2. **영감 수집**:
+   - Mobin (강력 추천): 필터링이 쉽고, 실제로 검증된 수백 개의 디자인 탐색 가능
+   - 경쟁사 분석
+   - Figma 커뮤니티
+3. **패턴 분석**: 실제 웹사이트들을 분석하면 대부분 **2~3개의 반복 컴포넌트**로 구성됨을 발견
+
+---
+
+## 🔍 실전 사례 분석: 컴포넌트 재사용 패턴
+
+### 분석 대상 웹사이트의 구조
+
+```
+페이지 구조:
+├── Header (글로벌 컴포넌트)
+├── Hero Section (글로벌 컴포넌트)
+├── Testimonial Cards (동일 컴포넌트 반복)
+├── Bento Grid (동일 컴포넌트, flexbox로 동적 레이아웃)
+├── 2-Column Section (이미지 + 텍스트)
+│   ├── 왼쪽: 이미지
+│   └── 오른쪽: Subheading + Heading + Details
+├── 2-Column Section (Reversed)
+│   └── flex-direction만 reverse (동일 컴포넌트!)
+├── CTA Section (글로벌 컴포넌트)
+└── Footer (글로벌 컴포넌트)
+```
+
+### 핵심 발견
+
+| 관찰 | 인사이트 |
+|------|----------|
+| **전체 페이지가 2개의 메인 컴포넌트로 구성** | 섹션들은 props만 다르고 구조는 동일 |
+| **4개 섹션 = 동일 컴포넌트** | Icon + Heading + Details (3개 props) |
+| **2-Column 레이아웃 = 1개 컴포넌트** | flex-direction: reverse로 좌우 전환 |
+| **모든 페이지가 같은 패턴** | Header, Hero, 반복 섹션, CTA, Footer |
+| **YouTube 카드 예시** | 모든 비디오 카드가 동일 스타일 + props, 내용만 변경 |
+
+**결론**: "Repeat Your Design" - 일관된 구조로 동적 데이터를 렌더링하기 위해 필수

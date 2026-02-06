@@ -1,0 +1,38 @@
+# Releasing Design Systems - Outputs, Cadence, Versions
+
+> Original issue: shaun0927/stocktitan-crawler#580
+
+## 📌 핵심 개념
+- **디자인 시스템 = 다중 아웃풋**: 코드만이 아닌 Doc Site, Design Tokens, Design Toolkits, Fonts/Icons, Demo Apps 등
+- **단일 진실 소스(MUST)**: UI Component Library (HTML/CSS 또는 React/Vue/Web Components)
+- **배포 목적지 계층**: Registry (npm) > Hosted (CDN) > Repository Access > Direct Download
+- **Design Assets 필수 아이템**: Sketch/Figma 툴킷, 폰트, 아이콘, ASE/CLR 파일, Illustration 라이브러리
+
+## 🎯 실무 노하우
+- **토큰 분리 관리**: Design Tokens를 별도 레포지토리로 분리, UI Library가 토큰을 패키지 의존성으로 소비
+- **Doc Site 전용 컴포넌트**: code-example-pair, do-dont, hex-code 등 문서 전용 컴포넌트는 별도 버저닝
+- **Cross-Platform 동기화**: iOS/Android/Windows 컴포넌트도 동일 릴리스 시리즈로 관리
+- **Registry 우선 배포**: npmjs(또는 내부 nexus)로 버전 관리, bower/npm/yarn/webpack 도구 체인 지원
+- **Design Toolkit 배포 전략**: BEST=Synced menu path, BETTER=Abstract/Lingo, GOOD=Doc download, OK=Shared drive
+
+## 📊 주요 구조/다이어그램
+```
+[Design Tokens] → [UI Components] → [Demo Site]
+       ↓                ↓                ↓
+   (SHOULD)         (MUST)           (COULD)
+```
+
+**아웃풋별 우선순위**:
+- MUST: UI Component Library, Doc Site, Design Toolkits, Fonts/Icons
+- SHOULD: Design Tokens (분리 레포)
+- COULD: Demo Apps, Cross-platform Components, Other Design Resources
+
+**배포 채널 순위**:
+1. Registry (npm) - BEST
+2. Hosted (CDN) - BETTER
+3. Repository Access (GitHub) - JUST OK
+4. Direct Download (ZIP) - IF NECESSARY
+
+---
+> 출처: Nathan Curtis (EightShapes)
+> 시리즈: Outputs | Cadence | Versions | Breaking | Dependencies | Process

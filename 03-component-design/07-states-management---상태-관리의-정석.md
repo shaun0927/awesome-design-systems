@@ -1,0 +1,172 @@
+# States Management - 상태 관리의 정석
+
+> Original issue: shaun0927/stocktitan-crawler#557
+
+# 디자인 시스템의 상태(States) 관리
+
+## 📌 핵심 개념
+
+**문제의 본질**: 대부분의 디자인 시스템이 Figma 컴포넌트의 `state` 속성을 **만능 속성(catch-all)**으로 사용
+
+```
+❌ 잘못된 접근:
+state: [rest, hover, active, focus, disabled, readonly, error, success]
+→ 모든 상태를 하나의 속성에 몰아넣기
+
+✅ 올바른 접근:
+state: [rest, hover, active, focus]        // 인터랙티브 상태
+disabled: [true, false]                     // 별도 속성
+readonly: [true, false]                     // 별도 속성
+validation: [none, error, success]          // 검증 상태
+```
+
+**왜 중요한가?**
+1. 핸드오프 마찰 감소
+2. 자동화 가능성 향상
+3. 전문성 인정
+
+## 🎯 실무 노하우
+
+### 상태 분류 (4가지)
+
+```
+1. 인터랙티브 상태: rest, hover, active, focus
+2. 제어 상태: disabled, readonly
+3. 검증 상태: error, success
+4. 선택 상태: selected, checked
+```
+
+### Text Input 완전 설계
+
+**Figma 속성 구조**:
+```typescript
+interface TextInputProps {
+  // 1. 인터랙티브 상태 (상호 배타적)
+  state: 'rest' | 'hover' | 'active' | 'focus';
+
+  // 2. 제어 상태 (독립적)
+  disabled?: boolean;
+  readonly?: boolean;
+
+  // 3. 검증 상태 (독립적)
+  validation?: 'none' | 'error' | 'success';
+}
+```
+
+**속성 순서 우선순위**:
+```
+1. disabled       (최우선 - 모든 것 무시)
+2. readonly       (disabled 다음)
+3. validation     (error/success)
+4. state          (마지막 - 인터랙티브)
+```
+
+### 완전 조합 세트 (Radio Button / Checkbox)
+
+**8가지 조합 구현**:
+- selected × state = 2 × 4 = 8 combinations
+
+```typescript
+// 올바른 Figma 속성 구조
+{
+  selected: boolean,
+  state: 'rest' | 'hover' | 'active' | 'focus'
+}
+```
+
+**실무 팁**:
+- `selected`를 별도 속성으로 분리
+- `state`에 복합 옵션 추가 금지 (예: "hover selected")
+
+### 부분 조합 세트 (Disabled 처리)
+
+```
+          |  state
+          | initial | hover | active | focus
+----------|---------|-------|--------|-------
+disabled  |    ✅   |  n/a  |  n/a   |  n/a
+false     |         |       |        |
+disabled  |    ✅   |  n/a  |  n/a   |  n/a
+true      |         |       |        |
+```
+
+**핵심 인사이트**:
+- `disabled: true`일 때 hover/active/focus는 무의미
+- 5/8 조합만 유효
+- **결정**: `disabled`를 별도 boolean 속성으로 분리
+
+### 상호의존 속성 (Interdependent Props)
+
+**Readonly + Disabled 관계**:
+
+```
+disabled | readonly | state
+---------|----------|--------
+false    | false    | ✅ all
+false    | true     | ✅ rest, focus (hover/active 제외)
+true     | n/a      | ✅ rest only
+```
+
+**중요 규칙**:
+1. `disabled`와 `readonly`는 동시에 `true` 불가
+2. `disabled`가 우선순위 (readonly 무시됨)
+
+### Boolean vs Enumerated 선택
+
+**Error/Success 검증 상태**:
+
+**옵션 1: Boolean (단일 에러만)**
+```typescript
+error?: boolean;
+```
+
+**옵션 2: Enumerated (다중 상태)**
+```typescript
+validation?: 'none' | 'error' | 'success';
+```
+
+**선택 기준**:
+- Error만 필요 → Boolean
+- Error + Success 모두 필요 → Enumerated
+
+### Focus는 별도 속성일까?
+
+**결론: 아니오 (대부분의 경우)**
+
+**Focus를 `state` 옵션에 포함하는 이유**:
+1. 클라이언트 측 트리거 (사용자 인터랙션으로 자동 발생)
+2. 시각 속성 분리 (주로 outline/shadow 영향)
+3. CSS pseudo-classes 관례 (`:hover`, `:active`, `:focus`)
+
+## 📊 조합 테이블 예시
+
+### Text Input 조합 매트릭스
+
+```
+Total possible: 4 × 2 × 2 × 3 = 48 combinations
+Valid combinations: 21
+
+disabled=false, readonly=false:
+  - state: rest, hover, active, focus (4)
+  - validation: none, error, success (×3 = 12)
+
+disabled=false, readonly=true:
+  - state: rest, focus (2)
+  - validation: none, error, success (×3 = 6)
+
+disabled=true:
+  - state: rest only (1)
+  - validation: none, error, success (×3 = 3)
+```
+
+## 🔑 Golden Rules
+
+1. **관심사 분리**: 인터랙티브 ≠ 제어 ≠ 검증 상태
+2. **코드와의 정렬**: Figma 속성 = TypeScript Props
+3. **실용주의**: Focus는 state에 포함해도 OK
+4. **문서화**: 조합 테이블 작성 → 개발자와 공유
+5. **점진적 개선**: 한 번에 모든 것을 바꾸지 말기
+
+---
+
+*출처: Nathan Curtis, "The Sorry State of States", 2024-12*

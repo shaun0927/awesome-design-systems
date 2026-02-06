@@ -1,0 +1,564 @@
+# CSS 3D 이미지 슬라이더 효과 구현 정리 - Create Crazy 3D Image Slider Effects Using CSS Only
+
+> Original issue: shaun0927/stocktitan-crawler#516
+
+# CSS 3D 이미지 슬라이더 효과 구현 정리
+
+> **출처**: Create Crazy 3D Image Slider Effects Using CSS Only (YouTube Tutorial)
+> **핵심**: 순수 CSS만으로 3차원 공간에서 무한 루프 이미지 슬라이더 구현 + 텍스트 오버레이 디자인 패턴
+
+---
+
+## 📋 핵심 개념
+
+### 1. 3D CSS 변환의 핵심 속성
+```css
+.slider {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+```
+
+- **`transform-style: preserve-3d`**: 자식 요소가 3D 공간에서 변환될 권한 부여 (필수)
+- **`perspective`**: 화면에서 요소까지의 거리 (Z축 깊이감 제어)
+- 값이 클수록 멀리서 보는 효과 (평면에 가까움)
+- 값이 작을수록 가까이서 보는 효과 (왜곡이 심함)
+
+### 2. 3차원 좌표계
+```
+2D: X축 (좌우), Y축 (상하)
+3D: X축 (좌우), Y축 (상하), Z축 (깊이)
+```
+
+- **Z축 이동**: `translateZ(550px)` - 화면에서 앞/뒤로 이동
+- **Y축 회전**: `rotateY(90deg)` - 좌우로 회전 (수평 원 형성)
+- **X축 회전**: `rotateX(90deg)` - 상하로 회전 (수직 원 형성)
+
+---
+
+## 🎯 3D 슬라이더 구현의 기본 원리
+
+### Step 1: HTML 구조
+```html
+<div class="banner">
+  <div class="slider">
+    <div class="item" style="--position: 1">
+      <img src="image1.jpg">
+    </div>
+    <div class="item" style="--position: 2">
+      <img src="image2.jpg">
+    </div>
+    <!-- ... 반복 ... -->
+  </div>
+  <div class="content">
+    <h1 data-content="제목">제목</h1>
+    <p class="author">설명 텍스트</p>
+    <div class="model"></div>
+  </div>
+</div>
+```
+
+**핵심 아이디어**:
+- CSS 변수 `--position`을 HTML에서 선언 → JavaScript 없이 각 아이템 위치 제어
+- CSS 변수 `--quantity`는 CSS에서 선언 → 전체 아이템 수 관리
+
+### Step 2: 3D 공간 설정
+```css
+.banner {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.slider {
+  position: absolute;
+  width: 200px;
+  height: 250px;
+  top: 10%;
+  left: calc(50% - 100px); /* 중앙 정렬 */
+
+  /* 3D 공간 활성화 */
+  transform-style: preserve-3d;
+  perspective: 1000px;
+
+  /* 아이템 총 개수 선언 */
+  --quantity: 10;
+}
+```
+
+### Step 3: 아이템 배치 (원형 배열)
+```css
+.item {
+  position: absolute;
+  inset: 0; /* top: 0; left: 0; right: 0; bottom: 0; */
+
+  /* Z축 거리 = 원의 반지름 */
+  transform: translateZ(550px)
+             rotateY(
+               calc((var(--position) - 1) * (360deg / var(--quantity)))
+             );
+}
+
+.item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+```
+
+**공식 해설**:
+```
+회전 각도 = (위치 - 1) × (360° / 전체 개수)
+
+예: 10개 아이템 기준
+- 아이템 1: (1-1) × 36° = 0°
+- 아이템 2: (2-1) × 36° = 36°
+- 아이템 3: (3-1) × 36° = 72°
+...
+- 아이템 10: (9-1) × 36° = 324°
+```
+
+**핵심 포인트**:
+1. **`translateZ(550px)` 먼저 실행** → 아이템을 Z축으로 550px 앞으로 이동 (원의 반지름)
+2. **`rotateY(각도)` 나중에 실행** → Y축 기준으로 회전시켜 원형 배치
+
+### Step 4: 무한 회전 애니메이션
+```css
+.slider {
+  animation: autoRun 20s linear infinite;
+}
+
+@keyframes autoRun {
+  from {
+    transform: perspective(1000px) rotateY(0deg);
+  }
+  to {
+    transform: perspective(1000px) rotateY(360deg);
+  }
+}
+```
+
+**핵심 통찰**:
+- **개별 아이템을 회전시키지 않고, 슬라이더 컨테이너 자체를 회전**
+- 놀이기구의 회전목마와 같은 원리: 의자(아이템)는 고정, 기계(슬라이더)가 회전
+- `perspective`를 애니메이션에 포함해야 3D 효과 유지
+
+---
+
+## 🛠️ 실전 구현 기법
+
+### 1. CSS 변수 활용 패턴
+```css
+/* 잘못된 방법 (하드코딩) */
+.item-1 { transform: rotateY(0deg); }
+.item-2 { transform: rotateY(36deg); }
+.item-3 { transform: rotateY(72deg); }
+
+/* 올바른 방법 (유지보수 가능) */
+.slider { --quantity: 10; }
+.item {
+  transform: rotateY(calc((var(--position) - 1) * (360deg / var(--quantity))));
+}
+```
+
+**장점**:
+- 아이템 개수 변경 시 `--quantity` 값만 수정하면 됨
+- HTML에서 `--position` 값만 지정하면 자동 배치
+- JavaScript 없이도 동적 계산 가능
+
+### 2. CSS calc() 함수의 단위 처리
+```css
+/* 오류: 단위 없는 값은 rotate에 사용 불가 */
+transform: rotateY(calc(var(--position) * 36));
+
+/* 정답: 1deg를 곱하여 단위 부여 */
+transform: rotateY(calc(var(--position) * 36 * 1deg));
+```
+
+**핵심**: `calc()` 결과에 단위가 없으면 1deg/1px를 곱해 단위를 부여해야 함
+
+### 3. 수직/수평 각도 제어
+```css
+/* 수평 회전 (기본) */
+animation: autoRun 20s linear infinite;
+@keyframes autoRun {
+  to { transform: perspective(1000px) rotateY(360deg); }
+}
+
+/* 수직 회전 추가 */
+@keyframes autoRun {
+  to {
+    transform: perspective(1000px)
+               rotateY(360deg)
+               rotateX(15deg); /* 약간 위에서 보는 각도 */
+  }
+}
+```
+
+**효과**:
+- `rotateX` 양수: 위에서 내려다보는 각도
+- `rotateX` 음수: 아래에서 올려다보는 각도
+
+### 4. Z-index 레이어 관리
+```css
+.model { z-index: 1; }      /* 배경 모델 이미지 */
+.content { z-index: 2; }     /* 콘텐츠 텍스트 */
+.slider { z-index: 3; }      /* 3D 슬라이더 (최상단) */
+```
+
+**규칙**:
+- 3D 슬라이더가 콘텐츠를 가려야 하므로 가장 높은 z-index
+- z-index는 `position: relative/absolute/fixed`가 있어야 작동
+
+---
+
+## 💡 텍스트 오버레이 디자인 패턴
+
+### 배경 이미지 위에 텍스트 윤곽선 표시하기
+```css
+/* HTML에서 텍스트 내용을 data 속성으로 복사 */
+<h1 data-content="ALPHAVIEW">ALPHAVIEW</h1>
+
+/* CSS 가상 요소로 윤곽선 버전 생성 */
+h1::after {
+  content: attr(data-content); /* HTML의 data-content 값 가져오기 */
+  position: absolute;
+  inset: 0; /* top: 0; left: 0; right: 0; bottom: 0; */
+  z-index: 2;
+
+  /* 텍스트 윤곽선만 표시 */
+  -webkit-text-stroke: 2px white;
+  color: transparent;
+}
+
+.model {
+  z-index: 1; /* 배경 이미지는 텍스트 아래 */
+}
+```
+
+**효과**:
+- 원본 텍스트는 채워진 색상
+- `::after` 가상 요소는 투명한 윤곽선만 표시
+- 배경 이미지가 윤곽선 사이로 비침
+
+**핵심 CSS 속성**:
+- `-webkit-text-stroke`: 텍스트 윤곽선 (크기 + 색상)
+- `color: transparent`: 텍스트 채우기 색상을 투명하게
+- `attr(data-content)`: HTML 속성값을 CSS content에서 사용
+
+---
+
+## 📦 CSS 코드 예시 (완전한 구현)
+
+```css
+/* 폰트 임포트 */
+@import url('https://fonts.googleapis.com/css2?family=IA+Writer+Quattro&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap');
+
+/* 배너 컨테이너 */
+.banner {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 3D 슬라이더 */
+.slider {
+  position: absolute;
+  width: 200px;
+  height: 250px;
+  top: 10%;
+  left: calc(50% - 100px);
+
+  transform-style: preserve-3d;
+  perspective: 1000px;
+
+  --quantity: 10;
+
+  animation: autoRun 20s linear infinite;
+}
+
+@keyframes autoRun {
+  from {
+    transform: perspective(1000px) rotateY(0deg);
+  }
+  to {
+    transform: perspective(1000px) rotateY(360deg);
+  }
+}
+
+/* 개별 아이템 */
+.item {
+  position: absolute;
+  inset: 0;
+
+  transform:
+    translateZ(550px)
+    rotateY(calc((var(--position) - 1) * (360deg / var(--quantity))));
+}
+
+.item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 콘텐츠 영역 */
+.content {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 1400px;
+  max-width: 100%;
+  height: max-content;
+  padding-bottom: 100px;
+
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+
+  z-index: 2;
+}
+
+.content h1 {
+  font-family: 'IA Writer Quattro', monospace;
+  font-size: 16em;
+  line-height: 1em;
+  color: #25283b;
+  position: relative;
+}
+
+/* 텍스트 윤곽선 오버레이 */
+.content h1::after {
+  content: attr(data-content);
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  -webkit-text-stroke: 2px white;
+  color: transparent;
+}
+
+.content .author {
+  font-family: 'Poppins', sans-serif;
+  text-align: right;
+  max-width: 200px;
+}
+
+.content .author span {
+  font-size: 3em;
+}
+
+/* 배경 모델 이미지 */
+.model {
+  width: 100%;
+  height: 75vh;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+
+  background-image: url('model.png');
+  background-size: auto 130%;
+  background-repeat: no-repeat;
+  background-position: top center;
+
+  z-index: 1;
+}
+```
+
+---
+
+## ✅ 구현 체크리스트
+
+### 기본 설정
+- [ ] `transform-style: preserve-3d` 선언 (부모 요소)
+- [ ] `perspective` 값 설정 (1000px 권장)
+- [ ] CSS 변수 `--quantity` 선언 (아이템 총 개수)
+- [ ] HTML에서 각 아이템에 `--position` 값 할당
+
+### 3D 배치
+- [ ] `translateZ`로 원의 반지름 설정 (550px 권장)
+- [ ] `rotateY` 공식 적용: `(position - 1) × (360deg / quantity)`
+- [ ] `calc()` 결과에 `1deg` 곱하여 단위 부여
+- [ ] `position: absolute`와 `inset: 0`으로 아이템 크기 통일
+
+### 애니메이션
+- [ ] 슬라이더 컨테이너에 애니메이션 적용 (개별 아이템 X)
+- [ ] `animation: linear infinite` 설정 (부드러운 무한 루프)
+- [ ] 애니메이션 내에서 `perspective` 값 유지
+- [ ] 필요시 `rotateX` 추가로 수직 각도 조정
+
+### 레이아웃
+- [ ] `overflow: hidden`으로 화면 밖 요소 숨김
+- [ ] `z-index` 레이어 순서 정리 (슬라이더 > 콘텐츠 > 배경)
+- [ ] `display: flex`로 콘텐츠 정렬
+- [ ] 반응형 대응: `max-width: 100%`, `vh` 단위 활용
+
+### 텍스트 오버레이 (선택)
+- [ ] HTML에 `data-content` 속성 추가
+- [ ] `::after` 가상 요소 생성
+- [ ] `-webkit-text-stroke`로 윤곽선 설정
+- [ ] `color: transparent`로 채우기 제거
+- [ ] 배경 이미지 z-index를 텍스트보다 낮게 설정
+
+---
+
+## 🎨 AlphaView 적용 포인트
+
+### 1. Hero 섹션 3D 카드 효과
+```css
+/* 추천 종목 카드를 원형으로 배치 */
+.hero-cards {
+  transform-style: preserve-3d;
+  perspective: 1200px;
+}
+
+.card {
+  transform: translateZ(400px) rotateY(calc(var(--position) * 40deg));
+}
+```
+
+**효과**: 추천 종목 카드들이 3D 공간에서 회전하며 표시
+
+### 2. 뉴스 기사 무한 캐러셀
+```css
+/* AlphaAIRecommendSection에서 활용 */
+.news-carousel {
+  perspective: 1500px;
+  animation: autoRotate 30s linear infinite;
+}
+```
+
+**효과**: 기사 썸네일이 3D 원형 슬라이더로 자동 회전
+
+### 3. 기업 인사이트 탭 전환 효과
+```css
+/* CompanyInsightsSection 탭 전환 시 3D 플립 */
+.insight-tab {
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+}
+
+.insight-tab.active {
+  transform: rotateY(180deg);
+}
+```
+
+**효과**: 탭 전환 시 카드가 뒤집히는 듯한 효과
+
+### 4. 주요 지표 카드 호버 효과
+```css
+/* SEC 데이터 카드 호버 시 3D 효과 */
+.metric-card {
+  transition: transform 0.3s;
+}
+
+.metric-card:hover {
+  transform: translateZ(20px) rotateY(5deg);
+}
+```
+
+**효과**: 마우스 오버 시 카드가 살짝 튀어나오고 회전
+
+### 5. 티커 심볼 윤곽선 디자인
+```css
+/* 메인 히어로의 티커 심볼을 윤곽선 스타일로 */
+.hero-ticker::after {
+  content: attr(data-ticker);
+  position: absolute;
+  inset: 0;
+  -webkit-text-stroke: 2px var(--accent-blue);
+  color: transparent;
+}
+```
+
+**효과**: 티커 심볼이 배경 차트 위에 윤곽선으로 표시
+
+### 6. 성능 최적화 고려사항
+- **`will-change: transform`**: 3D 애니메이션 성능 향상
+- **`backface-visibility: hidden`**: 뒷면 렌더링 방지
+- **`transform: translateZ(0)`**: GPU 가속 활성화
+
+```css
+.slider {
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.item {
+  transform: translateZ(0); /* GPU 가속 */
+}
+```
+
+---
+
+## 🔍 핵심 노하우 정리
+
+### 1. **CSS 변수로 하드코딩 제거**
+- HTML에서 `--position` 선언 → 각 아이템 개별 제어
+- CSS에서 `--quantity` 선언 → 전체 개수 한 곳에서 관리
+- `calc()` + CSS 변수로 동적 계산
+
+### 2. **변환 순서가 결과를 결정**
+```css
+/* 올바른 순서: translateZ 먼저, rotateY 나중 */
+transform: translateZ(550px) rotateY(36deg); /* ✅ 원형 배치 */
+
+/* 잘못된 순서: rotateY 먼저, translateZ 나중 */
+transform: rotateY(36deg) translateZ(550px); /* ❌ 의도와 다른 배치 */
+```
+
+### 3. **컨테이너 회전 > 개별 아이템 회전**
+- 놀이기구 회전목마 원리: 기계(슬라이더)만 회전시키면 의자(아이템)도 따라 회전
+- 코드 간결화 + 성능 향상
+
+### 4. **가상 요소로 레이어 효과**
+- `::before`, `::after`로 추가 DOM 없이 레이어 추가
+- `attr()`로 HTML 속성값 재사용
+- 텍스트 윤곽선, 그림자, 글로우 효과에 유용
+
+### 5. **perspective 값 실험**
+- 500px: 극적인 왜곡 (가까운 거리)
+- 1000px: 균형잡힌 깊이감 (권장)
+- 2000px: 부드러운 원근감 (먼 거리)
+
+---
+
+## 🚀 다음 단계 (JavaScript 확장)
+
+순수 CSS 버전의 한계:
+- 사용자 드래그/스와이프 불가
+- 특정 아이템으로 이동 불가
+- 재생/정지 제어 불가
+
+**JavaScript 추가 시 가능한 기능**:
+1. 드래그로 슬라이더 회전 제어
+2. 클릭한 아이템으로 자동 이동
+3. 마우스 휠로 회전 속도 조절
+4. 특정 아이템 포커스 시 애니메이션 일시정지
+
+---
+
+## 📌 참고 링크
+
+- **원본 영상**: Create Crazy 3D Image Slider Effects Using CSS Only
+- **관련 CSS 속성 문서**:
+  - [MDN: transform-style](https://developer.mozilla.org/en-US/docs/Web/CSS/transform-style)
+  - [MDN: perspective](https://developer.mozilla.org/en-US/docs/Web/CSS/perspective)
+  - [MDN: CSS 3D Transforms](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transforms/Using_CSS_transforms#3d_specific_css_properties)
+
+---
+
+**작성일**: 2026-02-05
+**카테고리**: CSS 3D 변환, 애니메이션, UI/UX 디자인 패턴
+**적용 대상**: AlphaView 프론트엔드 (Next.js)

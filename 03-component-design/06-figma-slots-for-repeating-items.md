@@ -1,0 +1,68 @@
+# Figma Slots for Repeating Items
+
+> Original issue: shaun0927/stocktitan-crawler#542
+
+# Figma Slots for Repeating Items
+
+## 📌 핵심 개념
+
+- **Repeating items는 가장 흔한 패턴**: Checkbox Group, Radio Button Group, Tabs, Breadcrumbs 등
+- **기존 방식의 한계**: Instance swapping (불편), Hidden layers (성능 저하), Count props (variant 폭발)
+- **Native Slots 솔루션**: 향상된 조합성, 낮은 에셋 복잡도, 명확한 API
+
+## 🎯 실무 노하우
+
+### Naming Convention
+- ✅ **권장**: `items` (목적성 있는 이름)
+- ⚠️ **비권장**: `children` (너무 범용적)
+
+### Default Item Quantity
+- ✅ **권장**: 3개 (Indeterminate list 느낌, Selected state 구분)
+- ⚠️ **주의**: Default ≠ Example
+
+### Min/Max Item Constraints
+```yaml
+items:
+  type: slot
+  anyOf: checkbox
+  minItems: 1    # 최소 1개 필수
+  maxItems: 4    # 선택적 (Avatar Group 등)
+```
+
+### Preferred vs Permitted Values
+- Figma slots는 본질적으로 **개방형** (신뢰 기반 시스템)
+- **Code-only props**로 validation 규칙 명세
+- 디자인 QA + 코드 생성 시 검증
+
+### Slot Architecture Pattern
+```yaml
+checkboxGroup:
+  elements:
+    headerArea:    # Header 영역
+    items:         # 반복 아이템 영역 (Slot!)
+    error:         # Validation 영역
+```
+
+## 📊 다이어그램
+
+### Checkbox Group 구조
+```
+┌─────────────────────────────────────┐
+│ {Checkbox group label}              │
+│ ┌─ Items Slot ──────────────────┐  │
+│ │ ☐ {Checkbox item label}       │  │
+│ │ ☐ {Checkbox item label}       │  │
+│ │ ☐ {Checkbox item label}       │  │
+│ └───────────────────────────────┘  │
+└─────────────────────────────────────┘
+```
+
+### Slot Property Panel (사용자 경험)
+1. `Items` 슬롯 옆 `⊕` 버튼 클릭
+2. "Add instances" 패널 오픈
+3. "Preferred" 탭에서 `DS Checkbox` 선택
+4. 검색도 가능 (`Search preferred values`)
+
+---
+
+*출처: Nathan Curtis (EightShapes)*

@@ -1,0 +1,339 @@
+# 디자인 토큰 네이밍 & 자동화 노하우 정리 - How to Name and Automate Design Tokens
+
+> Original issue: shaun0927/stocktitan-crawler#531
+
+# 디자인 토큰 네이밍 & 자동화 노하우 정리
+
+> **출처**: Into Design Systems Conference - "How to name and automate Design Tokens"
+> **발표자**: Samantha Gordashko (Token Studio), Romina Kavcic (Design System Guide)
+> **관점**: 디자인 시스템 효율성 및 실무 적용 노하우
+
+---
+
+## 📌 핵심 원칙
+
+### 1. 디자인 토큰의 본질
+- **디자인 토큰 = 디자인 결정의 표현**
+  - 플랫폼 독립적 공통 언어 (JSON)
+  - W3C DTCG 스펙 기반 (name, type, value, description)
+  - 디자이너-개발자-이해관계자 간 공유 가능한 단일 진실 공급원
+
+### 2. 좋은 토큰 이름의 조건
+| 원칙 | 의미 | 예시 |
+|------|------|------|
+| **Simple** | 단순하고 명확 | ❌ MDS.sys.sem.c.low ✅ button.neutral.tier2.default.bg |
+| **Human Readable** | 사람이 읽을 수 있음 | ❌ 약어 남발 ✅ color.text.secondary |
+| **Collaborative** | 모든 팀이 이해 가능 | 시스템 디자이너 ≠ 제품 디자이너 ≠ 개발자 |
+| **Future Friendly** | 기술적으로 정확 유지 | ❌ button.outlined (스타일 변경 시 부적합) ✅ button.tier2 |
+| **Scalable** | 시스템 확장에 대응 | 색상 추가, 상태 추가 시 구조 유지 |
+
+### 3. "Semantic"의 함정
+- **"Semantic" ≠ 만능 해결책**
+  - "나에게 의미 있음" ≠ "신입 디자이너/PM에게 의미 있음"
+  - 대신 **Contextual**(맥락적), **Thoughtful**(사려 깊은) 추구
+  - 팀마다 다른 용어 합의 필요 (loading vs in-progress, primary vs default)
+
+---
+
+## 🏗️ 네이밍 규칙 (3단계 구조)
+
+### Tier 1: Primitive (옵션/글로벌)
+**역할**: 원시 값 저장소 (팔레트, 스케일)
+
+**템플릿**: {property}.{group}.{option}
+
+**예시**:
+- colors.gray.500
+- space.base.8
+- font.weight.bold
+- border.radius.md
+
+**특징**:
+- 하드코딩된 값 (hex, px, etc.)
+- 숫자 스케일 (100-900) 또는 semantic (sm/md/lg) 통일 권장
+- 속성 이름으로 시작 → 개발자가 primitive 임을 즉시 인식
+
+### Tier 2: Semantic (결정 토큰)
+**역할**: 디자인 결정 표현 (누구를 위한 것인가?)
+
+**템플릿**: {who}.{where}.{condition}
+
+**예시**:
+- brand.colors.primary.default
+- theme.colors.neutral.hover
+- mode.colors.background.light
+
+**특징**:
+- 다른 토큰 참조 (primitive 또는 다른 semantic)
+- **앞부분으로 컨텍스트 제공**: brand/theme/mode → 제품 디자이너가 빠르게 선택
+- 2-layer 접근 (semantic만) vs 3-layer (semantic + component) 선택 가능
+
+### Tier 3: Component Specific (컴포넌트 토큰)
+**역할**: 특정 컴포넌트 전용 토큰
+
+**템플릿**: {component}.{role}.{state}.{property}
+
+**예시**:
+- button.neutral.tier2.default.bg.color
+- input.text.focus.border.color
+- card.container.hover.shadow
+
+**특징**:
+- **모든 컴포넌트가 필요한 것은 아님** (작은 팀은 semantic으로 충분)
+- 자동화/플러그인 개발 시 필수 (API가 세부 사항 필요)
+- 공통 속성은 공유 가능 (예: 모든 CTA 버튼의 gap이 동일하면 1개 토큰으로 재사용)
+
+---
+
+## 🎯 네이밍 전략 (계층별 차별화)
+
+### 핵심 인사이트: 계층마다 다른 템플릿 사용
+**왜?** → 토큰 이름만 봐도 어느 계층인지 즉시 파악 (디버깅/유지보수 용이)
+
+**예시**:
+- Primitive:  colors.blue.500        (속성으로 시작)
+- Semantic:   theme.colors.primary   (용도/대상으로 시작)
+- Component:  button.primary.bg      (컴포넌트 이름으로 시작)
+
+**개발자 입장 혜택**:
+- 이름이 colors.* → primitive (하드코딩 값 찾기)
+- 이름이 button.* → component token
+- 나머지 → semantic decision token
+- 자동화 스크립트 작성 용이 (Style Dictionary 등)
+
+---
+
+## 🔧 실무 워크플로우
+
+### Romina의 Airtable 기반 접근법
+
+#### 1. Airtable 데이터베이스 구조
+**테이블 1: Tokens**
+- 자동 생성된 token name (formula)
+- value (foundations 테이블 참조)
+- category, subcategory, component, role, state, surface
+- status (active/deprecated), themeable 여부
+- 설명
+
+**테이블 2: Components**
+- 컴포넌트 목록
+- 적용된 토큰 자동 연결 (lookup)
+- Figma 링크, 문서 링크
+- 구현 상태 (design/web/mobile/iOS/Android)
+- 담당자 할당
+
+**테이블 3: Foundations**
+- 원시 값 (색상, 간격 등)
+- hex/RGB 값 자동 표시
+- 연결된 토큰 역참조 (어느 토큰이 이 값을 사용하는가?)
+
+#### 2. Airtable 자동화 (3가지)
+| 트리거 | 액션 | 효과 |
+|--------|------|------|
+| 값 변경 감지 | GitHub Issue 생성 | [토큰명] updated by [사용자] |
+| 레코드 업데이트 | 이메일 발송 | 팀원에게 변경 알림 |
+| 레코드 업데이트 | Slack/Teams 메시지 | 실시간 알림 채널 |
+
+#### 3. 양방향 동기화
+- **디자이너 → 개발자**: Airtable 변경 → GitHub Issue 자동 생성
+- **개발자 → 디자이너**: Zapier로 GitHub commit → Airtable에 링크 자동 추가
+
+#### 4. Airtable 장점
+- **비기술자 친화적**: 코딩 없이 시각적 관리
+- **Interface 기능**: 스테이크홀더용 읽기 전용 뷰 제공
+- **Extensions**: 색상 팔레트 시각화, 검색/필터 강력
+- **단일 데이터베이스**: 모든 토큰 검색 가능 (JSON 파일 스크롤 불필요)
+
+### Samantha의 FigJam 기반 접근법
+
+#### 1. FigJam 템플릿 구조
+**Part 1: 디자인 결정 맵핑**
+- 컴포넌트 중심 사고 (container + label + asset)
+- 정보 흐름 시각화 (primitive → semantic → component)
+- 삼각형 모양 분석: 넓을수록 component token 필요성 ↑
+
+**Part 2: 협업 노트**
+- 팀과 합의할 질문 목록 (용어, 상태명, 스케일 규칙)
+- 의사결정 기록 공간
+
+**Part 3: 네이밍 템플릿 (은행/뱅크 방식)**
+- 각 계층별 sticky note 템플릿
+- 좌우에 선택 가능한 옵션 은행
+- 드래그 앤 드롭으로 이름 조합 실험
+
+#### 2. FigJam 워크플로우
+1. 컴포넌트 선택 (예: 버튼)
+2. 정보 흐름 그리기 (화살표로 연결)
+   - 컴포넌트 ← theme colors ← brand colors ← primitives
+3. 복잡도 판단
+   - 수직 컬럼형 → semantic만으로 충족
+   - 넓은 삼각형 → component token 필요
+4. 템플릿에서 sticky note 가져와 조합
+5. 최종 이름 복사 → GPT 도구로 정리
+
+#### 3. GPT 자동화 도구
+**기능**:
+- FigJam sticky note → 토큰 이름 자동 정리
+- W3C DTCG spec 기반 오류 검증 (예약어 제거: $, {} 등)
+- 대소문자 규칙 적용
+- 테이블 형식 출력 (Airtable/스프레드시트 붙여넣기 가능)
+- 템플릿 커스터마이징 대화형 지원
+
+**사용 사례**:
+입력: button.$primary.{bg-color}
+출력: button.primary.bg.color
+오류 설명: $ 기호는 코드에서 특수 용도로 예약됨
+
+---
+
+## 🚀 자동화 전략
+
+### 1. 토큰 스케일 일관성
+**문제**: 팀마다 다른 스케일 혼용
+- 색상: yellow 1, 2, 3
+- 그림자: 100-500
+- 폰트: XS/S/M/L
+- 레이어: level 1-3
+
+**해결**:
+- 단일 로직 선택 (숫자형 또는 서수형)
+- 예외 최소화 (border-radius만 semantic 허용 등)
+- 신입 개발자/디자이너 인지 부하 감소
+
+### 2. Composite Tokens (복합 토큰)
+**개념**: 여러 속성을 하나로 묶기
+
+**Typography composite 예시**:
+- fontFamily + fontSize + fontWeight + lineHeight 결합
+
+**Border composite 예시**:
+- color + width + style 결합
+
+### 3. 도구 통합 자동화
+**워크플로우**:
+Token Studio → JSON → GitHub → Style Dictionary → CSS/iOS/Android → 개발자 코드
+
+**실시간 동기화**:
+- Push & Pull API: Token Studio, Tokens Studio Sync
+- Git 기반: PR로 변경 추적, 버전 관리
+- Figma Variables: Native 변수 시스템
+
+---
+
+## 📋 워크샵 체크리스트 (팀 협업용)
+
+### Phase 1: 기초 정의 (Workshop 준비)
+- [ ] 현재 워크플로우 파악 (Figma → 코드 전달 방식)
+- [ ] 컴포넌트 인벤토리 작성
+- [ ] 3/6/9개월 로드맵 합의
+- [ ] 도구 선택 (Token Studio/Figma Variables/Airtable 등)
+
+### Phase 2: Workshop 진행
+- [ ] **Name That Component 게임**: 같은 컴포넌트 다른 이름 붙이기 → 용어 통일
+- [ ] **네이밍 구조 버전**: 여러 옵션 시도
+- [ ] **경험 공유**: 멀티브랜드 경험자, 1인 디자인 시스템 경험자 등
+- [ ] **도구 선택 최종 결정**
+
+### Phase 3: MVP 구축
+- [ ] 작은 subset 선택 (예: 버튼 + 인풋 필드만)
+- [ ] 토큰 생성 및 문서화
+- [ ] 실제 컴포넌트 적용 테스트
+- [ ] 팀 피드백 수집
+
+### Phase 4: 론칭 & 확장
+- [ ] 런칭 (프로덕션 적용)
+- [ ] 피드백 기반 조정
+- [ ] 테마 확장 (light/dark, high contrast, 브랜드 추가)
+- [ ] 자동화 도입 (linting, version control, API)
+
+---
+
+## ⚠️ 안티패턴 (하지 말아야 할 것)
+
+### 1. 불필요한 레이어 중복
+❌ BAD: size.100-600 → space.padding.xs/sm/md → space.desktop.sm
+이유: 세 번째 레이어가 의미 없이 중복
+
+### 2. 정확한 값 사용
+❌ BAD: spacing.16px, color.hex-ff0000
+이유: 값 변경 시 이름도 변경 필요 (not future-friendly)
+
+### 3. 과도한 상태 정의
+❌ BAD: button.default + button.primary + button.base (중복!)
+이유: default vs primary 차이 불명확
+
+### 4. ChatGPT로 이름 일괄 생성
+⚠️ 주의: GPT는 맥락 없이 일반적 패턴만 제시
+→ 팀 특성/비즈니스 컨텍스트 반영 불가
+→ 일괄 생성 후 팀 리뷰 필수
+
+---
+
+## 🎓 AlphaView 적용 포인트
+
+### 현재 상태 분석 (추정)
+- Next.js + Tailwind CSS 사용
+- 컴포넌트 기반 구조 (src/components/)
+- 다크 모드 지원 가능성
+
+### 도구 스택 제안
+1. **Figma Variables**: 디자인 토큰 관리 (무료)
+2. **Style Dictionary**: JSON → Tailwind config 변환
+3. **GitHub Actions**: 자동 빌드 & 동기화
+4. **Airtable (선택)**: 비개발자 팀원용 인터페이스
+
+### 적용 우선순위 (5주 플랜)
+**Week 1-2: Foundation 구축**
+- [ ] 기존 컴포넌트 인벤토리 작성
+- [ ] Tailwind config 분석 (현재 사용 중인 색상/간격)
+- [ ] 토큰 구조 설계 (colors, spacing, typography)
+
+**Week 3-4: MVP 구축**
+- [ ] Figma Variables 생성 (colors, spacing만)
+- [ ] Style Dictionary 설정
+- [ ] 버튼 1개 컴포넌트 토큰화
+
+**Week 5-6: 확장 & 자동화**
+- [ ] 나머지 컴포넌트 토큰 확장 (card, input, modal)
+- [ ] GitHub Actions CI/CD 구축
+- [ ] 팀 문서화 (사용 가이드라인)
+
+---
+
+## 📚 참고 자료
+
+### 필독 문서
+- W3C Design Tokens Community Group Spec
+- State of Design Tokens 2024 (Supernova)
+
+### 도구
+- Token Studio for Figma
+- Style Dictionary
+- Airtable
+- Hshape Specs
+
+### 사례 연구
+- Material Design Token System
+- Tailwind CSS Design Tokens
+- Adobe Spectrum Design Tokens
+
+---
+
+## 🎯 핵심 Takeaways
+
+1. **시작은 작게**: MVP로 버튼 1-2개만 토큰화 → 워크플로우 검증 후 확장
+2. **팀 협업 필수**: 디자이너-개발자-PM 모두 이해 가능한 이름 합의
+3. **도구는 수단**: Figma Variables, Token Studio, Airtable 중 팀에 맞는 것 선택
+4. **문서화 자동화**: 변경 이력, 사용처 추적을 자동화로 해결
+5. **완벽주의 경계**: 스타트업/PMF 찾는 중이면 토큰보다 비즈니스 우선
+6. **계층별 차별화**: primitive/semantic/component 각각 다른 템플릿으로 가독성 확보
+7. **Future Friendly**: 스타일 변경 시에도 이름이 유효하도록 추상적 네이밍
+
+---
+
+**마지막 조언** (발표자들의 말):
+"디자인 토큰은 무섭게 보일 수 있지만, 커뮤니티에 물어보세요. LinkedIn에 연락하면 모두가 도와줄 겁니다. 그리고 너무 쉽게 만들어서 디자이너가 복잡한 구조를 인식하지 못하게 하세요. 모든 게 마법처럼 작동해야 합니다."
+
+---
+
+_정리 완료: 2026-02-05_

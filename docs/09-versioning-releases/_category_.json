@@ -1,0 +1,9 @@
+{
+  "label": "📦 Versioning & Releases",
+  "position": 9,
+  "description": "시맨틱 버저닝, 릴리스 주기, 비주얼 브레이킹 체인지",
+  "link": {
+    "type": "generated-index",
+    "slug": "/category/09-versioning-releases"
+  }
+}

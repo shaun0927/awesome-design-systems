@@ -1,0 +1,9 @@
+{
+  "label": "📝 Component Documentation",
+  "position": 4,
+  "description": "컴포넌트 문서화 가이드라인, 예시, 명세서, 온보딩",
+  "link": {
+    "type": "generated-index",
+    "slug": "/category/04-component-documentation"
+  }
+}

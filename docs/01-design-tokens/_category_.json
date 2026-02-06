@@ -1,0 +1,9 @@
+{
+  "label": "🎨 Design Tokens",
+  "position": 1,
+  "description": "토큰 아키텍처, 네이밍 규칙, 분류 체계, 자동화, 토큰의 미래",
+  "link": {
+    "type": "generated-index",
+    "slug": "/category/01-design-tokens"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "label": "🏗️ Scaling & Architecture",
+  "position": 8,
+  "description": "티어 시스템, 멀티 라이브러리, 시스템 범위, 아키텍처 다이어그램",
+  "link": {
+    "type": "generated-index",
+    "slug": "/category/08-scaling-architecture"
+  }
+}

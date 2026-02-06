@@ -1,0 +1,9 @@
+{
+  "label": "♿ Accessibility",
+  "position": 6,
+  "description": "WCAG 준수, 접근성 감사, 시스템 접근성과 제품 접근성의 차이",
+  "link": {
+    "type": "generated-index",
+    "slug": "/category/06-accessibility"
+  }
+}

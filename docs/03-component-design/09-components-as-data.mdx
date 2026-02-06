@@ -1,0 +1,157 @@
+---
+title: "Components as Data - 플랫폼 독립적 정의"
+sidebar_label: "Components as Data"
+sidebar_position: 9
+tags: [components, data, automation]
+---
+
+> Original issue: shaun0927/stocktitan-crawler#556
+
+## Components as Data
+
+## 📌 핵심 개념
+
+> UI 컴포넌트를 디자인 툴이나 플랫폼별 코드에 하드코딩하는 대신, **중립적인 포맷(YAML/JSON)으로 구조화하여 표현**하는 방식
+
+**핵심 철학**:
+- 컴포넌트를 "시각적 에셋"이 아닌 "데이터"로 취급
+- Figma는 **출력물(output)**이지 소스(source)가 아님
+- 단일 진실 공급원(Single Source of Truth)을 데이터 레이어에 둠
+
+## 🎯 실무 노하우
+
+### 데이터 기반 정의의 4가지 요소
+
+#### 1) Anatomy (해부학적 구조)
+```yaml
+anatomy:
+  root:
+    type: container
+  content:
+    type: container
+  leadingVisual:
+    type: slot
+  label:
+    type: text
+```
+
+#### 2) Props (속성)
+```yaml
+props:
+  disabled:
+    type: boolean
+    default: false
+  state:
+    type: string
+    default: rest
+    enum: [rest, hover, active]
+  leadingVisual:
+    type: slot
+    nullable: true
+    oneOf: [icon, avatar, image]
+```
+
+#### 3) Styles (스타일)
+```yaml
+default:
+  elements:
+    root:
+      styles:
+        height: foundations/size/8x
+        backgroundColor: foundations/color/surface/primary
+        borderColor: foundations/color/outline/primary
+        layoutDirection: HORIZONTAL
+```
+
+#### 4) Variants (변형)
+```yaml
+variants:
+  - configuration:
+      state: hover
+    elements:
+      root:
+        styles:
+          backgroundColor: foundations/color/interactive/hover
+```
+
+### AI 시대의 필수 조건
+
+**왜 AI에 구조화된 데이터가 중요한가?**
+
+1. **LLM 활용 가능**:
+   - "이 컴포넌트가 어떻게 작동하나요?"
+   - "구현과 비교했을 때 차이점은?"
+
+2. **Figma Dev Mode MCP Server의 한계**:
+   - ❌ 확률적(stochastic): 일관성 없음
+   - ❌ 불완전(incomplete): 모든 디테일 캡처 못함
+   - ❌ 부정확(imprecise): 한 플랫폼에 편향
+
+3. **데이터 기반 접근의 장점**:
+   - ✅ 재사용 가능(reusable)
+   - ✅ 확장 가능(scalable)
+   - ✅ 일관되게 해석 가능(consistently interpretable)
+
+### 품질 감사 자동화
+
+**문제 상황**:
+```yaml
+variants:
+  - configuration:
+      state: hover
+    elements:
+      root:
+        styles:
+          backgroundColor: #045bbc  ## 토큰 대신 raw 값!
+```
+
+**데이터 기반 검증**:
+- 수천 줄의 Figma 레이어를 일일이 검사 불필요
+- 구조화된 데이터로 자동 스캔 가능
+
+### AI를 통한 카탈로그 분석
+
+**질문 예시**:
+- "foundations/color/surface/secondary 토큰이 얼마나 자주 사용되나?"
+- "state 옵션이 모든 컴포넌트에서 일관되게 처리되나?"
+- "accessibilityLabel이 모든 적절한 케이스에 적용되었나?"
+
+## 📊 컴포넌트 생명주기 변화
+
+| 단계 | 기존 방식 | 데이터 기반 방식 |
+|------|----------|----------------|
+| **계획** | Figma에서 직접 디자인 | 텍스트 에디터에서 데이터 정의 |
+| **디자인** | 수동으로 variant 제작 | 데이터에서 Figma 자동 생성 |
+| **핸드오프** | 스크린샷 + 비구조화된 문서 | 기계 판독 가능한 정의 |
+| **개발** | 수동 코드 작성 | 데이터에서 코드 스캐폴딩 생성 |
+| **문서화** | 수동 작성 + 동기화 이슈 | 데이터에서 자동 생성 |
+| **유지보수** | Figma 수정 → 개발 재작업 | 데이터 수정 → 모든 플랫폼 재생성 |
+
+### 역방향 생성 워크플로우
+
+```
+Idea → Plan → Data → [Figma, React, iOS, Android]
+```
+
+**패러다임 전환**:
+- Figma가 입력이 아니라 **출력**이 됨
+- 1시간 계획 + 1시간 팀 협의로 데이터 정의 완료
+- 수동으로 수십 개 variant 만드는 대신 **자동 생성**
+
+---
+
+*출처: Nathan Curtis, Medium 2025-09*
+
+---
+
+## 📎 Related Articles
+
+import CrossRef from '@site/src/components/CrossRef';
+
+<CrossRef
+  related={[
+    { path: "/docs/component-design/variants", label: "Variants Analysis - 데이터 기반 컴포넌트" },
+    { path: "/docs/component-design/code-only-props", label: "Code Only Props - 비시각적 속성 관리" },
+    { path: "/docs/design-tokens/token-taxonomy", label: "Token Taxonomy - Audit to Implementation" },
+  ]}
+/>

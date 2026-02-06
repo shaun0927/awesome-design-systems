@@ -1,0 +1,55 @@
+---
+title: "Component Introductions - Pithy Names and Descriptions"
+sidebar_label: "컴포넌트 소개 작성법"
+sidebar_position: 5
+tags: [naming, descriptions, documentation, introductions]
+---
+
+> Original issue: shaun0927/stocktitan-crawler#572
+
+## 핵심 개념
+- **Component naming consistency**: 동일한 컴포넌트 이름을 design, code, conversation 전반에 걸쳐 일관되게 사용
+- **Deck (description) format**: 컴포넌트 설명은 Tweet 길이(144자) 이내로 간결하게 작성
+- **Singular vs Plural naming**: 대부분의 라이브러리는 복수형 선호 (Buttons, Inputs), 단 페이지에 한 번만 나오는 요소는 단수형 (Footer, Grid)
+- **"Also known as" pattern**: 동의어를 subtly하게 제시하여 사용자 혼란을 줄임
+- **Visual pairing**: 컴포넌트 이름을 sensitizing example과 가까이 배치
+
+## 실무 노하우
+- 컴포넌트 이름을 타이틀로, 간단한 thumbnail과 함께 네비게이션에 표시
+- 설명은 구조와 목적에 초점을 맞추고 구현 세부사항은 피함 (예: "12 columns" 대신 "rows and columns")
+- Do not separate name from picture with lengthy context - 사용자는 "Get to the goods!" 원함
+- 긴 소개를 피하고 바로 examples로 이동하도록 유도
+- 컴포넌트 recognition은 이름보다 시각적 요소에 의존함을 기억
+
+## 주요 구조/다이어그램
+**Component naming hierarchy:**
+- Page title: Component name
+- Navigation label: Same name
+- Code identifier: CSS class (`.button`) or HTML (`<Button>`)
+
+**Description placement:**
+```
+[Component Title + Visual Example]
+     ↓
+[Deck - 144 characters max]
+     ↓
+[Examples and detailed docs]
+```
+
+---
+> 출처: Nathan Curtis (EightShapes)
+> Series: Documenting Components #2 of 7
+
+---
+
+## 📎 Related Articles
+
+import CrossRef from '@site/src/components/CrossRef';
+
+<CrossRef
+  related={[
+    { path: "/docs/component-documentation/documenting-components", label: "Documenting Components - Serving System Audiences" },
+    { path: "/docs/component-documentation/documentation-guidelines", label: "Component Documentation Guidelines - Nathan Curtis" },
+    { path: "/docs/governance-operations/core-principles", label: "거버넌스 운영 기초" },
+  ]}
+/>

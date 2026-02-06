@@ -1,0 +1,101 @@
+---
+title: "Code Only Props - 비시각적 속성 관리"
+sidebar_label: "Code Only Props"
+sidebar_position: 8
+tags: [props, figma, accessibility]
+---
+
+> Original issue: shaun0927/stocktitan-crawler#544
+
+## Code Only Props in Figma
+
+## 📌 핵심 개념
+
+**문제**: Figma는 시각적 결과물 중심으로 설계되어 접근성, 동작, 비시각적 로직 표현 수단이 제한적
+
+**솔루션**: 실제로는 보이지 않지만 Figma 컴포넌트 구조 내에 존재하는 "Code Only Props" 레이어
+
+## 🎯 실무 노하우
+
+### 구현 프로세스
+
+**Step 1: Code only props 레이어 생성**
+```
+1. 컴포넌트 루트의 자식으로 프레임 추가
+2. 이름: "Code only props"
+3. 위치: X=0, Y=0
+4. 크기: W=0.01, H=0.01
+5. Clip content 활성화
+```
+
+**Step 2: 각 prop별 레이어 추가**
+- TEXT 레이어 → 컴포넌트 prop에 바인딩
+- VARIANT 레이어 → 별도 컴포넌트 생성 (예: "as" 컴포넌트)
+- 필요시 레이어 숨김 (프로덕트 디자이너에게 불필요한 경우)
+
+**Step 3: 자동화 통합**
+- Anova 플러그인 등이 Code only props 레이어 탐색
+- 자식 레이어의 prop 값 읽기
+- spec data로 변환
+
+### 노출 전략 (Visibility Strategy)
+
+| 상황 | 레이어 표시 | 프로덕트 디자이너가 봄 |
+|------|------------|---------------------|
+| 접근성 필수 항목 | ✅ | ✅ (입력 가능) |
+| 플랫폼별 기술 속성 | ❌ | ❌ (자동화 전용) |
+| 동작 제약 조건 | ❌ 또는 ✅ | 선택적 |
+
+### 타입 추론 규칙
+
+```yaml
+"Label"     → type: string
+"0"         → type: number
+"h1|h2|h3"  → type: string, enum: [h1, h2, h3]
+```
+
+## 📊 예시
+
+### Heading 컴포넌트
+```yaml
+props:
+  as:
+    type: string
+    enum: [h1, h2, h3, h4, h5, h6]
+    default: h1
+  level:
+    type: number
+    enum: [1, 2, 3, 4, 5, 6]
+    default: 1
+```
+
+### Checkbox Group (Slot 제약)
+```yaml
+props:
+  items anyOf:
+    type: text
+    value: "checkbox"
+    codeOnly: true
+  items minItems:
+    type: text
+    value: "1"
+    codeOnly: true
+```
+
+---
+
+*출처: Nathan Curtis, Medium 2026-01*
+
+---
+
+## 📎 Related Articles
+
+import CrossRef from '@site/src/components/CrossRef';
+
+<CrossRef
+  related={[
+    { path: "/docs/component-design/figma-slots", label: "Figma Slots for Repeating Items" },
+    { path: "/docs/component-design/states", label: "States Management - 상태 관리의 정석" },
+    { path: "/docs/component-documentation/spec-guide", label: "컴포넌트 명세서 작성 가이드" },
+  ]}
+/>

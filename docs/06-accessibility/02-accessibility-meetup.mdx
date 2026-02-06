@@ -1,0 +1,63 @@
+---
+title: "디자인 시스템 접근성 밋업 - 컴포넌트 리뷰 정리"
+sidebar_label: "접근성 밋업"
+sidebar_position: 2
+tags: [accessibility, meetup, component-review, screen-reader, wcag]
+---
+
+## 디자인 시스템 접근성 밋업 - 컴포넌트 리뷰 정리
+
+> Original issue: shaun0927/stocktitan-crawler#537
+
+## 세션 개요
+
+IntoDesignSystems에서 주최한 접근성 중심의 디자인 시스템 컴포넌트 리뷰 세션. 접근성 전문가 Sarah Massingale(독립 접근성 컨설턴트, 전맹 스크린 리더 사용자)과 Marcelo Paiva(WCAG 플러그인 제작자)가 실제 제출된 컴포넌트를 리뷰하며 접근성 구현 방법론을 공유.
+
+---
+
+## 핵심 원칙
+
+### 1. 접근성 리뷰 세션의 필요성
+
+**통계적 근거:**
+- 전 세계 웹사이트의 97-98%가 접근성 기준 미달
+- 4개 폼 중 3개가 접근성 문제 보유
+- 전 세계 인구의 25% (4명 중 1명)가 장애인
+- 장애인 커뮤니티는 **모든 다른 커뮤니티와 교차하는 유일한 집단** (인종, 성별, 성적 지향 무관)
+
+**Frank Yan (Figma Config 2023)의 명언:**
+> "디자이너들은 자신들이 말하는 만큼 공감적이지 않다. 만약 그랬다면 우리 제품들이 더 접근 가능했을 것이다."
+
+### 2. 접근성 리뷰 세션을 진행해야 하는 4가지 이유
+
+| 목적 | 설명 |
+|------|------|
+| **인식 (Awareness)** | 팀원들이 장애인이 겪는 장벽을 이해하도록 유도 |
+| **학습 (Learning)** | 함께 배우는 과정을 통한 역량 강화 |
+| **오해 해소 (Misconception)** | "접근 가능한 컴포넌트 라이브러리 다운로드 = 접근성 해결"과 같은 잘못된 믿음 제거 |
+| **협업 (Collaboration)** | 지속적인 지식 교환 문화 형성 |
+
+### 3. 접근성 구현의 현실
+
+**중요한 깨달음:**
+- "접근 가능한 컴포넌트 라이브러리를 사용한다고 해서 제품이 자동으로 접근 가능해지지 않는다"
+- Material UI 같은 라이브러리가 접근성을 주장하더라도, **구현 방식**에 따라 접근성이 깨질 수 있음
+- "아무것도 접근 가능하지 않다 - 제대로 구현하기 전까지는" (Nothing is accessible until you implement it)
+
+---
+
+_이하 생략 (실제 내용은 알파뷰 적용 사항 포함)_
+
+---
+
+## 📎 Related Articles
+
+import CrossRef from '@site/src/components/CrossRef';
+
+<CrossRef
+  related={[
+    { path: "/docs/accessibility/accessible-systems", label: "Accessible Design Systems Don't Guarantee Accessible Products" },
+    { path: "/docs/category/03-component-design", label: "Component Design" },
+    { path: "/docs/quality-testing/figma-review", label: "Figma 컴포넌트 리뷰 가이드" },
+  ]}
+/>

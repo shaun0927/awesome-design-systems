@@ -1,0 +1,63 @@
+---
+title: "Doc Components - Top 8 Reusable Components for Documentation"
+sidebar_label: "문서화용 컴포넌트 Top 8"
+sidebar_position: 4
+tags: [doc-components, documentation, tooling, reusable]
+---
+
+> Original issue: shaun0927/stocktitan-crawler#579
+
+## 핵심 개념
+- **Documentation as product**: Doc site도 library toolkit을 사용하여 구축하는 또 다른 제품
+- **Missing components**: System은 자체 documentation에 필요한 모든 parts를 제공하지 않음 (code viewer, color swatch 등)
+- **Top 8 doc components**: (1) Example-Code Pair (2) Markdown Chunks (3) Page TOC (4) Do & Don't (5) Tint Stack (6) Framed Page Gallery (7) Release Details (8) Spec/Token Tables
+- **Build your own**: Documentation 전용 components를 library와 분리하여 구축
+- **Meta benefit**: Doc site 구축 과정이 team을 library 사용자 입장에 sensitize함
+
+## 실무 노하우
+- **#1 Example-Code Pair**: Click-to-copy 기능, responsive tabs, state stacking (hover/active/disabled 동시 표시)
+- **#2 Markdown + Templating**: Nunjucks 같은 templating에 Markdown 통합, Google Docs에서 migration 용이하게
+- **#3 Sticky local TOC**: Wide displays에서 sticky, subsections 자동 표시 (scroll position 기반)
+- **#4 Do & Don't**: Green/red border로 구분, "DO" & "DON'T" prefix 자동 추가, image는 conflict 피하게 compose
+- **#5 Tint Stack**: Accessibility scores 표시 (AA/AAA), click-to-copy variable names ($color-neutral-95)
+- **#6 Page Gallery**: iFrame 사용, transform: scale() 조정 기능, viewport width toggle
+- **#7 Release Details**: Change type 표시 (markup/style/script/spec), grouping (enhancements/fixes/new)
+- **#8 Spec Tables**: Recursive hierarchy display ($space-s → $space-inset-s → $space-inset-squish-s)
+
+## 주요 구조/다이어그램
+**Doc component priority ranking:**
+```
+#1 ★★★ Example-Code Pair (필수 - 모든 doc의 핵심)
+#2 ★★★ Markdown Chunks (long-form content 기본)
+#3 ★★☆ Page-level TOC (navigation 개선)
+#4 ★★☆ Do & Don't (guidelines 시각화)
+#5 ★☆☆ Tint Stack (color system 전용)
+#6 ★☆☆ Framed Page Gallery (showcase용)
+#7 ★☆☆ Release Details (version management)
+#8 ★☆☆ Spec/Token Tables (technical reference)
+```
+
+**Example-Code Pair features:**
+- Visual example (rendered)
+- Code tabs (HTML, @extends, macro)
+- Responsive toggles (small/medium/large)
+- Click-to-copy button
+- State stacking display
+
+---
+> 출처: Nathan Curtis (EightShapes)
+> Article: Design System Doc Components (Sep 13, 2016)
+
+---
+
+## 📎 Related Articles
+
+import CrossRef from '@site/src/components/CrossRef';
+
+<CrossRef
+  related={[
+    { path: "/docs/component-documentation/component-examples", label: "Component Examples - 15 Tips" },
+    { path: "/docs/component-documentation/documenting-components", label: "Documenting Components - Serving System Audiences" },
+    { path: "/docs/design-tokens/token-taxonomy", label: "Token Taxonomy - Audit to Implementation" },
+  ]}
+/>

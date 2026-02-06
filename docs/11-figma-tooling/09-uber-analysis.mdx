@@ -1,0 +1,519 @@
+---
+title: "Uber 디자인 시스템 심층 분석 정리 - Deep Dive into Uber's Design Systems"
+sidebar_label: "Uber 심층 분석"
+sidebar_position: 9
+tags: ["Uber", "component-architecture", "figma-variables", "contribution-model"]
+---
+
+> Original issue: shaun0927/stocktitan-crawler#520
+
+## Uber 디자인 시스템 심층 분석 - 효율성과 실무 노하우
+
+> 출처: Figma Deep Dive - Ian (Uber Design Systems Lead) 인터뷰
+>
+> 이 문서는 Uber의 디자인 시스템 리드 Ian이 공유한 실무 경험과 노하우를 **디자인 시스템 효율성 및 실무 적용** 관점에서 정리한 것입니다.
+
+---
+
+## 📌 핵심 인사이트 요약
+
+### 1. 컴포넌트 최적화의 극적인 효과
+- **기존 Tag 컴포넌트**: 880개 variants, 13,000 layers, 17k instances
+- **리팩토링 후**: 84개 variants, 800 layers
+- **결과**: **94% 레이어 감소, 90% 컴포넌트 감소**
+- **비즈니스 임팩트**: 메모리 최적화, 파일 로딩 속도 향상, 작업 손실 방지
+
+### 2. Figma Variables + Mode의 혁명적 활용
+- **Component-specific Variables**: 색상, 밀도(density), 스페이싱을 variant 대신 variable로 제어
+- **Hidden from Publishing**: 디자이너에게는 보이지 않는 중간 레이어 토큰 생성
+- **결과**: variant 폭발 방지, 유지보수 부담 90% 감소
+
+### 3. 소프트 디프리케이션(Soft Deprecation) 전략
+- **절대 금지**: 컴포넌트 구조 변경 후 즉시 배포 (디자이너 파일 깨짐)
+- **3개월 디프리케이션 프로세스**:
+  1. 신규 컴포넌트 추가
+  2. 구 컴포넌트에 "deprecated" 태그 추가
+  3. 구 컴포넌트 hidden 처리 (`.` prefix)
+  4. 3개월 후 완전 삭제
+- **이유**: 글로벌 팀, 휴가, 타임존 차이 고려
+
+### 4. 엔지니어를 위한 픽셀 퍼펙트 Spec 문서화
+- **모든 컴포넌트마다 별도 Spec 파일 생성**
+- **Spec 수준**: 디자이너 없이도 엔지니어가 100% 구현 가능해야 함
+- **러시안 돌(Russian Doll) 방식**: 겉에서 안으로 (Parent Container → Child → Nested)
+- **복잡한 List 컴포넌트**: 5-6개월 소요 (audit → design → spec → review)
+- **간단한 Button**: 3주 개발 + 1주 리뷰
+
+### 5. 80/20 법칙
+- **80%**: 디자이너/엔지니어와 소통, 교육, 니즈 파악
+- **20%**: 실제 디자인 문제 해결
+
+---
+
+## 🏗️ Uber 디자인 시스템 아키텍처
+
+### 시스템 규모
+- **컴포넌트 수**: 71개 (20개가 Core Components)
+- **가장 복잡한 컴포넌트**: List Item (Uber 앱의 80% 차지)
+- **지원 플랫폼**: 모바일(Rider/Driver), 웹(Uber Eats), 내부 툴
+
+### 제품별 밀도(Density) 요구사항
+
+**Rider App (Default)**: 야외, 햇빛 아래 - 고대비, 한눈에 정보 파악
+**Uber Eats (Compact)**: 소파에서 메뉴 탐색 - 많은 정보 밀집, 48px 터치 타겟 유지
+**Driver App (Spacious)**: 운전 중 (50mph) - 큰 터치 영역, 명확한 정보
+
+### 파일 구조
+```
+Uber Design System (Figma)
+├── Base UI Kits (공개 라이브러리)
+│   ├── Tag Component (84 variants)
+│   ├── List Item Component
+│   └── Button, Input, etc.
+├── Component Spec Files (엔지니어용)
+│   ├── Tag Spec Page
+│   ├── List Item Spec Page (가장 복잡)
+│   └── Version History 추적
+└── Exploration/Local Components
+    ├── V6, V5.5, V3 (테스트용)
+    └── Deprecated Components (hidden)
+```
+
+---
+
+## 🎨 토큰/변수 시스템 (Token & Variable System)
+
+### 1. Component-Specific Variables (핵심 혁신!)
+
+#### Tag 컴포넌트 예시
+- **기존 방식**: 색상마다 variant 생성 → 800+ variants
+- **새로운 방식**: Component-specific color collection
+  - `tag-background-disabled`
+  - `tag-content`
+  - `tag-border`
+  - `tag-border-selected`
+  - → 기존 primitive 토큰을 가리키는 **중간 레이어**
+  - → **Hidden from publishing** (디자이너에게 보이지 않음)
+
+#### 결과
+- Variant를 만들지 않고 **Mode로 색상 전환**
+- 코드에서는 여전히 primitive 토큰 참조
+- 디자인에서만 존재하는 "Logic Layer"
+
+### 2. Density Variables (밀도 제어)
+
+List Item에 적용된 Variables:
+- `parent-container-height`
+- `child-vertical-padding`
+- `minimum-height`
+
+→ Default/Compact/Spacious 모드 전환 시 자동으로 padding/height 조정
+
+### 3. Token 네이밍 컨벤션
+- **Primitive 토큰**: `color-gray-100`, `spacing-8`
+- **Component 토큰**: `tag-background-gray`, `list-padding-vertical-default`
+- **Hidden 토큰**: Component-specific variables (편집 권한 있는 사람만 보임)
+
+---
+
+## 🧩 컴포넌트 전략
+
+### 1. Figma 메모리 최적화의 충격적인 사실
+
+**"Variant 하나를 가져오면, 모든 variant가 메모리에 로드된다"**
+
+- Tag 1개를 파일에 삽입 → 실제로는 800개 Tag가 백그라운드에서 로드됨
+- 파일 메모리 한계:
+  - **50%**: 파일 극심하게 느려짐
+  - **60%**: 경고 메시지
+  - **70%**: 작업 저장 불가, 파일 손실 위험
+
+→ **Variant 수 감소 = 메모리 최적화 = 비용 절감**
+
+### 2. 리팩토링 ROI 측정 (Leadership 설득용)
+
+**Plugin 활용**: "Select Layers but Layer Counter"
+
+**구 Tag vs 신 Tag**:
+- Layers: 13,000 → 800 (94% 감소)
+- Components: 880 → 84 (90% 감소)
+
+→ 리더십에게 "cost savings"로 제시
+
+### 3. Composable Slots (확장성의 핵심)
+
+**디자인**: 고정된 옵션만 보임 (Icon, Text, Badge 등)
+**코드**: Composable Slot으로 구현 → 예측 불가능한 엣지 케이스 대응
+
+→ 컴포넌트 수명 2년+ 보장
+
+---
+
+## 👥 팀 협업 프로세스
+
+### 1. 신규 컴포넌트 생성 기준
+
+#### Triage 질문 (Ian의 필터링 프로세스)
+1. **System Component vs Product-Specific Feature?**
+   - Product-specific → 해당 팀이 직접 구축
+   - System-level → 다음 단계 진행
+
+2. **3개 이상의 제품에서 사용하는가?**
+   - 1-2개 제품 → Product-specific으로 판단
+   - 3개+ 제품 → System component 후보
+
+3. **모든 플랫폼(iOS, Android, Web)에서 필요한가?**
+   - 일부 플랫폼만 → Product-specific
+   - 모든 플랫폼 → System component
+
+### 2. 시스템 컴포넌트 개발 프로세스
+
+```
+1. 탐색(Exploration) - 1-2주
+   ├── 5개 팀이 니즈 제시
+   ├── 각 팀의 디자인 모아서 분석
+   └── 공통 패턴 추출
+
+2. 접근성(Accessibility) 검증 - 1주
+   ├── Selected State
+   ├── Voice Over
+   ├── Text Resizing
+   └── 48x48 터치 타겟 (모바일 필수)
+
+3. Spec 작성 - 2-4주 (복잡도에 따라)
+   ├── Russian Doll 방식 (겉→안)
+   ├── 모든 variant 문서화
+   └── Token, Padding, Border 명시
+
+4. 엔지니어 리뷰 - 1-2주
+   ├── "디자이너 없이 픽셀 퍼펙트로 구현 가능한가?"
+   ├── 피드백 반영
+   └── 최종 승인
+
+5. 구현
+   ├── Platform 엔지니어 담당 (시간 오래 걸림)
+   └── 또는 Feature 엔지니어 Contribution (긴급 시)
+```
+
+### 3. Contribution Model (급한 경우)
+
+**문제**: 5개 팀이 다음주까지 필요하다고 요청
+**해결**:
+- Spec 승인 후
+- Feature Engineer가 System에 Contribute
+- System Lead가 코드 리뷰/승인
+- 즉시 배포
+
+→ "Pull resources from anywhere"
+
+### 4. "Ian Jail"은 없다 (오픈 문화)
+
+**컴포넌트 커스터마이징 요청 시**:
+1. "Be okay with not being right" - 내가 틀릴 수 있음
+2. 왜 더 나은지 근거 들어보기
+3. 99%는 다른 해결책이 있음 (Custom Slot, Product-specific 등)
+4. 교육의 기회로 활용
+
+---
+
+## 📏 확장성 노하우 (Scalability Best Practices)
+
+### 1. Spec 파일 관리 (Source of Truth)
+
+#### 엔지니어용 Spec vs 디자이너용 Library를 분리하는 이유
+
+**Spec File (엔지니어 참조)**:
+- 모든 variant 명시적으로 나열
+- Layer 이름 완벽
+- Annotation 풍부
+- Versioning (V6, V5.5, V3)
+
+**UI Kit Library (디자이너 사용)**:
+- Variant 최소화 (Variables 활용)
+- 메모리 최적화
+- Component-specific variables hidden
+- 깔끔한 네이밍
+
+**이점**:
+- Spec 파일에서 실험/버전 관리 → UI Kit에 영향 없음
+- UI Kit 최적화 → Spec 완결성 유지
+- Evergreen Source of Truth
+
+### 2. Version Control (Figma 내)
+
+**Figma의 Version History 활용**:
+- 누가 언제 무엇을 수정했는지 추적
+- 새 variant 추가 시점 기록
+- Rename 이력 확인
+
+→ Git 없이도 버전 관리 가능
+
+### 3. Soft Deprecation 프로세스 (상세)
+
+#### 왜 필요한가?
+- 글로벌 팀 (타임존 차이)
+- 휴가/출장 중인 디자이너
+- 수십~수백 명의 디자이너가 사용 중인 컴포넌트
+- **구조 변경 시 즉시 배포 → 디자이너 파일 깨짐 (Reset to default)**
+
+#### 3단계 프로세스
+
+**Phase 1: 새 컴포넌트 추가 + 구 컴포넌트 태깅**
+```
+1. 신규 컴포넌트 라이브러리에 추가
+2. 구 컴포넌트에 "deprecated" 태그 추가
+3. 구 컴포넌트 Description에 경고 추가
+4. Publish
+```
+
+**Phase 2: Hidden 처리 (2주 후)**
+```
+1. 구 컴포넌트 앞에 "." prefix 추가 (Hidden from library)
+2. Publish
+3. 새 파일에서는 구 컴포넌트 안 보임
+4. 기존 파일은 여전히 작동 (깨지지 않음)
+```
+
+**Phase 3: 완전 삭제 (3개월 후)**
+```
+1. 피드백 기간 종료
+2. 구 컴포넌트 완전 삭제
+3. 메모리 최적화 효과 발생
+```
+
+**안티패턴**: "Deprecated Component Library"로 이동
+- 좀비 컴포넌트 누적
+- 유지보수 부담 증가
+- 메모리 최적화 효과 없음
+
+### 4. Platform Parity (플랫폼 일관성)
+
+**문제**: iOS, Android, Web에서 픽셀 퍼펙트 동일성 보장
+**해결**:
+- **초정밀 Spec 문서화**가 유일한 답
+- Spec 없으면 → 플랫폼마다 다르게 구현됨
+- "Superpower for designers today: 컴포넌트를 Spec할 수 있는 능력"
+
+---
+
+## 🛠️ Figma 고급 기능 활용
+
+### 1. Annotation in Design Mode (최신 기능)
+
+**기존**: Dev Mode에서만 annotation 가능
+**현재**: Design Mode에서도 annotation 가능
+
+**Ian의 사용법**:
+- Min-width/Min-height 화살표로 표시
+- Bounding box에 Stroke 추가 (가시성)
+- 같은 정보를 2번 표기 (위 + 아래) → "Overcommunicate"
+
+### 2. Layer Counter Plugin
+
+**용도**: 리팩토링 ROI 측정
+**메트릭**: Layers, Instances, Components 개수
+**활용**: Leadership에게 비용 절감 효과 제시
+
+### 3. Component-Specific Variables
+
+**Scope**: "Hidden from publishing"
+**효과**:
+- 라이브러리 소비자에게 안 보임
+- 편집 권한 있는 사람만 수정 가능
+- 디자이너는 Mode만 선택 (색상, 밀도 등)
+
+---
+
+## ✅ 디자인 시스템 체크리스트
+
+### 리팩토링 전 확인사항
+- [ ] Variant 수가 100개 이상인가?
+- [ ] 파일 메모리 사용량 50% 이상인가?
+- [ ] Component-specific Variables로 대체 가능한가?
+- [ ] 리팩토링 ROI 측정 (Layer Counter Plugin)
+- [ ] Leadership 승인 받을 수 있는가?
+
+### 신규 컴포넌트 생성 전 질문
+- [ ] System Component인가, Product-specific인가?
+- [ ] 3개 이상의 제품에서 사용하는가?
+- [ ] 모든 플랫폼에서 필요한가?
+- [ ] 접근성 요구사항 충족하는가? (48px 터치 타겟, Voice Over)
+- [ ] 픽셀 퍼펙트 Spec 작성 가능한가?
+
+### Spec 문서 완성도 검증
+- [ ] "디자이너 없이 엔지니어가 픽셀 퍼펙트로 구현 가능한가?"
+- [ ] Russian Doll 방식 (Parent → Child → Nested)
+- [ ] 모든 Token 명시되어 있는가?
+- [ ] Padding, Margin, Border 정확한가?
+- [ ] Composable Slot 명시되어 있는가?
+
+### Soft Deprecation 프로세스
+- [ ] 신규 컴포넌트 추가 완료
+- [ ] 구 컴포넌트에 "deprecated" 태그 추가
+- [ ] Description에 경고 메시지 작성
+- [ ] 2주 후 Hidden 처리 (`.` prefix)
+- [ ] 3개월 후 완전 삭제 일정 설정
+- [ ] 글로벌 팀에 공지 (Slack, 이메일)
+
+---
+
+## 🚀 AlphaView 적용 포인트
+
+### 1. 즉시 적용 가능한 것들
+
+#### Component-Specific Variables로 Tag 최적화
+**현재 상태 (추정)**:
+- Tag 컴포넌트: 색상별 variant 존재?
+- 밀도/사이즈별 variant 존재?
+
+**적용 방법**:
+```
+1. Tag Component에 Component-specific Variables 추가
+   - tag-background (mode: primary, secondary, warning, error)
+   - tag-size (mode: small, medium, large)
+
+2. 기존 Variant 제거
+   - 80+ variants → 1개 component + modes
+
+3. Primitive 토큰 매핑
+   - tag-background-primary → color-blue-500
+   - tag-background-error → color-red-500
+```
+
+#### 버튼/카드 컴포넌트도 동일하게 적용
+- Button: `button-color`, `button-size`, `button-state`
+- Card: `card-padding`, `card-elevation`, `card-corner`
+
+### 2. Spec 문서화 (엔지니어 협업 강화)
+
+**AlphaView 주요 컴포넌트 Spec 작성**:
+- ArticleCard (뉴스 카드)
+- AlphaFilterBar (필터 바)
+- AlphaAIRecommendSection (큐레이션 섹션)
+
+**Spec 문서 포함 내용**:
+1. Parent Container: Padding, Border, Corner Radius
+2. Child Elements: 위치, 크기, 토큰
+3. Composable Slots: 어디에 무엇을 넣을 수 있는지
+4. Accessibility: Touch target, Voice over
+5. Responsive Behavior: Mobile/Tablet/Desktop
+
+### 3. 메모리 최적화 (파일 로딩 속도 개선)
+
+**현재 상태 체크**:
+```
+1. Layer Counter Plugin 설치
+2. 주요 컴포넌트 Layer 수 측정
+3. 1000+ layers 컴포넌트 → 리팩토링 우선순위
+```
+
+**목표**:
+- Layer 수 50% 감소
+- Variant 수 70% 감소
+- 파일 로딩 속도 체감 개선
+
+### 4. Soft Deprecation 프로세스 도입
+
+**AlphaView 팀 규모는 작지만**:
+- 버전 관리 명확성 증가
+- 실수로 파일 깨지는 일 방지
+- 프로페셔널한 워크플로우 구축
+
+**간소화된 프로세스** (1개월):
+```
+Week 1-2: 신규 컴포넌트 + deprecated 태그
+Week 3-4: Hidden 처리 + 알림
+Week 4+: 완전 삭제
+```
+
+### 5. Token System 정리
+
+**현재 상태 점검**:
+- Primitive Tokens 정의되어 있는가?
+- Semantic Tokens 정의되어 있는가?
+- Component-specific Tokens 필요한가?
+
+**3-Layer Token System**:
+```
+Layer 1: Primitive (color-blue-500, spacing-8)
+Layer 2: Semantic (text-primary, background-card)
+Layer 3: Component-specific (tag-background, list-padding)
+         ↳ Hidden from publishing
+```
+
+---
+
+## 💡 실무 Tip 모음
+
+### Leadership 설득 전략
+- **Before/After 지표**: Layer 수, Component 수, 메모리 사용량
+- **비용 절감 프레임**: "파일 로딩 속도 = 디자이너 생산성 = 비용"
+- **리스크 제시**: "70% 메모리 사용 시 파일 손실 위험"
+
+### 엔지니어와의 협업
+- **픽셀 퍼펙트 Spec**: "디자이너 없이도 구현 가능한가?"를 항상 질문
+- **Russian Doll 방식**: 겉에서 안으로 (Parent → Child)
+- **Overcommunicate**: 같은 정보를 여러 곳에 표기
+
+### 디자이너 교육
+- **80% 시간**: 소통, 교육, 니즈 파악
+- **20% 시간**: 실제 디자인 문제 해결
+- **"Be okay with not being right"**: 열린 자세로 피드백 수용
+
+### 컴포넌트 수명 연장
+- **Composable Slots**: 예측 불가능한 니즈 대비
+- **2년+ 수명 목표**: 빠르게 변하는 요구사항 흡수
+- **Accessibility First**: 접근성은 협상 불가 (non-negotiable)
+
+### Figma 파일 최적화
+- **Variant는 적의 적**: Variables + Modes로 대체
+- **Hidden Tokens**: Component-specific logic layer
+- **메모리 체크**: 50% 넘기 전에 리팩토링
+
+---
+
+## 📚 참고 자료
+
+- **Nathan Curtis**: Subcomponent Structure 개념 (List Item에 적용)
+- **Plugin**: Select Layers but Layer Counter (리팩토링 ROI 측정)
+- **Figma Features**:
+  - Component-Specific Variables
+  - Modes
+  - Hidden from Publishing
+  - Annotation in Design Mode
+
+---
+
+## 🎯 결론
+
+Uber의 디자인 시스템은 **"효율성"**과 **"확장성"**의 극한을 추구합니다:
+
+1. **Component-Specific Variables**로 variant 폭발 방지 (94% 레이어 감소)
+2. **Soft Deprecation**으로 글로벌 팀의 파일 안전성 보장
+3. **픽셀 퍼펙트 Spec**으로 플랫폼 일관성 달성
+4. **80/20 법칙**: 소통이 디자인보다 4배 중요
+5. **Composable Slots**로 2년+ 컴포넌트 수명 보장
+
+**핵심 교훈**:
+"디자이너의 Superpower는 컴포넌트를 Spec할 수 있는 능력이다. 이것만 있으면 어떤 제품이든 만들 수 있다."
+
+---
+
+**작성일**: 2026-02-05
+**작성자**: Claude (Ultrapilot Worker 10/12)
+**태그**: #DesignSystem #Figma #ComponentArchitecture #Uber #DesignOps
+
+
+---
+
+## Related Articles
+
+import CrossRef from '@site/src/components/CrossRef';
+
+<CrossRef
+  related={[
+    { path: "/docs/category/08-scaling-architecture", label: "Scaling & Architecture" },
+    { path: "/docs/category/03-component-design", label: "Component Design" },
+    { path: "/docs/category/09-versioning-releases", label: "Versioning & Releases" },
+  ]}
+/>

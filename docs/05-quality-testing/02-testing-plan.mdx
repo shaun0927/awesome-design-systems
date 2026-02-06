@@ -1,0 +1,152 @@
+---
+title: "컴포넌트 테스팅 계획 수립"
+sidebar_label: "테스팅 계획"
+sidebar_position: 2
+tags: [testing, planning, quality, roadmap, visual-regression]
+---
+
+## 컴포넌트 테스팅 계획 수립
+
+> Original issue: shaun0927/stocktitan-crawler#553
+
+## 📌 핵심 개념
+
+### 1. 품질 vs 수량의 패러다임 전환
+**핵심 질문의 변화**:
+- ❌ "우리 카탈로그에 컴포넌트가 몇 개나 필요한가?" (수량 중심)
+- ✅ "우리 컴포넌트의 품질이 충분한가?" (품질 중심)
+
+**주요 인사이트**: 완벽한 품질의 컴포넌트를 가진 시스템은 없습니다.
+
+### 2. 테스팅 계획의 정의
+- 품질은 **구현된 테스팅 계획**에서 나옴
+- 릴리스 전 컴포넌트 검사 기준
+- 점진적으로 추가 가능한 능력(Capability)
+
+### 3. NOW → NEXT → LATER 로드맵
+
+| 단계 | 시기 | 테스팅 항목 |
+|------|------|-------------|
+| **NOW** | 개발 시작 시 | Visual Testing Page, Hostile Styles, Browser Testing, Coding Linting |
+| **NEXT** | 알파/베타 단계 | Functional Testing, Unit Testing, Visual Regression, Accessibility Audit |
+| **LATER** | 성숙 단계 | Dark Mode, Subbrand Themes, Right-to-Left, Analytics |
+
+## 🎯 실무 노하우
+
+### 1. 테스팅 기본 원칙 (NOW)
+
+#### Visual Testing Page (Kitchen Sink)
+- 컴포넌트의 모든 변형, 상태, 행동 시각화
+- 다양한 배경 설정, 크기 변화, 반응형 특성
+
+#### Hostile Styles Environment
+- 컴포넌트가 외부 스타일의 영향을 받지 않는지 검증
+- 페이지 레벨 선택자로 CSS Cascade 오염 시키기
+```css
+* {
+  box-sizing: content-box !important;
+  font-family: Comic Sans MS;
+}
+```
+
+#### Design Tokens 의존성
+- 처음부터 디자인 토큰 의존성 설정
+- 하드코딩 대신 토큰 사용
+```css
+/* ❌ 잘못된 예 */
+.button { background: #3b82f6; }
+/* ✅ 올바른 예 */
+.button { background: var(--color-primary-500); }
+```
+
+### 2. 출시 전 필수 절차 (NEXT)
+
+#### Automated Visual Regression (AVR)
+- 추천 도구: BackstopJS, Percy, Chromatic
+- 베이스라인 스크린샷 생성 → 코드 변경 후 비교 → 차이점 시각화
+
+#### Accessibility Audit
+**전략 2가지**:
+1. Per-Component: 컴포넌트 완성 시마다 감사 (즉각 피드백)
+2. Periodic: 정기 간격 (비용 효율적)
+
+**체크리스트**:
+- 키보드 네비게이션, 스크린 리더 호환성, ARIA 라벨, 색상 대비율, 포커스 표시
+
+#### Semantic Versioning + Changelog
+```markdown
+# v2.1.0 (2024-01-15)
+
+## 🎉 New Features
+- Button: 새로운 `size="xs"` prop 추가
+
+## 🐛 Bug Fixes
+- Modal: iOS Safari 스크롤 버그 수정
+```
+
+### 3. 고급 스코프 (LATER)
+
+#### Light & Dark Mode
+| 레벨 | 배경 수 | 예시 |
+|------|---------|------|
+| 기본 | 2개 | White, Black |
+| 중급 | 4개 | White, Black, Light Gray, Dark Gray |
+| 고급 | 8개 | + Mid Gray, Off-White, Charcoal, Slate |
+
+#### Internationalization (i18n)
+1. Easy: 긴 독일어 라벨 테스트
+2. Medium: 넓은 문자 (일본 엔화)
+3. Hard: 글로벌 헤더 (다국어 혼합)
+
+## 📋 테스트 계획 체크리스트
+
+### 초기 단계 (NOW)
+- [ ] Kitchen Sink 페이지 구축
+- [ ] Hostile Styles 환경 검증
+- [ ] Design Tokens로만 스타일링
+- [ ] 브라우저 호환성 (Chrome, Firefox, Safari, Edge)
+- [ ] ESLint/Prettier 설정
+
+### 중기 단계 (NEXT)
+- [ ] Visual Regression (BackstopJS/Percy)
+- [ ] Unit Tests (80% 커버리지)
+- [ ] axe-core 자동 검사
+- [ ] 키보드 네비게이션 테스트
+- [ ] Semantic Versioning 규칙
+
+### 성숙 단계 (LATER)
+- [ ] Light/Dark Mode 지원
+- [ ] RTL 레이아웃 지원
+- [ ] Small/Medium/Large variants
+- [ ] 컴포넌트 사용 추적
+- [ ] 퍼포먼스 모니터링
+
+## 💡 핵심 교훈
+
+1. **품질 > 수량**: 30개의 평범한 컴포넌트보다 10개의 완벽한 컴포넌트
+2. **점진적 개선**: 완벽한 테스트 스위트로 시작하지 말고 기본부터
+3. **시각화**: 테스팅 계획을 테이블 형태로 시각화 → 팀 정렬
+4. **자동화 투자**: 초기 노력 크지만 장기적 ROI 높음
+5. **Design Tokens 처음부터**: 나중에 리팩토링하면 10배 힘듦
+6. **Hostile Styles**: 진짜 강건함의 척도
+7. **버전 관리 규율**: Semantic Versioning + 명확한 Changelog
+8. **팀 합의**: 테스팅 계획은 팀 전체의 buy-in 필요
+9. **현실적 목표**: 모든 컴포넌트가 모든 기준 만족 불필요
+
+---
+*출처: Nathan Curtis (EightShapes)*
+*분석일: 2026-02-06*
+
+---
+
+## 📎 Related Articles
+
+import CrossRef from '@site/src/components/CrossRef';
+
+<CrossRef
+  related={[
+    { path: "/docs/category/01-design-tokens", label: "Design Tokens" },
+    { path: "/docs/quality-testing/component-qa", label: "Component QA" },
+    { path: "/docs/accessibility/accessible-systems", label: "Accessible Design Systems" },
+  ]}
+/>

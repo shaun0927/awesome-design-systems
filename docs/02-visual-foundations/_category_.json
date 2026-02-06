@@ -1,0 +1,9 @@
+{
+  "label": "🧱 Visual Foundations",
+  "position": 2,
+  "description": "컬러 팔레트, 타이포그래피, 스페이싱, 사이징, 시각 계층",
+  "link": {
+    "type": "generated-index",
+    "slug": "/category/02-visual-foundations"
+  }
+}

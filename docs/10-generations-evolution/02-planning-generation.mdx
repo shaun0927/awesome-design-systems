@@ -1,0 +1,128 @@
+---
+title: "Planning a Design System Generation"
+sidebar_label: "Planning"
+sidebar_position: 2
+tags: ["planning", "lifecycle", "alpha", "beta", "launch"]
+---
+
+> Original issue: shaun0927/stocktitan-crawler#554
+
+## 디자인 시스템 세대 계획 수립
+
+## 📌 핵심 개념
+
+- **세대(Generation)**: 전체 라이브러리를 재구축하는 대규모 변화 (수개월~1년 이상)
+- **생애주기 단계**: Strategy → Implementation(Alpha → Beta) → Launch → Deprecation → End of Life
+- **4가지 핵심 마일스톤**: Commit → Launch → Deprecation → End of Life
+- **작은 것부터 큰 것 순서로**: 의존성 트리 기반 순서 결정 (Icon → Button → Form → Complex)
+
+## 🎯 생애주기별 전략
+
+### Strategy 단계 (전략 합의)
+- Discovery: 요구사항 수집, 이해관계자 인터뷰
+- Exploration: 비주얼 언어 방향 실험, 기술 POC
+- Planning: 누가, 무엇을, 어떻게, 언제
+- Alignment: 이해관계자 합의 도출 (Commit)
+
+### Implementation 단계 (Alpha/Beta)
+
+**Alpha vs Beta**:
+| 구분 | Alpha | Beta |
+|------|-------|------|
+| 목적 | 작동 방식 증명 | 프로덕션 사용 가능 |
+| 품질 | 검증되지 않은 품질 허용 | 프로덕션 수준 필수 |
+| 안정성 | API 변경 가능 | 점차 안정화 |
+| 사용자 | 내부 팀/초기 파트너 | 얼리 어답터 |
+
+### Launch 단계 (정식 출시)
+- 공식 발표, 라이브 데모, 축하 행사
+- 교육 심화 과정 (마이그레이션 중심)
+- **보증 기간(Warranty Period)**: 출시 후 집중 지원 (4-8주)
+
+## 📊 의존성 기반 순서 결정
+
+```
+Icon (의존성 없음) → 최우선
+  ├─ Button (Icon 사용) → 그다음
+  ├─ Tooltip → Form label → Checkbox
+  │                      └─ Radio, Toggle
+  │                      └─ List group (마지막)
+  └─ Breadcrumb, Tabs (독립적, 낮은 우선순위)
+```
+
+**배치 할당 전략**:
+- 의존성 커넥터가 팀원 간 최소화 (블로킹 위험 감소)
+- 작업량 균등 배분
+- 각 디자이너의 전문성/관심사 고려
+
+## 📈 품질-안정성-수량 곡선
+
+```
+         ┌─────────────────────────────────┐
+  High   │      ╱─────────────────  Quality
+         │     ╱        ╱─────────  Stability
+         │    ╱   ╱────╱
+  Low    │ ╱───╱               ╱─  Quantity
+         └─────────────────────────────────┘
+           Alpha      Beta        Launch
+```
+
+**핵심 원칙**:
+- **Quality**: 시작부터 높고 계속 높게 (접근성/성능 타협 불가)
+- **Stability**: Alpha 불안정 → Beta 안정화 → Launch 완전 안정
+- **Quantity**: S-커브 (느린 시작 → 급가속 → Launch 직전 감속)
+
+## 🛠️ 완성도 매트릭스
+
+| Release | Plan | Design | Spec | Code | Figma | Doc |
+|---------|------|--------|------|------|-------|-----|
+| Alpha 1 | Done | Done   | Done | Done | Done  | Done |
+| Beta 1  | Done | Review | In progress | Not yet | Not yet | Not yet |
+| Beta 2  | Ready | Not yet | Not yet | Not yet | Not yet | Not yet |
+
+**활용법**:
+- 한눈에 전체 진행 상황 파악
+- 병목 지점 식별 (특정 열이 전부 "In progress")
+- 릴리스 준비도 평가
+
+## ⚠️ 피해야 할 함정
+
+1. **알파벳 순서로 작업**: 의존성 트리 무시하면 재작업 폭증
+2. **완벽주의로 진행 지연**: Alpha는 증명 목적, 완벽 불필요
+3. **의존성 무시 병렬 작업**: Checkbox API 변경 → List group 전부 재작업
+4. **커뮤니케이션 부족**: "갑자기 Beta 출시" → 사용자 준비 안 됨
+5. **출시 후 방치**: 지원 없이 방치하면 신뢰 하락
+
+## ✅ 성공 체크리스트
+
+**전략 단계**:
+- [ ] 요구사항 수집 완료
+- [ ] 이해관계자 합의 획득 (Commit)
+
+**구현 단계**:
+- [ ] Alpha: 소수 핵심 컴포넌트 완성
+- [ ] Beta: 프로덕션 수준 품질 + 충분한 수량
+- [ ] Launch: 100% 완성 + 완전 안정 + 전체 문서화
+
+**출시 단계**:
+- [ ] 출시 공지 발송 (이메일, Slack)
+- [ ] 교육 세션 운영
+- [ ] 보증 기간(4-8주) 지원 체계 강화
+
+---
+*출처: Nathan Curtis (EightShapes) - Planning a Design System Generation*
+*"세대 교체는 디자인 시스템 생애에서 가장 중요한 순간. 단계별 계획, 점진적 전달, 명확한 커뮤니케이션으로 파트너들이 함께 계획할 수 있게 하세요."*
+
+---
+
+## Related Articles
+
+import CrossRef from '@site/src/components/CrossRef';
+
+<CrossRef
+  related={[
+    { path: "/docs/category/07-governance-operations", label: "Governance & Operations" },
+    { path: "/docs/category/03-component-design", label: "Component Design" },
+    { path: "/docs/category/09-versioning-releases", label: "Versioning & Releases" },
+  ]}
+/>

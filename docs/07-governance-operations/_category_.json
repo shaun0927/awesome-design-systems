@@ -1,0 +1,9 @@
+{
+  "label": "⚙️ Governance & Operations",
+  "position": 7,
+  "description": "거버넌스 모델, 지원 워크플로우, 기여 프로세스, 핵심 원칙",
+  "link": {
+    "type": "generated-index",
+    "slug": "/category/07-governance-operations"
+  }
+}

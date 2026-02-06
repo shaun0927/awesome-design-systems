@@ -1,0 +1,9 @@
+{
+  "label": "🧩 Component Design",
+  "position": 3,
+  "description": "버튼부터 카드, 슬롯, 서브컴포넌트, 상태 관리까지",
+  "link": {
+    "type": "generated-index",
+    "slug": "/category/03-component-design"
+  }
+}

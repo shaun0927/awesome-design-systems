@@ -6,8 +6,6 @@ audience: both
 tags: ["adoption", "migration", "incremental-delivery", "communication"]
 ---
 
-> Original issue: shaun0927/stocktitan-crawler#585
-
 import DevQuickStart from '@site/src/components/DevQuickStart';
 
 <DevQuickStart
@@ -87,48 +85,133 @@ gantt
 
 세대 전환 시 자동화된 코드 변환 도구가 핵심입니다.
 
-```typescript title="codemods/migrate-tokens.ts"
-// Token import 경로 자동 변환 codemod
-import { API, FileInfo } from 'jscodeshift';
+```typescript title="codemods/v2-to-v3.ts"
+// jscodeshift를 사용한 v2 → v3 완전 자동 변환
+import type { API, FileInfo, Options } from 'jscodeshift';
 
-export default function transformer(file: FileInfo, api: API) {
+export default function transformer(file: FileInfo, api: API, options: Options) {
   const j = api.jscodeshift;
   const root = j(file.source);
 
-  // v1 → v2 token import 변환
-  root
-    .find(j.ImportDeclaration, {
-      source: { value: '@design-system/tokens' }
-    })
-    .forEach(path => {
-      path.node.source.value = '@design-system/tokens-v2';
-    });
+  let hasChanges = false;
 
-  // 구 token 이름 → 신 token 이름 매핑
+  // 1. Import 경로 변경: @company/tokens-v2 → @company/tokens
+  root.find(j.ImportDeclaration, {
+    source: { value: '@company/tokens-v2' }
+  }).forEach(path => {
+    path.node.source.value = '@company/tokens';
+    hasChanges = true;
+  });
+
+  // 2. Component import 경로 변경
+  root.find(j.ImportDeclaration, {
+    source: { value: '@company/components-v2' }
+  }).forEach(path => {
+    path.node.source.value = '@company/core-ui';
+    hasChanges = true;
+  });
+
+  // 3. SCSS 변수 → CSS custom properties
+  // $color-primary → var(--color-primary)
+  root.find(j.StringLiteral).forEach(path => {
+    if (typeof path.node.value === 'string' && path.node.value.startsWith('$')) {
+      const varName = path.node.value.slice(1); // $ 제거
+      path.node.value = `var(--${varName})`;
+      hasChanges = true;
+    }
+  });
+
+  // 4. Token 이름 매핑 (v2 → v3)
   const TOKEN_MAP: Record<string, string> = {
     'colorPrimary': 'colorBrandPrimary',
     'colorDanger': 'colorAlertError',
     'spacingSm': 'spaceCompact',
     'spacingMd': 'spaceDefault',
     'spacingLg': 'spaceRelaxed',
+    'radiusDefault': 'radiusMd',
+    'shadowDefault': 'shadowMd',
   };
 
-  // 식별자 이름 치환
   Object.entries(TOKEN_MAP).forEach(([oldName, newName]) => {
-    root
-      .find(j.Identifier, { name: oldName })
-      .forEach(path => {
-        path.node.name = newName;
-      });
+    root.find(j.Identifier, { name: oldName }).forEach(path => {
+      path.node.name = newName;
+      hasChanges = true;
+    });
   });
 
-  return root.toSource();
+  // 5. Component prop 변경 (Breaking API changes)
+  // Button: type → variant
+  root.find(j.JSXElement, {
+    openingElement: { name: { name: 'Button' } }
+  }).forEach(path => {
+    const attrs = path.node.openingElement.attributes;
+    attrs?.forEach((attr: any) => {
+      if (attr.type === 'JSXAttribute' && attr.name.name === 'type') {
+        attr.name.name = 'variant';
+        hasChanges = true;
+      }
+    });
+  });
+
+  return hasChanges ? root.toSource() : null;
 }
+```
+
+**실행 방법**:
+```bash
+# Dry-run (미리보기)
+npx jscodeshift -t codemods/v2-to-v3.ts src/ --dry --print
+
+# 실제 적용
+npx jscodeshift -t codemods/v2-to-v3.ts src/
+
+# 특정 파일만
+npx jscodeshift -t codemods/v2-to-v3.ts src/components/Button.tsx
 ```
 
 ## Adapter 패턴: 점진적 전환
 
 한 번에 모든 컴포넌트를 교체하기 어려울 때, Adapter 패턴을 사용합니다.
+
+```tsx title="adapters/GenerationBridge.tsx"
+import React from 'react';
+
+interface BridgeProps<T> {
+  v2Component: React.ComponentType<T>;
+  v3Component: React.ComponentType<T>;
+  useV3?: boolean;
+  props: T;
+}
+
+/**
+ * 세대 간 호환성 레이어.
+ * Feature flag나 Context로 v2/v3를 동적 전환합니다.
+ */
+export function GenerationBridge<T extends Record<string, any>>({
+  v2Component: V2,
+  v3Component: V3,
+  useV3 = false,
+  props,
+}: BridgeProps<T>) {
+  const Component = useV3 ? V3 : V2;
+  return <Component {...props} />;
+}
+
+// 사용 예시
+import { Button as ButtonV2 } from '@company/components-v2';
+import { Button as ButtonV3 } from '@company/core-ui';
+
+export function MyButton(props: any) {
+  return (
+    <GenerationBridge
+      v2Component={ButtonV2}
+      v3Component={ButtonV3}
+      useV3={process.env.NEXT_PUBLIC_USE_V3 === 'true'}
+      props={props}
+    />
+  );
+}
+```
 
 ```tsx title="adapters/ButtonAdapter.tsx"
 import { Button as ButtonV1 } from '@design-system/components-v1';
@@ -199,44 +282,94 @@ export function GenerationProvider({
 export const useGenerationContext = () => useContext(GenerationContext);
 ```
 
+## 마이그레이션 진행률 추적
+
+자동으로 v2/v3 사용 현황을 스캔하여 리포트를 생성합니다.
+
+```typescript title="scripts/migration-progress.ts"
+import { execSync } from 'child_process';
+import { writeFileSync } from 'fs';
+
+interface MigrationStatus {
+  component: string;
+  v2Usage: number;
+  v3Usage: number;
+  percentMigrated: number;
+}
+
+function scanImports(packageName: string, version: 'v2' | 'v3'): number {
+  const pattern = version === 'v2'
+    ? '@company/components-v2'
+    : '@company/core-ui';
+
+  try {
+    const output = execSync(
+      `grep -r "from '${pattern}" src/ | wc -l`,
+      { encoding: 'utf-8' }
+    );
+    return parseInt(output.trim(), 10);
+  } catch {
+    return 0;
+  }
+}
+
+function generateMigrationReport(): MigrationStatus[] {
+  const components = ['Button', 'Card', 'Input', 'Select', 'Modal'];
+
+  return components.map(component => {
+    const v2Usage = scanImports(component, 'v2');
+    const v3Usage = scanImports(component, 'v3');
+    const total = v2Usage + v3Usage;
+    const percentMigrated = total > 0 ? Math.round((v3Usage / total) * 100) : 0;
+
+    return { component, v2Usage, v3Usage, percentMigrated };
+  });
+}
+
+function formatReport(statuses: MigrationStatus[]): string {
+  const total = statuses.length;
+  const complete = statuses.filter(s => s.percentMigrated === 100).length;
+  const overall = Math.round((complete / total) * 100);
+
+  let report = `# Migration Progress Report\n\n`;
+  report += `**Overall**: ${complete}/${total} components (${overall}%)\n\n`;
+  report += `| Component | v2 Imports | v3 Imports | Status | Progress |\n`;
+  report += `|-----------|-----------|-----------|--------|----------|\n`;
+
+  for (const s of statuses) {
+    const status = s.percentMigrated === 100 ? '✅ Done' :
+                   s.percentMigrated > 0 ? '🔄 In Progress' : '⏳ Not Started';
+    const bar = '█'.repeat(s.percentMigrated / 10) + '░'.repeat(10 - s.percentMigrated / 10);
+    report += `| ${s.component} | ${s.v2Usage} | ${s.v3Usage} | ${status} | ${bar} ${s.percentMigrated}% |\n`;
+  }
+
+  return report;
+}
+
+// 실행
+const statuses = generateMigrationReport();
+const report = formatReport(statuses);
+console.log(report);
+writeFileSync('migration-status.md', report);
+```
+
+**실행 방법**:
+```bash
+npx ts-node scripts/migration-progress.ts
+cat migration-status.md
+```
+
 ## 마이그레이션 CLI
 
 ```json title="package.json"
 {
   "scripts": {
-    "migrate:check": "npx @design-system/cli check --from v1 --to v2",
-    "migrate:run": "npx @design-system/cli migrate --from v1 --to v2 --dry-run",
-    "migrate:apply": "npx @design-system/cli migrate --from v1 --to v2",
-    "migrate:report": "npx @design-system/cli report --format markdown > migration-status.md"
+    "migrate:check": "npx @design-system/cli check --from v2 --to v3",
+    "migrate:run": "npx @design-system/cli migrate --from v2 --to v3 --dry-run",
+    "migrate:apply": "npx @design-system/cli migrate --from v2 --to v3",
+    "migrate:report": "ts-node scripts/migration-progress.ts",
+    "migrate:codemod": "jscodeshift -t codemods/v2-to-v3.ts src/"
   }
-}
-```
-
-```typescript title="scripts/migration-report.ts"
-// 마이그레이션 진행률 리포트 생성
-interface MigrationStatus {
-  component: string;
-  v1Usage: number;
-  v2Usage: number;
-  percentMigrated: number;
-}
-
-function generateReport(components: MigrationStatus[]): string {
-  const total = components.length;
-  const complete = components.filter(c => c.percentMigrated === 100).length;
-
-  let report = `# Migration Report\n\n`;
-  report += `**Progress**: ${complete}/${total} components (${Math.round(complete / total * 100)}%)\n\n`;
-  report += `| Component | v1 Imports | v2 Imports | Migrated |\n`;
-  report += `|-----------|-----------|-----------|----------|\n`;
-
-  for (const c of components) {
-    const status = c.percentMigrated === 100 ? 'Done' :
-                   c.percentMigrated > 0 ? 'In Progress' : 'Not Started';
-    report += `| ${c.component} | ${c.v1Usage} | ${c.v2Usage} | ${status} (${c.percentMigrated}%) |\n`;
-  }
-
-  return report;
 }
 ```
 

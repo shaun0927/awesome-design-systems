@@ -207,21 +207,39 @@ export function FlipCard({ front, back }: { front: ReactNode; back: ReactNode })
 
 ---
 
-## 접근성 애니메이션
+## 접근성: 모션 감소 설정
+
+CSS 3D 슬라이더의 무한 회전 애니메이션은 전정 장애(vestibular disorders)가 있는 사용자에게 어지러움, 메스꺼움, 두통을 유발할 수 있습니다. WCAG 2.3.3 Animation from Interactions 기준을 준수하려면 `prefers-reduced-motion` 미디어 쿼리를 반드시 추가해야 합니다.
+
+### 구현 방법
 
 ```css
+/* 접근성: 모션 감소 설정 존중 */
 @media (prefers-reduced-motion: reduce) {
   .slider {
-    animation: none; /* 애니메이션 중지 */
+    animation: none; /* 무한 회전 중지 */
+  }
+
+  .slider .item {
+    transition: none; /* 전환 효과 제거 */
   }
 
   .flip-card-inner {
-    transition: none; /* 전환 효과 제거 */
+    transition: none; /* 카드 플립 전환 제거 */
   }
 }
 ```
 
-**이유:** 전정 장애가 있는 사용자를 위한 필수 설정
+### 사용자가 설정하는 방법
+
+| OS | 설정 경로 |
+|-----|----------|
+| **macOS** | 시스템 설정 → 손쉬운 사용 → 디스플레이 → "움직임 줄이기" |
+| **Windows** | 설정 → 접근성 → 시각 효과 → "애니메이션 효과 표시" 끄기 |
+| **iOS** | 설정 → 손쉬운 사용 → 동작 → "동작 줄이기" |
+| **Android** | 설정 → 접근성 → 애니메이션 삭제 |
+
+이 설정을 켜면 운영체제와 웹 브라우저가 `prefers-reduced-motion: reduce`를 활성화하고, 위 CSS 규칙이 자동으로 적용됩니다
 
 ---
 

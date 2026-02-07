@@ -6,8 +6,6 @@ audience: both
 tags: [figma, slots, components, react, typescript]
 ---
 
-> Original issue: shaun0927/stocktitan-crawler#542
-
 import DevQuickStart from '@site/src/components/DevQuickStart';
 
 <DevQuickStart
@@ -75,50 +73,470 @@ checkboxGroup:
 3. "Preferred" 탭에서 `DS Checkbox` 선택
 4. 검색도 가능 (`Search preferred values`)
 
-## Figma Slots to TypeScript Mapping
+## 🎨 Figma Slot → Code 시각적 매핑
 
-```typescript title="figma-to-react-mapping.ts"
-// Figma slot definition (YAML spec)
-// items:
-//   type: slot
-//   anyOf: checkbox
-//   minItems: 1
-//   maxItems: undefined
+이 다이어그램은 Figma의 slot 정의가 어떻게 React 코드로 변환되는지 보여줍니다.
 
-// Equivalent React TypeScript interface
-interface CheckboxGroupProps {
-  /** Slot: accepts only Checkbox children (min 1) */
-  children: React.ReactElement<CheckboxProps> | React.ReactElement<CheckboxProps>[];
-  label: string;
-  error?: string;
+```mermaid
+graph TB
+    subgraph Figma["Figma Component Definition"]
+        FigmaSlot["Slot: items<br/>anyOf: checkbox<br/>minItems: 1<br/>maxItems: undefined"]
+        FigmaLabel["Text: label"]
+        FigmaError["Text: error (optional)"]
+    end
+
+    subgraph TypeScript["TypeScript Interface"]
+        TSChildren["children: ReactElement&lt;CheckboxProps&gt;[]"]
+        TSLabel["label: string"]
+        TSError["error?: string"]
+    end
+
+    subgraph ReactCode["React Component"]
+        Validation["Runtime Validation<br/>(min/max check)"]
+        Render["Render &lt;fieldset&gt;<br/>with slot children"]
+    end
+
+    FigmaSlot -->|maps to| TSChildren
+    FigmaLabel -->|maps to| TSLabel
+    FigmaError -->|maps to| TSError
+
+    TSChildren --> Validation
+    TSLabel --> Render
+    TSError --> Render
+    Validation --> Render
+
+    style Figma fill:#f3e8ff,stroke:#7c3aed
+    style TypeScript fill:#dbeafe,stroke:#2563eb
+    style ReactCode fill:#d1fae5,stroke:#059669
+```
+
+---
+
+## 📋 Figma Slot 정의 표기법 (표준화)
+
+기존 YAML 표기법 대신, Figma의 실제 UI와 일치하는 표준 JSON 스키마를 사용합니다.
+
+### Figma Properties Panel 표기
+
+```json
+{
+  "componentName": "CheckboxGroup",
+  "properties": {
+    "label": {
+      "type": "text",
+      "default": "Select options"
+    },
+    "items": {
+      "type": "slot",
+      "anyOf": ["Checkbox"],
+      "minItems": 1,
+      "maxItems": null,
+      "preferredValues": ["DS Checkbox", "DS Checkbox (with description)"]
+    },
+    "error": {
+      "type": "text",
+      "default": "",
+      "visible": "if has validation error"
+    }
+  }
+}
+```
+
+### 동등한 TypeScript 정의
+
+```typescript
+interface FigmaSlotDefinition {
+  type: 'slot';
+  /** Which component types are allowed in this slot */
+  anyOf: string[];
+  /** Minimum number of items required */
+  minItems?: number;
+  /** Maximum number of items allowed (null = unlimited) */
+  maxItems?: number | null;
+  /** Suggested components shown in "Add instances" panel */
+  preferredValues?: string[];
 }
 
-// With runtime validation
-function CheckboxGroup({ children, label, error }: CheckboxGroupProps) {
-  const items = React.Children.toArray(children);
+// Example: Checkbox Group slot configuration
+const checkboxGroupSlot: FigmaSlotDefinition = {
+  type: 'slot',
+  anyOf: ['Checkbox'],
+  minItems: 1,
+  maxItems: null,
+  preferredValues: ['DS Checkbox']
+};
+```
 
-  if (items.length < 1) {
-    console.warn('CheckboxGroup requires at least 1 Checkbox child');
+---
+
+## 🛠️ 완전한 Card 컴포넌트 예시 (3개 Slot)
+
+이 예시는 여러 slot을 가진 복잡한 컴포넌트를 보여줍니다.
+
+### Figma Component Structure
+
+```
+Card
+├── header (slot: CardHeader)
+├── media (slot: Image | Video)
+├── content (slot: any, minItems: 1)
+└── actions (slot: Button, maxItems: 3)
+```
+
+### Figma Slot Definitions (JSON)
+
+```json
+{
+  "componentName": "Card",
+  "slots": {
+    "header": {
+      "type": "slot",
+      "anyOf": ["CardHeader"],
+      "minItems": 0,
+      "maxItems": 1,
+      "preferredValues": ["DS Card Header"]
+    },
+    "media": {
+      "type": "slot",
+      "anyOf": ["Image", "Video", "Chart"],
+      "minItems": 0,
+      "maxItems": 1,
+      "preferredValues": ["DS Image", "DS Video"]
+    },
+    "content": {
+      "type": "slot",
+      "anyOf": ["Text", "Paragraph", "List"],
+      "minItems": 1,
+      "maxItems": null
+    },
+    "actions": {
+      "type": "slot",
+      "anyOf": ["Button"],
+      "minItems": 0,
+      "maxItems": 3,
+      "preferredValues": ["DS Button Primary", "DS Button Secondary"]
+    }
+  }
+}
+```
+
+### TypeScript Interface (Generated)
+
+```typescript
+interface CardHeaderProps {
+  title: string;
+  subtitle?: string;
+}
+
+interface CardProps {
+  /** Optional: Card header (max 1) */
+  header?: React.ReactElement<CardHeaderProps>;
+
+  /** Optional: Visual media (Image, Video, or Chart) */
+  media?: React.ReactElement<ImageProps | VideoProps | ChartProps>;
+
+  /** Required: Main content (min 1, no max) */
+  children: React.ReactNode;
+
+  /** Optional: Action buttons (max 3) */
+  actions?: React.ReactElement<ButtonProps> | React.ReactElement<ButtonProps>[];
+
+  /** Visual props */
+  elevation?: 'flat' | 'raised' | 'floating';
+  padding?: 'none' | 'compact' | 'default' | 'spacious';
+}
+```
+
+### React Component Implementation
+
+```typescript
+import React from 'react';
+
+export function Card({
+  header,
+  media,
+  children,
+  actions,
+  elevation = 'raised',
+  padding = 'default'
+}: CardProps) {
+  // Runtime validation
+  const actionButtons = React.Children.toArray(actions);
+  if (actionButtons.length > 3) {
+    console.warn(`Card: Too many actions (${actionButtons.length}). Maximum is 3.`);
+  }
+
+  const childrenArray = React.Children.toArray(children);
+  if (childrenArray.length < 1) {
+    console.warn('Card: At least 1 content child is required.');
   }
 
   return (
-    <fieldset className="checkbox-group" role="group" aria-labelledby={`${label}-label`}>
-      <legend id={`${label}-label`}>{label}</legend>
-      <div className="checkbox-group__items">{children}</div>
-      {error && <span className="checkbox-group__error" role="alert">{error}</span>}
-    </fieldset>
+    <div
+      className={`card card--${elevation} card--padding-${padding}`}
+      role="article"
+    >
+      {/* Slot: header (optional, max 1) */}
+      {header && (
+        <div className="card__header">
+          {header}
+        </div>
+      )}
+
+      {/* Slot: media (optional, max 1) */}
+      {media && (
+        <div className="card__media">
+          {media}
+        </div>
+      )}
+
+      {/* Slot: content (required, min 1) */}
+      <div className="card__content">
+        {children}
+      </div>
+
+      {/* Slot: actions (optional, max 3) */}
+      {actions && actionButtons.length > 0 && (
+        <div className="card__actions">
+          {actionButtons.slice(0, 3)}
+        </div>
+      )}
+    </div>
   );
 }
 
-// Figma "preferred values" → TypeScript generic constraint
-interface SlotConfig<T extends React.ElementType> {
-  component: T;
+// Sub-component: CardHeader
+export function CardHeader({ title, subtitle }: CardHeaderProps) {
+  return (
+    <header className="card-header">
+      <h3 className="card-header__title">{title}</h3>
+      {subtitle && <p className="card-header__subtitle">{subtitle}</p>}
+    </header>
+  );
+}
+```
+
+### Usage Example
+
+```tsx
+import { Card, CardHeader } from './Card';
+import { Image } from './Image';
+import { Button } from './Button';
+
+function ProductCard() {
+  return (
+    <Card elevation="floating" padding="default">
+      {/* Slot: header */}
+      <CardHeader
+        title="Premium Headphones"
+        subtitle="Noise-cancelling, 30hr battery"
+      />
+
+      {/* Slot: media */}
+      <Image
+        src="/headphones.jpg"
+        alt="Premium headphones"
+        aspectRatio="16:9"
+      />
+
+      {/* Slot: content (children) */}
+      <p>
+        Experience studio-quality sound with advanced noise cancellation
+        technology. Perfect for music lovers and remote workers.
+      </p>
+      <p className="price">$299.99</p>
+
+      {/* Slot: actions (max 3) */}
+      <Button variant="primary">Add to Cart</Button>
+      <Button variant="secondary">Learn More</Button>
+    </Card>
+  );
+}
+```
+
+---
+
+## 🧑‍💻 개발자 구현 가이드: Figma Spec → React Component
+
+Figma 디자이너로부터 slot이 포함된 컴포넌트 스펙을 받았을 때, 이 단계를 따르세요.
+
+### Step 1: Figma 스펙 읽기
+
+디자이너가 제공하는 스펙 문서 또는 Figma Dev Mode에서 다음 정보를 확인:
+
+- **Slot 이름**: `items`, `actions`, `header` 등
+- **anyOf**: 허용되는 컴포넌트 타입
+- **minItems/maxItems**: 개수 제약
+- **preferredValues**: 권장 컴포넌트 목록
+
+### Step 2: TypeScript Interface 생성
+
+```typescript
+// From Figma spec:
+// items: { type: slot, anyOf: [Checkbox], minItems: 1 }
+
+interface CheckboxGroupProps {
+  // Slot → children prop
+  children: React.ReactElement<CheckboxProps> | React.ReactElement<CheckboxProps>[];
+  // Other visual props from Figma
+  label: string;
+  error?: string;
+  orientation?: 'vertical' | 'horizontal';
+}
+```
+
+**매핑 규칙:**
+- Figma slot → React `children` prop (또는 named slot prop)
+- `anyOf: [Type]` → `ReactElement<TypeProps>`
+- `minItems: 1` → Type validation in component
+- `maxItems: 3` → `.slice(0, 3)` in render
+
+### Step 3: 런타임 검증 추가
+
+```typescript
+function CheckboxGroup({ children, label, error, orientation = 'vertical' }: CheckboxGroupProps) {
+  const items = React.Children.toArray(children);
+
+  // Validate minItems
+  if (items.length < 1) {
+    console.warn('[CheckboxGroup] minItems violation: At least 1 Checkbox required');
+  }
+
+  // Validate anyOf (type checking)
+  const invalidChildren = items.filter(child => {
+    return !React.isValidElement(child) || child.type !== Checkbox;
+  });
+
+  if (invalidChildren.length > 0) {
+    console.warn(
+      `[CheckboxGroup] anyOf violation: Only Checkbox components allowed. ` +
+      `Found ${invalidChildren.length} invalid children.`
+    );
+  }
+
+  return (/* render implementation */);
+}
+```
+
+### Step 4: Storybook Examples 작성
+
+```typescript
+import type { Meta, StoryObj } from '@storybook/react';
+import { CheckboxGroup, Checkbox } from './CheckboxGroup';
+
+const meta: Meta<typeof CheckboxGroup> = {
+  title: 'Components/CheckboxGroup',
+  component: CheckboxGroup,
+  parameters: {
+    design: {
+      type: 'figma',
+      url: 'https://figma.com/file/xxx/CheckboxGroup',
+    },
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof CheckboxGroup>;
+
+// Valid: meets minItems = 1
+export const Default: Story = {
+  render: () => (
+    <CheckboxGroup label="Select your interests">
+      <Checkbox label="Design Systems" />
+      <Checkbox label="Component Libraries" />
+      <Checkbox label="Accessibility" />
+    </CheckboxGroup>
+  ),
+};
+
+// Invalid: violates minItems (triggers console.warn in dev)
+export const MinItemsViolation: Story = {
+  render: () => (
+    <CheckboxGroup label="Empty group (invalid)">
+      {/* No children - violates minItems: 1 */}
+    </CheckboxGroup>
+  ),
+  parameters: {
+    docs: {
+      description: {
+        story: '⚠️ This example violates minItems constraint (should have at least 1 Checkbox)',
+      },
+    },
+  },
+};
+
+// Invalid: violates anyOf (wrong child type)
+export const AnyOfViolation: Story = {
+  render: () => (
+    <CheckboxGroup label="Invalid children">
+      <Checkbox label="Valid checkbox" />
+      <button>Invalid button</button> {/* ❌ anyOf violation */}
+    </CheckboxGroup>
+  ),
+};
+```
+
+### Step 5: 디자인 QA 체크리스트
+
+컴포넌트 구현 후 디자이너와 함께 검증:
+
+- [ ] Slot 이름이 Figma 정의와 일치하는가?
+- [ ] `minItems` 제약이 런타임 검증되는가?
+- [ ] `maxItems` 제약이 enforced되는가? (`.slice()` 또는 warning)
+- [ ] `preferredValues`가 Storybook examples에 반영되었는가?
+- [ ] 잘못된 자식 컴포넌트 사용 시 명확한 에러 메시지가 표시되는가?
+
+---
+
+## 🔄 Figma Slots to TypeScript Mapping (완전판)
+
+### Basic Mapping
+
+```typescript
+// Figma slot definition
+interface FigmaSlotSpec {
+  type: 'slot';
+  anyOf: string[];
   minItems?: number;
-  maxItems?: number;
+  maxItems?: number | null;
 }
 
-// Example: Tab slot only accepts TabItem
-type TabSlot = SlotConfig<typeof TabItem>;
+// React TypeScript mapping utility
+type SlotToReactType<
+  T extends FigmaSlotSpec,
+  ComponentType
+> = T['minItems'] extends 1
+  ? T['maxItems'] extends 1
+    ? React.ReactElement<ComponentType>  // Exactly 1
+    : React.ReactElement<ComponentType> | React.ReactElement<ComponentType>[]  // 1 or more
+  : T['maxItems'] extends 1
+    ? React.ReactElement<ComponentType> | undefined  // 0 or 1
+    : React.ReactElement<ComponentType>[] | undefined;  // 0 or more
+
+// Usage
+type CheckboxSlot = SlotToReactType<
+  { type: 'slot'; anyOf: ['Checkbox']; minItems: 1; maxItems: null },
+  CheckboxProps
+>;
+// Result: ReactElement<CheckboxProps> | ReactElement<CheckboxProps>[]
+```
+
+### Advanced: Multi-Type Slot
+
+```typescript
+// Figma: anyOf: ["Image", "Video", "Chart"]
+type MediaSlot = React.ReactElement<ImageProps | VideoProps | ChartProps>;
+
+interface CardProps {
+  media?: MediaSlot;
+}
+
+// Runtime type guard
+function isValidMediaComponent(element: React.ReactNode): element is MediaSlot {
+  if (!React.isValidElement(element)) return false;
+  const validTypes = [Image, Video, Chart];
+  return validTypes.some(type => element.type === type);
+}
 ```
 
 ---

@@ -178,10 +178,13 @@ jobs:
 
       - name: Extract Figma Variables
         run: |
-          npx figma-variables-export \
-            --file-key ${{ secrets.FIGMA_FILE_KEY }} \
-            --token ${{ secrets.FIGMA_TOKEN }} \
-            --output tokens/
+          # Figma Variables API로 토큰 추출 (REST API 사용)
+          curl -s -H "X-Figma-Token: ${{ secrets.FIGMA_TOKEN }}" \
+            "https://api.figma.com/v1/files/${{ secrets.FIGMA_FILE_KEY }}/variables/local" \
+            | node scripts/transform-figma-tokens.js > tokens/figma-variables.json
+
+          # 참고: scripts/transform-figma-tokens.js는 Figma API 응답을
+          # Style Dictionary 포맷으로 변환하는 커스텀 스크립트입니다
 
       - name: Build tokens
         run: npx style-dictionary build

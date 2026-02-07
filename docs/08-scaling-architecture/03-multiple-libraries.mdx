@@ -156,8 +156,11 @@ design-system/
 # React는 준비되면 바로 릴리스
 cd packages/react && npx changeset publish
 
-# iOS는 별도 주기로 릴리스
-cd native/ios && swift package publish
+# iOS는 git tag로 배포 (Swift Package Manager 방식)
+cd native/ios && git tag 3.1.0 && git push origin 3.1.0
+
+# Android는 Maven/Gradle로 배포
+cd native/android && ./gradlew publish
 
 # 통합 릴리스 노트 생성
 node scripts/generate-release-notes.js

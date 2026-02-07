@@ -306,8 +306,20 @@ flowchart LR
 ```
 
 ```bash
-# 시스템 간 컴포넌트 비교 자동화
-npx diff-package @system-a/core @system-b/core --exports
+# 시스템 간 컴포넌트 API 비교 방법
+
+# 방법 1: npm pack으로 패키지 내용 비교
+diff <(npm pack @system-a/core --dry-run 2>&1) <(npm pack @system-b/core --dry-run 2>&1)
+
+# 방법 2: exports 비교 (Node.js)
+node -e "console.log(Object.keys(require('@system-a/core')))" > system-a-exports.txt
+node -e "console.log(Object.keys(require('@system-b/core')))" > system-b-exports.txt
+diff system-a-exports.txt system-b-exports.txt
+
+# 방법 3: package.json exports 필드 비교
+jq '.exports' node_modules/@system-a/core/package.json > a-exports.json
+jq '.exports' node_modules/@system-b/core/package.json > b-exports.json
+diff a-exports.json b-exports.json
 
 # codemod로 마이그레이션 자동화
 npx jscodeshift -t transforms/system-a-to-b.ts src/**/*.tsx

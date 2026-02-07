@@ -6,8 +6,6 @@ audience: both
 tags: ["strategy", "technology", "TRACES", "alignment", "workshop"]
 ---
 
-> Original issue: shaun0927/stocktitan-crawler#534
-
 import DevQuickStart from '@site/src/components/DevQuickStart';
 
 <DevQuickStart
@@ -149,6 +147,62 @@ function prioritize(initiatives: Initiative[]): Initiative[] {
     }))
     .sort((a, b) => b.score - a.score);
 }
+
+// 실전 사용 예시
+const initiatives: Initiative[] = [
+  {
+    name: 'Design System Gen 3 Migration',
+    strategicAlignment: 85,
+    deliveryCapacity: 70,
+    traces: {
+      technicalDebt: 9,
+      regulatoryRisk: 3,
+      audienceShift: 6,
+      competition: 7,
+      economicTrend: 5,
+      substituteTech: 8,
+    },
+  },
+  {
+    name: 'Accessibility Compliance (WCAG 2.2)',
+    strategicAlignment: 90,
+    deliveryCapacity: 50,
+    traces: {
+      technicalDebt: 4,
+      regulatoryRisk: 10,
+      audienceShift: 7,
+      competition: 6,
+      economicTrend: 4,
+      substituteTech: 2,
+    },
+  },
+  {
+    name: 'Dark Mode Support',
+    strategicAlignment: 60,
+    deliveryCapacity: 80,
+    traces: {
+      technicalDebt: 5,
+      regulatoryRisk: 1,
+      audienceShift: 8,
+      competition: 9,
+      economicTrend: 6,
+      substituteTech: 3,
+    },
+  },
+];
+
+const ranked = prioritize(initiatives);
+ranked.forEach((init, idx) => {
+  const quadrant = classifyInitiative(init);
+  console.log(`${idx + 1}. ${init.name} (${quadrant}) - Score: ${init.score.toFixed(2)}`);
+});
+```
+
+**출력 예시**:
+```
+1. Design System Gen 3 Migration (optimal) - Score: 81.25
+2. Accessibility Compliance (WCAG 2.2) (over-invested) - Score: 77.50
+3. Dark Mode Support (under-invested) - Score: 73.00
 ```
 
 ## TRACES Workshop 설계
@@ -194,7 +248,7 @@ interface WorkshopOutput {
     owner: string;
     deadline: string;
     tracesJustification: string;
-    quadrant: Quadrant;
+    quadrant: 'optimal' | 'under-invested' | 'over-invested' | 'low-priority';
   }[];
 }
 
@@ -225,6 +279,214 @@ function generateWorkshopReport(output: WorkshopOutput): string {
 
   return report;
 }
+
+// 실전 워크샵 데이터 예시
+const workshopData: WorkshopOutput = {
+  date: '2025-03-15',
+  participants: [
+    'Jane Doe (Head of Design)',
+    'John Smith (Tech Lead)',
+    'Sarah Lee (Product Manager)',
+    'Mike Chen (Security Engineer)',
+    'Emily Brown (Legal Counsel)',
+  ],
+  assessments: [
+    {
+      date: '2025-03-15',
+      assessor: 'John Smith',
+      element: 'T',
+      description: 'Legacy design tokens still use SCSS variables, blocking CSS-in-JS migration',
+      velocity: 'critical',
+      impact: 9,
+      initiatives: ['Design System Gen 3 Migration'],
+    },
+    {
+      date: '2025-03-15',
+      assessor: 'Emily Brown',
+      element: 'R',
+      description: 'EU Accessibility Act compliance deadline in 6 months',
+      velocity: 'critical',
+      impact: 10,
+      initiatives: ['WCAG 2.2 Compliance'],
+    },
+    {
+      date: '2025-03-15',
+      assessor: 'Sarah Lee',
+      element: 'A',
+      description: '68% of users now prefer dark mode according to user research',
+      velocity: 'fast',
+      impact: 8,
+      initiatives: ['Dark Mode Support'],
+    },
+  ],
+  selectedInitiatives: [
+    {
+      name: 'WCAG 2.2 Compliance',
+      owner: 'Jane Doe',
+      deadline: '2025-09-01',
+      quadrant: 'optimal',
+      tracesJustification: 'Regulatory (R=10) + Audience (A=7) + High strategic alignment',
+    },
+    {
+      name: 'Design System Gen 3 Migration',
+      owner: 'John Smith',
+      deadline: '2025-12-31',
+      quadrant: 'optimal',
+      tracesJustification: 'Technical Debt (T=9) + Substitute Tech (S=8) blocking innovation',
+    },
+    {
+      name: 'Dark Mode Support',
+      owner: 'Sarah Lee',
+      deadline: '2026-03-01',
+      quadrant: 'under-invested',
+      tracesJustification: 'Audience shift (A=8) + Competition (C=9) but lower strategic priority',
+    },
+  ],
+};
+
+const report = generateWorkshopReport(workshopData);
+console.log(report);
+```
+
+## Feature Flag로 점진적 디자인 시스템 롤아웃
+
+세대 전환을 한 번에 강제하지 않고, 팀별/페이지별로 점진적으로 활성화합니다.
+
+```typescript title="lib/design-system-flags.ts"
+type FeatureFlags = {
+  useV3Tokens: boolean;
+  useV3Components: boolean;
+  useNewSpacing: boolean;
+  useDarkMode: boolean;
+};
+
+const flags: FeatureFlags = {
+  useV3Tokens: process.env.NEXT_PUBLIC_DS_V3_TOKENS === 'true',
+  useV3Components: process.env.NEXT_PUBLIC_DS_V3_COMPONENTS === 'true',
+  useNewSpacing: process.env.NEXT_PUBLIC_DS_V3_SPACING === 'true',
+  useDarkMode: process.env.NEXT_PUBLIC_DS_DARK_MODE === 'true',
+};
+
+export function useDesignSystemFlag(flag: keyof FeatureFlags): boolean {
+  return flags[flag] ?? false;
+}
+
+// 팀별/환경별 플래그 오버라이드
+export function getTeamFlags(teamId: string): Partial<FeatureFlags> {
+  const teamOverrides: Record<string, Partial<FeatureFlags>> = {
+    'team-design': { useV3Tokens: true, useV3Components: true },
+    'team-marketing': { useV3Tokens: true, useV3Components: false },
+    'team-sales': { useV3Tokens: false, useV3Components: false },
+  };
+
+  return teamOverrides[teamId] ?? {};
+}
+```
+
+**사용 예시**:
+```tsx title="components/MyComponent.tsx"
+import { useDesignSystemFlag } from '@/lib/design-system-flags';
+import { Button as ButtonV2 } from '@company/components-v2';
+import { Button as ButtonV3 } from '@company/core-ui';
+
+export function MyComponent() {
+  const useV3 = useDesignSystemFlag('useV3Components');
+  const Button = useV3 ? ButtonV3 : ButtonV2;
+
+  return <Button variant="primary">Click me</Button>;
+}
+```
+
+**환경변수로 제어**:
+```bash title=".env.local"
+# 로컬 개발: v3 전체 활성화
+NEXT_PUBLIC_DS_V3_TOKENS=true
+NEXT_PUBLIC_DS_V3_COMPONENTS=true
+NEXT_PUBLIC_DS_V3_SPACING=true
+```
+
+```bash title=".env.production"
+# 프로덕션: 단계적 활성화
+NEXT_PUBLIC_DS_V3_TOKENS=true
+NEXT_PUBLIC_DS_V3_COMPONENTS=false
+NEXT_PUBLIC_DS_V3_SPACING=false
+```
+
+## Token 마이그레이션 스크립트
+
+SCSS 변수를 CSS custom properties로 자동 변환합니다.
+
+```typescript title="scripts/migrate-tokens.ts"
+import { readFileSync, writeFileSync, readdirSync } from 'fs';
+import { join } from 'path';
+
+interface TokenMapping {
+  scssVar: string;
+  cssVar: string;
+  value: string;
+}
+
+const TOKEN_MAPPINGS: TokenMapping[] = [
+  { scssVar: '$color-primary', cssVar: '--color-primary', value: '#6B47DC' },
+  { scssVar: '$color-secondary', cssVar: '--color-secondary', value: '#8B5CF6' },
+  { scssVar: '$spacing-sm', cssVar: '--space-2', value: '0.5rem' },
+  { scssVar: '$spacing-md', cssVar: '--space-4', value: '1rem' },
+  { scssVar: '$spacing-lg', cssVar: '--space-8', value: '2rem' },
+  { scssVar: '$radius-default', cssVar: '--radius-md', value: '0.375rem' },
+];
+
+function convertScssToCSS(scssContent: string): string {
+  let cssContent = scssContent;
+
+  TOKEN_MAPPINGS.forEach(({ scssVar, cssVar }) => {
+    // SCSS 변수 사용 → CSS custom property
+    const scssUsageRegex = new RegExp(`\\${scssVar}(?![-\\w])`, 'g');
+    cssContent = cssContent.replace(scssUsageRegex, `var(${cssVar})`);
+  });
+
+  return cssContent;
+}
+
+function generateCSSTokens(): string {
+  let css = ':root {\n';
+  TOKEN_MAPPINGS.forEach(({ cssVar, value }) => {
+    css += `  ${cssVar}: ${value};\n`;
+  });
+  css += '}\n';
+  return css;
+}
+
+function migrateDirectory(srcDir: string) {
+  const files = readdirSync(srcDir, { recursive: true, withFileTypes: true });
+
+  files.forEach(file => {
+    if (file.isFile() && file.name.endsWith('.scss')) {
+      const filePath = join(file.path, file.name);
+      const content = readFileSync(filePath, 'utf-8');
+      const converted = convertScssToCSS(content);
+
+      if (content !== converted) {
+        writeFileSync(filePath, converted);
+        console.log(`✅ Migrated: ${filePath}`);
+      }
+    }
+  });
+}
+
+// 실행
+console.log('🚀 Starting SCSS → CSS custom properties migration...\n');
+console.log('📝 Generating tokens.css...');
+writeFileSync('styles/tokens.css', generateCSSTokens());
+console.log('✅ tokens.css created\n');
+
+console.log('🔄 Converting SCSS files...');
+migrateDirectory('src/styles');
+console.log('\n✨ Migration complete!');
+```
+
+**실행 방법**:
+```bash
+npx ts-node scripts/migrate-tokens.ts
 ```
 
 ---

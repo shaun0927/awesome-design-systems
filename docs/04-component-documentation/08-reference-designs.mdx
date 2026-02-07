@@ -97,16 +97,11 @@ export default function ProductList() {
 
 ## After: 디자인 시스템 적용
 
-동일한 페이지를 디자인 시스템 컴포넌트로 구현한 버전.
+동일한 페이지를 디자인 시스템 컴포넌트로 구현한 버전. Compound Component 패턴과 CSS Custom Properties를 활용합니다.
 
 ```tsx
-// pages/ProductList.tsx - 디자인 시스템 적용
-import { PageLayout } from '@ds/layouts';
-import { Heading } from '@ds/typography';
-import { Grid } from '@ds/layout';
-import { ProductCard } from '@ds/cards';
-import { Button } from '@ds/buttons';
-import { formatCurrency } from '@ds/utils';
+// pages/ProductList.tsx - 디자인 시스템 적용 (Self-contained 버전)
+// 예시: 실제 구현 시 디자인 시스템 패키지의 컴포넌트로 대체하세요
 
 interface Product {
   id: string;
@@ -116,14 +111,68 @@ interface Product {
   image: string;
 }
 
-export default function ProductList({ products }: { products: Product[] }) {
+// Compound Component 패턴으로 구성 가능한 ProductCard
+function ProductCard({ children, ...props }: React.PropsWithChildren<React.HTMLAttributes<HTMLDivElement>>) {
   return (
-    <PageLayout maxWidth="lg" padding="md">
-      <Heading level={1} size="xl" marginBottom="lg">
-        상품 목록
-      </Heading>
+    <div
+      {...props}
+      style={{
+        border: '1px solid var(--color-border)',
+        borderRadius: 'var(--radius-card, 8px)',
+        overflow: 'hidden',
+        boxShadow: 'var(--shadow-card)',
+        transition: 'all 0.2s',
+        ...props.style,
+      }}
+    >
+      {children}
+    </div>
+  );
+}
 
-      <Grid columns={{ sm: 1, md: 2, lg: 3 }} gap="md">
+ProductCard.Image = function CardImage({ src, alt }: { src: string; alt: string }) {
+  return <img src={src} alt={alt} style={{ width: '100%', display: 'block' }} />;
+};
+
+ProductCard.Body = function CardBody({ children }: React.PropsWithChildren) {
+  return <div style={{ padding: 'var(--space-md, 16px)' }}>{children}</div>;
+};
+
+ProductCard.Title = function CardTitle({ children }: React.PropsWithChildren) {
+  return <h3 style={{ fontSize: '1rem', fontWeight: 600, margin: '0 0 0.5rem' }}>{children}</h3>;
+};
+
+ProductCard.Description = function CardDescription({ children }: React.PropsWithChildren) {
+  return <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', margin: '0 0 0.75rem' }}>{children}</p>;
+};
+
+ProductCard.Price = function CardPrice({ children }: React.PropsWithChildren) {
+  return <div style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--color-primary)' }}>{children}</div>;
+};
+
+ProductCard.Footer = function CardFooter({ children }: React.PropsWithChildren) {
+  return <div style={{ padding: '0 var(--space-md, 16px) var(--space-md, 16px)' }}>{children}</div>;
+};
+
+// 메인 컴포넌트
+export default function ProductList({ products }: { products: Product[] }) {
+  const addToCart = (id: string) => {
+    console.log('Add to cart:', id);
+  };
+
+  return (
+    <div style={{ padding: 'var(--space-md, 16px)', maxWidth: '1200px', margin: '0 auto' }}>
+      <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '1.5rem' }}>
+        상품 목록
+      </h1>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+          gap: 'var(--space-md, 16px)',
+        }}
+      >
         {products.map((product) => (
           <ProductCard key={product.id}>
             <ProductCard.Image
@@ -134,24 +183,32 @@ export default function ProductList({ products }: { products: Product[] }) {
               <ProductCard.Title>{product.name}</ProductCard.Title>
               <ProductCard.Description>{product.description}</ProductCard.Description>
               <ProductCard.Price>
-                {formatCurrency(product.price, 'KRW')}
+                {product.price.toLocaleString('ko-KR')}원
               </ProductCard.Price>
             </ProductCard.Body>
             <ProductCard.Footer>
-              <Button
-                variant="primary"
-                size="md"
-                fullWidth
+              <button
                 onClick={() => addToCart(product.id)}
                 aria-label={`${product.name} 장바구니에 담기`}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  backgroundColor: 'var(--color-primary)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 'var(--radius-button, 6px)',
+                  cursor: 'pointer',
+                  fontSize: '1rem',
+                  fontWeight: 600,
+                }}
               >
                 장바구니 담기
-              </Button>
+              </button>
             </ProductCard.Footer>
           </ProductCard>
         ))}
-      </Grid>
-    </PageLayout>
+      </div>
+    </div>
   );
 }
 ```

@@ -108,13 +108,13 @@ AA 등급만 준수하려면 Level A, AA 카드만 남김
 ### 예시 1: 1.4.3 Contrast (Minimum)
 
 ```css
-/* BAD: Contrast ratio 1.6:1 (AA 기준 4.5:1 미달) */
+/* BAD: Contrast ratio 1.8:1 (AA 기준 4.5:1 미달) */
 .button {
   background-color: #999;
   color: #ccc;
 }
 
-/* GOOD: Contrast ratio 7.2:1 (AA 통과) */
+/* GOOD: Contrast ratio 5.6:1 (AA 통과) */
 .button {
   background-color: #0066cc;
   color: #ffffff;
@@ -396,9 +396,9 @@ module.exports = {
     extend: {
       colors: {
         brand: {
-          50: '#e6f2ff',  // 7:1 contrast
-          500: '#0066cc', // 7.2:1 contrast
-          700: '#004499', // 10:1 contrast
+          50: '#e6f2ff',  // 배경 틴트 (어두운 텍스트와 함께 사용)
+          500: '#0066cc', // 5.6:1 contrast (AA 통과, 흰색 배경 기준)
+          700: '#004499', // 9.2:1 contrast (AAA 통과, 흰색 배경 기준)
         },
       },
     },

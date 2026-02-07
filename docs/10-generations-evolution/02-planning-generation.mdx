@@ -6,8 +6,6 @@ audience: both
 tags: ["planning", "lifecycle", "alpha", "beta", "launch"]
 ---
 
-> Original issue: shaun0927/stocktitan-crawler#554
-
 import DevQuickStart from '@site/src/components/DevQuickStart';
 
 <DevQuickStart
@@ -104,6 +102,136 @@ xychart-beta
 - 병목 지점 식별 (특정 열이 전부 "In progress")
 - 릴리스 준비도 평가
 
+## npm 릴리스 채널 관리
+
+Alpha → Beta → RC → Stable 단계별로 릴리스 채널을 분리하여 팀별 도입 속도를 제어합니다.
+
+```bash title="Release Channel 전략"
+# Alpha 릴리스 (얼리 어답터용)
+npm version 3.0.0-alpha.1
+npm publish --tag alpha
+
+# Beta 릴리스 (테스트 팀용)
+npm version 3.0.0-beta.1
+npm publish --tag beta
+
+# Release Candidate (프로덕션 준비 팀용)
+npm version 3.0.0-rc.1
+npm publish --tag next
+
+# Stable 릴리스 (전체 사용자)
+npm version 3.0.0
+npm publish --tag latest
+```
+
+**팀별 설치 명령어**:
+```bash
+# 얼리 어답터 팀
+npm install @company/core-ui@alpha
+
+# 테스트 팀
+npm install @company/core-ui@beta
+
+# 프로덕션 준비 팀
+npm install @company/core-ui@next
+
+# 안정화된 버전만 사용
+npm install @company/core-ui@latest
+```
+
+## 의존성 트리 시각화
+
+어떤 프로젝트가 어떤 버전을 사용 중인지 자동으로 추적합니다.
+
+```typescript title="scripts/dependency-tree.ts"
+import { execSync } from 'child_process';
+
+interface DependencyNode {
+  name: string;
+  version: string;
+  dependents: string[];
+}
+
+function getDependencyTree(packageName: string): DependencyNode[] {
+  try {
+    const output = execSync(
+      `npm ls ${packageName} --all --json 2>/dev/null`,
+      { encoding: 'utf-8' }
+    );
+    const tree = JSON.parse(output);
+    return extractDependents(tree, packageName);
+  } catch (error) {
+    console.error(`Failed to get dependency tree for ${packageName}`);
+    return [];
+  }
+}
+
+function extractDependents(tree: any, targetPackage: string): DependencyNode[] {
+  const results: DependencyNode[] = [];
+
+  function traverse(node: any, parentPath: string[] = []) {
+    if (!node.dependencies) return;
+
+    for (const [name, info] of Object.entries(node.dependencies)) {
+      if (name === targetPackage) {
+        results.push({
+          name: parentPath[0] || 'root',
+          version: (info as any).version,
+          dependents: parentPath,
+        });
+      }
+      traverse(info, [...parentPath, name]);
+    }
+  }
+
+  traverse(tree);
+  return results;
+}
+
+// 사용 예시
+const dependents = getDependencyTree('@company/tokens-v2');
+console.log(`\n📊 Projects using @company/tokens-v2:\n`);
+dependents.forEach(dep => {
+  console.log(`  ${dep.name} → v${dep.version}`);
+});
+```
+
+## Changeset을 활용한 세대 전환 관리
+
+Monorepo에서 여러 패키지를 동시에 업데이트할 때 Changeset의 `fixed` 그룹을 활용합니다.
+
+```json title=".changeset/config.json"
+{
+  "$schema": "https://unpkg.com/@changesets/config@2.3.0/schema.json",
+  "changelog": "@changesets/cli/changelog",
+  "commit": false,
+  "fixed": [
+    ["@company/tokens", "@company/core-ui", "@company/icons"]
+  ],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": []
+}
+```
+
+**`fixed` 그룹의 효과**:
+- `@company/tokens`를 3.0.0으로 업그레이드하면
+- `@company/core-ui`와 `@company/icons`도 자동으로 3.0.0으로 동기화됨
+- 세대 전환 시 모든 패키지가 동일한 메이저 버전을 유지
+
+```bash title="Changeset 워크플로우"
+# 1. 변경 사항 기록
+npx changeset add
+
+# 2. 버전 업데이트 (fixed 그룹 자동 동기화)
+npx changeset version
+
+# 3. 릴리스
+npx changeset publish --tag beta
+```
+
 ## 릴리스 스크립트 예시
 
 릴리스 단계별 자동화를 위한 설정:
@@ -115,7 +243,8 @@ xychart-beta
     "release:beta": "npm version prerelease --preid=beta && npm publish --tag beta",
     "release:stable": "npm version minor && npm publish",
     "deprecate:old": "npm deprecate @design-system/core@\"<2.0.0\" \"Please upgrade to v2\"",
-    "migration:check": "npx @design-system/cli check --from v1 --to v2"
+    "migration:check": "npx @design-system/cli check --from v1 --to v2",
+    "deps:tree": "ts-node scripts/dependency-tree.ts"
   }
 }
 ```
@@ -161,6 +290,20 @@ function canRelease(stage: string, metrics: QualityGate['requirements']): boolea
     (!gate.performanceBudget || metrics.performanceBudget) &&
     (!gate.documentationComplete || metrics.documentationComplete)
   );
+}
+
+// 사용 예시
+const currentMetrics = {
+  unitTestCoverage: 85,
+  a11yAuditPass: true,
+  performanceBudget: true,
+  documentationComplete: false,
+};
+
+if (canRelease('beta', currentMetrics)) {
+  console.log('✅ Ready for Beta release');
+} else {
+  console.log('❌ Quality gate not met for Beta');
 }
 ```
 

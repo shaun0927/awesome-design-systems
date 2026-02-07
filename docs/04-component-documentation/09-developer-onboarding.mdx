@@ -38,24 +38,26 @@ graph LR
 
 ## React/Next.js 실전 예제
 
+> **📦 예시 패키지명 안내**: 아래 코드는 실제 디자인 시스템 구조를 보여주기 위한 예시입니다. `@your-company/design-system`을 프로젝트의 실제 패키지명으로 변경하세요.
+
 ### Step 1: Installation
 
 ```bash
-# npm 설치
-npm install @acme/design-system @acme/tokens
+# npm 설치 (예시: 실제 패키지명으로 변경 필요)
+npm install @your-company/design-system @your-company/tokens
 
 # 또는 yarn
-yarn add @acme/design-system @acme/tokens
+yarn add @your-company/design-system @your-company/tokens
 
 # 또는 pnpm (monorepo 권장)
-pnpm add @acme/design-system @acme/tokens
+pnpm add @your-company/design-system @your-company/tokens
 ```
 
 **인증이 필요한 경우:**
 
 ```bash
 # .npmrc 설정 (private registry)
-@acme:registry=https://npm.pkg.github.com
+@your-company:registry=https://npm.pkg.github.com
 //npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
@@ -63,7 +65,7 @@ pnpm add @acme/design-system @acme/tokens
 
 ```bash
 # 패키지 구조 확인
-ls node_modules/@acme/design-system/
+ls node_modules/@your-company/design-system/
 
 # 결과:
 # dist/
@@ -75,7 +77,8 @@ ls node_modules/@acme/design-system/
 ```
 
 ```tsx
-// 주요 export 확인
+// 예시: 디자인 시스템이 제공하는 주요 API
+// 실제 시스템 패키지로 import 경로를 변경하세요
 import {
   // 레이아웃
   PageLayout, Grid, Stack, Flex,
@@ -85,18 +88,19 @@ import {
   Heading, Text, Link,
   // 유틸리티
   ThemeProvider, useTheme, tokens,
-} from '@acme/design-system';
+} from '@your-company/design-system';
 ```
 
 ### Step 3: Apply Visual Style
 
 ```tsx
 // app/layout.tsx (Next.js App Router)
-import '@acme/design-system/dist/styles/tokens.css';  // 토큰 먼저
-import '@acme/design-system/dist/styles/reset.css';    // 리셋
-import '@acme/design-system/dist/styles/components.css'; // 컴포넌트
-import { ThemeProvider } from '@acme/design-system';
+// 예시: CSS import 경로는 실제 패키지 구조에 맞게 조정
+import '@your-company/design-system/dist/styles/tokens.css';
+import '@your-company/design-system/dist/styles/reset.css';
+import '@your-company/design-system/dist/styles/components.css';
 
+// ThemeProvider는 대부분의 디자인 시스템에서 제공하는 표준 패턴입니다
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
@@ -108,9 +112,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <ThemeProvider defaultTheme="light" storageKey="acme-theme">
+        {/* 다크모드 지원을 위한 ThemeProvider 패턴 */}
+        <div data-theme="light">
           {children}
-        </ThemeProvider>
+        </div>
       </body>
     </html>
   );
@@ -120,33 +125,57 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 ### Step 4: Use a Component
 
 ```tsx
-// app/page.tsx - 첫 번째 컴포넌트 사용
-import { Button, Heading, Text, Stack, Alert } from '@acme/design-system';
+// app/page.tsx - 첫 번째 컴포넌트 사용 예시
+// 실제로는 디자인 시스템 문서를 참고하여 컴포넌트를 import하세요
 
 export default function HomePage() {
   return (
-    <Stack gap="lg" padding="xl">
-      <Heading level={1} size="2xl">
+    <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
+      <h1 style={{ fontSize: '2rem', fontWeight: 700, marginBottom: '1.5rem' }}>
         디자인 시스템에 오신 것을 환영합니다
-      </Heading>
+      </h1>
 
-      <Text size="lg" color="secondary">
+      <p style={{ fontSize: '1.125rem', color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>
         첫 번째 컴포넌트를 성공적으로 렌더링했습니다.
-      </Text>
+      </p>
 
-      <Alert severity="success" title="설치 완료">
-        디자인 시스템이 정상적으로 동작합니다.
-      </Alert>
+      <div style={{
+        padding: '1rem',
+        backgroundColor: 'var(--color-success-light)',
+        borderLeft: '4px solid var(--color-success)',
+        marginBottom: '1.5rem'
+      }}>
+        <strong>설치 완료</strong>
+        <p>디자인 시스템이 정상적으로 동작합니다.</p>
+      </div>
 
-      <Stack direction="horizontal" gap="md">
-        <Button variant="primary" size="lg">
+      <div style={{ display: 'flex', gap: '1rem' }}>
+        <button style={{
+          padding: '0.75rem 1.5rem',
+          backgroundColor: 'var(--color-primary)',
+          color: 'white',
+          border: 'none',
+          borderRadius: '0.5rem',
+          cursor: 'pointer',
+          fontSize: '1rem',
+          fontWeight: 600
+        }}>
           시작하기
-        </Button>
-        <Button variant="secondary" size="lg">
+        </button>
+        <button style={{
+          padding: '0.75rem 1.5rem',
+          backgroundColor: 'transparent',
+          color: 'var(--color-primary)',
+          border: '2px solid var(--color-primary)',
+          borderRadius: '0.5rem',
+          cursor: 'pointer',
+          fontSize: '1rem',
+          fontWeight: 600
+        }}>
           문서 보기
-        </Button>
-      </Stack>
-    </Stack>
+        </button>
+      </div>
+    </div>
   );
 }
 ```
@@ -154,30 +183,41 @@ export default function HomePage() {
 ### Step 5: Extend/Override Component
 
 ```tsx
-// components/CustomCard.tsx - 시스템 컴포넌트를 확장
-import { Card, Badge, Text, tokens } from '@acme/design-system';
-import type { CardProps } from '@acme/design-system';
-
-interface ProductCardProps extends CardProps {
+// components/ProductCard.tsx - 커스텀 컴포넌트 구현 예시
+interface ProductCardProps {
   title: string;
   price: number;
   isNew?: boolean;
 }
 
-export function ProductCard({ title, price, isNew, ...cardProps }: ProductCardProps) {
+export function ProductCard({ title, price, isNew }: ProductCardProps) {
   return (
-    <Card
-      {...cardProps}
-      padding="lg"
-      shadow="md"
-      hover={{ shadow: 'lg', transform: 'translateY(-2px)' }}
-    >
-      {isNew && <Badge variant="accent" size="sm">NEW</Badge>}
-      <Text weight="semibold" size="md">{title}</Text>
-      <Text color="brand" weight="bold" size="lg">
+    <div style={{
+      padding: '1.5rem',
+      border: '1px solid var(--color-border)',
+      borderRadius: '0.75rem',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+      transition: 'all 0.2s',
+    }}>
+      {isNew && (
+        <span style={{
+          display: 'inline-block',
+          padding: '0.25rem 0.5rem',
+          backgroundColor: 'var(--color-accent)',
+          color: 'white',
+          fontSize: '0.75rem',
+          fontWeight: 600,
+          borderRadius: '0.25rem',
+          marginBottom: '0.5rem'
+        }}>
+          NEW
+        </span>
+      )}
+      <h3 style={{ fontSize: '1rem', fontWeight: 600, margin: '0.5rem 0' }}>{title}</h3>
+      <p style={{ color: 'var(--color-primary)', fontWeight: 700, fontSize: '1.25rem' }}>
         {price.toLocaleString('ko-KR')}원
-      </Text>
-    </Card>
+      </p>
+    </div>
   );
 }
 ```
@@ -185,32 +225,30 @@ export function ProductCard({ title, price, isNew, ...cardProps }: ProductCardPr
 ### Step 6: Configure (Theme & Tokens)
 
 ```tsx
-// config/theme.ts - 브랜드 커스터마이징
-import { createTheme } from '@acme/design-system';
+// config/theme.ts - CSS Custom Properties로 브랜드 커스터마이징
+// 디자인 시스템의 토큰을 오버라이드하는 패턴
 
-export const myTheme = createTheme({
-  colors: {
-    brand: {
-      50: '#faf5ff',
-      500: '#8b5cf6',  // 보라색 브랜드
-      600: '#7c3aed',
-      700: '#6d28d9',
-    },
-  },
-  fonts: {
-    heading: '"Pretendard", sans-serif',
-    body: '"Pretendard", sans-serif',
-  },
-  radii: {
-    card: '12px',    // 기본 8px → 12px로 오버라이드
-    button: '8px',
-  },
-});
+export const brandTokens = {
+  // CSS Custom Properties로 브랜드 색상 정의
+  '--color-primary': '#8b5cf6',
+  '--color-primary-hover': '#7c3aed',
+  '--color-primary-active': '#6d28d9',
+  '--font-family-heading': '"Pretendard", sans-serif',
+  '--font-family-body': '"Pretendard", sans-serif',
+  '--radius-card': '12px',
+  '--radius-button': '8px',
+} as const;
 
 // app/layout.tsx에서 적용
-<ThemeProvider theme={myTheme}>
-  {children}
-</ThemeProvider>
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="ko">
+      <body style={brandTokens}>
+        {children}
+      </body>
+    </html>
+  );
+}
 ```
 
 ### Step 7: Learn More
@@ -251,21 +289,21 @@ export const myTheme = createTheme({
 ```bash
 # 도움 요청
 # Slack: #design-system-help
-# GitHub Issues: https://github.com/acme/design-system/issues
+# GitHub Issues: https://github.com/your-company/design-system/issues
 
 # 버그 신고
-gh issue create --repo acme/design-system \
+gh issue create --repo your-company/design-system \
   --title "Button: hover 상태에서 색상 깜빡임" \
   --label "bug,component:button"
 
 # 기능 요청
-gh issue create --repo acme/design-system \
+gh issue create --repo your-company/design-system \
   --title "feat: DatePicker 컴포넌트 추가" \
   --label "feature-request" \
   --template feature_request.md
 
 # 기여하기
-git clone https://github.com/acme/design-system
+git clone https://github.com/your-company/design-system
 cd design-system
 pnpm install
 pnpm storybook  # 개발 환경 시작

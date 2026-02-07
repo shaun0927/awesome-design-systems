@@ -6,8 +6,6 @@ audience: both
 tags: ["generations", "strategy", "lifecycle", "migration"]
 ---
 
-> Original issue: shaun0927/stocktitan-crawler#560
-
 import DevQuickStart from '@site/src/components/DevQuickStart';
 
 <DevQuickStart
@@ -86,6 +84,136 @@ gantt
 - 세대는 순차적이지만 **중첩** 가능
 - 이전 세대와 새 세대가 일정 기간 **공존** (도입팀 업그레이드 기간)
 
+## 세대 탐지 자동화
+
+프로젝트가 어떤 세대를 사용 중인지 자동으로 파악하는 도구가 필요합니다.
+
+```typescript title="scripts/detect-generation.ts"
+import { readFileSync, existsSync } from 'fs';
+import { resolve } from 'path';
+
+interface GenerationInfo {
+  generation: 1 | 2 | 3;
+  packages: Record<string, string>;
+  migrationNeeded: boolean;
+  recommendations: string[];
+}
+
+export function detectGeneration(projectPath: string): GenerationInfo {
+  const packageJsonPath = resolve(projectPath, 'package.json');
+
+  if (!existsSync(packageJsonPath)) {
+    throw new Error(`package.json not found at ${packageJsonPath}`);
+  }
+
+  const pkg = JSON.parse(readFileSync(packageJsonPath, 'utf-8'));
+  const deps = { ...pkg.dependencies, ...pkg.devDependencies };
+
+  // Gen 3: CSS custom properties + React 18+ + ESM
+  if (deps['@company/tokens-v3'] || deps['@company/core-ui']?.startsWith('3.')) {
+    return {
+      generation: 3,
+      packages: deps,
+      migrationNeeded: false,
+      recommendations: [
+        '최신 세대를 사용 중입니다',
+        'Design Tokens 3.0 분류법 활용 가능',
+        'CSS custom properties로 런타임 테마 전환 가능',
+      ],
+    };
+  }
+
+  // Gen 2: SCSS variables + React 16-17
+  if (deps['@company/tokens-v2'] || deps['node-sass'] || deps['sass']) {
+    return {
+      generation: 2,
+      packages: deps,
+      migrationNeeded: true,
+      recommendations: [
+        'Gen 3으로 마이그레이션 권장',
+        'SCSS → CSS custom properties 전환 필요',
+        'React 18+ 업그레이드 검토',
+        'Codemod 도구 사용 가능: npm run migrate:check',
+      ],
+    };
+  }
+
+  // Gen 1: Hardcoded values, no design tokens
+  return {
+    generation: 1,
+    packages: deps,
+    migrationNeeded: true,
+    recommendations: [
+      '긴급 마이그레이션 필요',
+      '디자인 토큰 시스템 도입 우선',
+      '컴포넌트 라이브러리 업그레이드 필수',
+      '마이그레이션 가이드: docs/migration-v1-to-v2.md',
+    ],
+  };
+}
+
+// CLI 사용 예시
+if (require.main === module) {
+  const info = detectGeneration(process.cwd());
+  console.log(`\n🔍 Design System Generation: ${info.generation}`);
+  console.log(`\n📦 Key Packages:`);
+  Object.entries(info.packages)
+    .filter(([name]) => name.includes('@company') || name.includes('design'))
+    .forEach(([name, version]) => console.log(`  ${name}: ${version}`));
+  console.log(`\n💡 Recommendations:`);
+  info.recommendations.forEach(r => console.log(`  - ${r}`));
+}
+```
+
+**실행 방법**:
+```bash
+# 현재 프로젝트 세대 확인
+npx ts-node scripts/detect-generation.ts
+
+# 특정 프로젝트 경로 지정
+npx ts-node scripts/detect-generation.ts /path/to/project
+```
+
+## 세대별 package.json 비교
+
+```json title="Gen 1 (Legacy) - package.json"
+{
+  "dependencies": {
+    "react": "^16.14.0",
+    "styled-components": "^5.3.0"
+  },
+  "devDependencies": {
+    "node-sass": "^6.0.0"
+  }
+}
+```
+
+```json title="Gen 2 (Current) - package.json"
+{
+  "dependencies": {
+    "react": "^17.0.2",
+    "@company/tokens-v2": "^2.5.0",
+    "@company/components-v2": "^2.8.0"
+  },
+  "devDependencies": {
+    "sass": "^1.56.0"
+  }
+}
+```
+
+```json title="Gen 3 (Modern) - package.json"
+{
+  "dependencies": {
+    "react": "^18.2.0",
+    "@company/tokens": "^3.0.0",
+    "@company/core-ui": "^3.0.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
+```
+
 ## 마이그레이션 설정 코드 예시
 
 세대 전환 시 패키지 버전 관리는 핵심 과제입니다.
@@ -99,7 +227,8 @@ gantt
   },
   "scripts": {
     "migrate:check": "npx @design-system/migration-cli check",
-    "migrate:run": "npx @design-system/migration-cli run --from v1 --to v2"
+    "migrate:run": "npx @design-system/migration-cli run --from v1 --to v2",
+    "detect:generation": "ts-node scripts/detect-generation.ts"
   }
 }
 ```

@@ -424,6 +424,222 @@ progress::-webkit-progress-value {
 
 ---
 
+## Modern CSS (2024+)
+
+### 29. color-mix() - 동적 색상 조작
+
+CSS에서 직접 색상을 혼합할 수 있습니다. SCSS의 `mix()` 함수가 네이티브로 제공됩니다.
+
+```css
+:root {
+  --color-primary: #0066cc;
+}
+
+.button {
+  background: var(--color-primary);
+}
+
+.button:hover {
+  /* primary 색상을 white와 10% 혼합 (밝아짐) */
+  background: color-mix(in srgb, var(--color-primary) 90%, white);
+}
+
+.button:active {
+  /* primary 색상을 black과 10% 혼합 (어두워짐) */
+  background: color-mix(in srgb, var(--color-primary) 90%, black);
+}
+
+/* 투명도 조절 */
+.overlay {
+  background: color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+/* 보색 생성 */
+.accent {
+  background: color-mix(in hsl, var(--color-primary) 50%, hsl(180, 80%, 50%));
+}
+```
+
+<BrowserSupport
+  chrome="111"
+  firefox="113"
+  safari="16.2"
+  edge="111"
+/>
+
+### 30. popover Attribute - JS 없는 팝오버
+
+HTML 네이티브 popover 속성으로 JavaScript 없이 팝오버/툴팁을 구현할 수 있습니다.
+
+```tsx
+export function TooltipExample() {
+  return (
+    <div>
+      <button popovertarget="help-popover">도움말</button>
+      <div id="help-popover" popover="auto">
+        <h3>사용 방법</h3>
+        <p>버튼을 클릭하면 이 팝오버가 나타납니다.</p>
+        <p>바깥을 클릭하면 자동으로 닫힙니다.</p>
+      </div>
+    </div>
+  );
+}
+```
+
+```css
+[popover] {
+  padding: 1.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background: white;
+}
+
+/* 배경 어둡게 (::backdrop) */
+[popover]::backdrop {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(2px);
+}
+
+/* 애니메이션 */
+[popover]:popover-open {
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+```
+
+**popover 옵션:**
+- `popover="auto"`: 바깥 클릭 시 자동 닫힘 (기본값)
+- `popover="manual"`: 명시적으로 닫아야 함
+
+<BrowserSupport
+  chrome="114"
+  firefox="125"
+  safari="17"
+  edge="114"
+/>
+
+### 31. scroll-snap - 캐러셀 스크롤
+
+JavaScript 없이 스냅 스크롤을 구현할 수 있습니다.
+
+```tsx
+export function ImageCarousel({ images }: { images: string[] }) {
+  return (
+    <div className="carousel">
+      {images.map((src, idx) => (
+        <img key={idx} src={src} alt={`Slide ${idx + 1}`} />
+      ))}
+    </div>
+  );
+}
+```
+
+```css
+.carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory; /* X축 스냅 활성화 */
+  gap: 1rem;
+  padding: 1rem;
+
+  /* 스크롤바 숨기기 (선택사항) */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel img {
+  scroll-snap-align: center; /* 중앙 정렬 */
+  flex: 0 0 80%; /* 한 번에 한 장 + 다음 장 미리보기 */
+  max-width: 500px;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+/* 모바일: 전체 너비 */
+@media (max-width: 768px) {
+  .carousel img {
+    flex: 0 0 100%;
+    scroll-snap-align: start; /* 시작점 정렬 */
+  }
+}
+```
+
+**scroll-snap 옵션:**
+- `scroll-snap-type: x mandatory`: X축, 반드시 스냅
+- `scroll-snap-type: y proximity`: Y축, 가까우면 스냅
+- `scroll-snap-align: start | center | end`: 정렬 위치
+
+<BrowserSupport
+  chrome="69"
+  firefox="68"
+  safari="11"
+  edge="79"
+/>
+
+### 32. text-wrap: balance - 헤딩 타이포그래피
+
+제목의 각 줄 길이를 균형있게 조정하여 가독성을 높입니다.
+
+```css
+h1, h2, h3 {
+  /* 자동으로 줄 길이 균형 맞춤 */
+  text-wrap: balance;
+  max-width: 50ch; /* 최대 50글자 */
+}
+
+/* Before: 한 줄은 길고 다음 줄은 짧음 */
+/* The Quick Brown Fox Jumps Over The */
+/* Lazy Dog */
+
+/* After: 균형잡힌 줄 길이 */
+/* The Quick Brown Fox Jumps */
+/* Over The Lazy Dog */
+```
+
+**다른 text-wrap 옵션:**
+```css
+/* 긴 단어 강제 줄바꿈 */
+.code-block {
+  text-wrap: wrap;
+  overflow-wrap: break-word;
+}
+
+/* 줄바꿈 방지 */
+.nowrap {
+  text-wrap: nowrap;
+}
+
+/* 보기 좋은 줄바꿈 (고아 단어 방지) */
+p {
+  text-wrap: pretty;
+}
+```
+
+<BrowserSupport
+  chrome="114"
+  firefox="121"
+  safari="17.5"
+  edge="114"
+/>
+
+---
+
 ## 체크리스트
 
 ### 프로젝트 시작 시

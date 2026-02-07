@@ -82,99 +82,6 @@ import CrossRef from '@site/src/components/CrossRef';
 
 ---
 
-## Container Queries (모던 반응형)
-
-Container Queries는 **부모 컨테이너 크기**에 따라 스타일을 변경합니다. Media Queries는 **뷰포트 크기**에 반응합니다.
-
-```css
-/* 컨테이너 정의 */
-.card-container {
-  container-type: inline-size;
-  container-name: card;
-}
-
-/* 좁은 컨테이너: 세로 레이아웃 */
-.card {
-  display: flex;
-  flex-direction: column;
-}
-
-/* 넓은 컨테이너 (400px+): 가로 레이아웃 */
-@container card (min-width: 400px) {
-  .card {
-    flex-direction: row;
-  }
-
-  .card-title {
-    font-size: 1.5rem;
-  }
-}
-```
-
-### React 적응형 카드
-
-```tsx
-interface CardProps {
-  title: string;
-  description: string;
-  image: string;
-}
-
-export function AdaptiveCard({ title, description, image }: CardProps) {
-  return (
-    <div className="card-container">
-      <div className="card">
-        <img src={image} alt={title} className="card-image" />
-        <div className="card-content">
-          <h3 className="card-title">{title}</h3>
-          <p className="card-description">{description}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-```
-
-```css
-.card-container {
-  container-type: inline-size;
-}
-
-.card {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-}
-
-.card-image {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  border-radius: 4px;
-}
-
-/* 컨테이너가 500px 이상일 때 가로 레이아웃 */
-@container (min-width: 500px) {
-  .card {
-    flex-direction: row;
-  }
-
-  .card-image {
-    width: 40%;
-    height: auto;
-  }
-
-  .card-title {
-    font-size: 1.5rem;
-  }
-}
-```
-
----
-
 ## Flexbox 반응형 패턴
 
 ### 균등 분배
@@ -429,6 +336,310 @@ export function ResponsivePage() {
   border-top: 1px solid #e0e0e0;
 }
 ```
+
+---
+
+## Modern CSS: Container Queries
+
+Container Queries는 2023년부터 모든 주요 브라우저에서 지원되는 차세대 반응형 기술입니다. Media Queries는 **뷰포트 크기**를 기준으로 하지만, Container Queries는 **부모 컨테이너 크기**를 기준으로 합니다.
+
+### 왜 중요한가?
+
+재사용 가능한 컴포넌트를 만들 때 "이 컴포넌트가 페이지의 어디에 배치될지 모르는" 상황이 발생합니다. 사이드바에 들어가면 좁고, 메인 영역에 들어가면 넓습니다. Container Queries는 컴포넌트가 **자신이 들어간 공간에 맞춰** 스타일을 조정합니다.
+
+```css
+/* Container Queries - 컴포넌트 기반 반응형 */
+.card-container {
+  container-type: inline-size;
+  container-name: card;
+}
+
+@container card (min-width: 400px) {
+  .card {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+  }
+}
+
+@container card (max-width: 399px) {
+  .card {
+    display: flex;
+    flex-direction: column;
+  }
+}
+```
+
+### 실전 예시: 재사용 가능한 제품 카드
+
+```tsx
+export function ProductCard({ name, price, image }: ProductCardProps) {
+  return (
+    <div className="product-container">
+      <article className="product-card">
+        <img src={image} alt={name} className="product-image" />
+        <div className="product-info">
+          <h3 className="product-name">{name}</h3>
+          <p className="product-price">{price}</p>
+          <button className="product-btn">Add to Cart</button>
+        </div>
+      </article>
+    </div>
+  );
+}
+```
+
+```css
+.product-container {
+  container-type: inline-size;
+  container-name: product;
+}
+
+/* 기본: 좁은 컨테이너 (세로 레이아웃) */
+.product-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.product-image {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.product-name {
+  font-size: 1rem;
+}
+
+.product-btn {
+  width: 100%;
+}
+
+/* 400px 이상: 가로 레이아웃 */
+@container product (min-width: 400px) {
+  .product-card {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .product-image {
+    width: 150px;
+    height: 150px;
+  }
+
+  .product-info {
+    flex: 1;
+  }
+
+  .product-name {
+    font-size: 1.25rem;
+  }
+}
+
+/* 600px 이상: 그리드 레이아웃 */
+@container product (min-width: 600px) {
+  .product-card {
+    display: grid;
+    grid-template-columns: 200px 1fr auto;
+    gap: 2rem;
+  }
+
+  .product-btn {
+    width: auto;
+    align-self: center;
+  }
+}
+```
+
+import BrowserSupport from '@site/src/components/BrowserSupport';
+
+<BrowserSupport
+  chrome="105"
+  firefox="110"
+  safari="16"
+  edge="105"
+/>
+
+---
+
+## Modern CSS: :has() Selector
+
+`:has()` 선택자는 "부모 선택자"로 불리며, **자식 요소의 상태에 따라 부모를 스타일링**할 수 있습니다.
+
+### 실전 활용
+
+```css
+/* :has() - 부모 선택자 */
+
+/* 에러가 있는 input을 포함한 form-group 스타일링 */
+.form-group:has(input:invalid) {
+  border-color: var(--color-error);
+  background-color: #fff5f5;
+}
+
+/* 이미지가 있는 카드는 그리드 레이아웃 */
+.card:has(img) {
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+/* 이미지가 없는 카드는 플렉스 레이아웃 */
+.card:not(:has(img)) {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 체크된 라디오 버튼을 포함한 label 하이라이트 */
+label:has(input[type="radio"]:checked) {
+  background-color: var(--color-primary-light);
+  border-color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* 비어있지 않은 input을 포함한 form 그룹 */
+.form-group:has(input:not(:placeholder-shown)) .label {
+  transform: translateY(-1.5rem);
+  font-size: 0.75rem;
+  color: var(--color-primary);
+}
+```
+
+### React 폼 검증 예시
+
+```tsx
+export function FormGroup({ label, error, children }: FormGroupProps) {
+  return (
+    <div className="form-group">
+      <label>{label}</label>
+      {children}
+      {error && <span className="error-message">{error}</span>}
+    </div>
+  );
+}
+```
+
+```css
+/* CSS만으로 에러 상태 스타일링 */
+.form-group:has(.error-message) {
+  border-left: 3px solid var(--color-error);
+  padding-left: 1rem;
+}
+
+.form-group:has(.error-message) input {
+  border-color: var(--color-error);
+}
+
+.form-group:has(.error-message) label {
+  color: var(--color-error);
+}
+```
+
+<BrowserSupport
+  chrome="105"
+  firefox="121"
+  safari="15.4"
+  edge="105"
+/>
+
+---
+
+## Modern CSS: Native Nesting
+
+CSS Nesting은 SCSS/SASS 없이도 **네이티브 CSS**에서 중첩 문법을 사용할 수 있게 합니다.
+
+```css
+/* CSS Nesting - 네이티브 중첩 */
+.card {
+  padding: var(--space-md);
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+
+  /* 자식 선택자 */
+  & .title {
+    font-size: var(--font-lg);
+    margin-bottom: var(--space-sm);
+  }
+
+  & .description {
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+
+  /* 가상 선택자 */
+  &:hover {
+    box-shadow: var(--shadow-md);
+    transform: translateY(-2px);
+  }
+
+  &:focus-within {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  /* 미디어 쿼리 중첩 */
+  @media (width >= 768px) {
+    padding: var(--space-lg);
+
+    & .title {
+      font-size: var(--font-xl);
+    }
+  }
+}
+
+/* 복잡한 선택자 조합 */
+.button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+
+  &.primary {
+    background: var(--color-primary);
+    color: white;
+
+    &:hover {
+      background: var(--color-primary-dark);
+    }
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+
+  &.secondary {
+    background: transparent;
+    border: 1px solid var(--color-primary);
+    color: var(--color-primary);
+
+    &:hover {
+      background: var(--color-primary-light);
+    }
+  }
+}
+```
+
+### 장점
+
+| Before (Flat CSS) | After (Nested CSS) |
+|-------------------|-------------------|
+| `.card { ... }` | `.card { ... }` |
+| `.card .title { ... }` | `  & .title { ... }` |
+| `.card:hover { ... }` | `  &:hover { ... }` |
+| `@media (...) { .card { ... } }` | `  @media (...) { ... }` |
+
+- 관련 스타일이 한곳에 모여 유지보수 쉬움
+- SCSS/PostCSS 의존성 제거
+- 미디어 쿼리를 컴포넌트 내부에 배치 가능
+
+<BrowserSupport
+  chrome="120"
+  firefox="117"
+  safari="17.2"
+  edge="120"
+/>
 
 ---
 

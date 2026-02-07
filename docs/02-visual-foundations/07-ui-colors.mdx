@@ -2,19 +2,21 @@
 title: "UI 색상 선택 노하우 정리"
 sidebar_label: "UI 색상 선택 노하우"
 sidebar_position: 7
-tags: [color, hsl, dark-mode]
+audience: developer
+tags: [color, hsl, oklch, dark-mode, css]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#511
 
-## UI 색상 선택 노하우 정리 - The Easy Way to Pick UI Colors
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-> **출처**: [The Easy Way to Pick UI Colors - YouTube](https://www.youtube.com/watch?v=_2LLXnUdUIc)
-> **정리 관점**: 디자인 시스템 효율성 및 실무 적용 노하우
+<DevQuickStart
+  what="3 color categories (Neutral, Brand, Semantic) with HSL/OKLCH shades cover all UI needs without guesswork"
+  learn="How to build a complete dark/light color system using HSL lightness math, CSS custom properties, and OKLCH for perceptual uniformity"
+  able="Implement a production-ready color token system with automatic dark/light theme switching using CSS custom properties"
+/>
 
----
-
-## 📌 핵심 철학
+## 핵심 철학
 
 ### 1. UI 색상은 단순하게
 ```
@@ -393,7 +395,37 @@ LCH/OKLCH: 전체 범위에서 일관된 채도 유지
 
 ---
 
-## 🔗 유용한 리소스
+## Tailwind v4 OKLCH Configuration
+
+```css title="tailwind v4 theme"
+@theme {
+  /* Tailwind v4 uses OKLCH natively */
+  --color-surface-dark: oklch(0% 0 0);
+  --color-surface-base: oklch(5% 0.01 220);
+  --color-surface-light: oklch(10% 0.02 220);
+
+  --color-text-primary: oklch(90% 0 0);
+  --color-text-muted: oklch(70% 0 0);
+
+  /* Brand color with automatic shade generation */
+  --color-brand-500: oklch(55% 0.25 260);
+  --color-brand-400: oklch(65% 0.22 260);
+  --color-brand-600: oklch(45% 0.25 260);
+}
+```
+
+```html
+<!-- Usage in Tailwind v4 -->
+<div class="bg-surface-base text-text-primary">
+  <h1 class="text-text-primary">Heading</h1>
+  <p class="text-text-muted">Body text</p>
+  <button class="bg-brand-500 hover:bg-brand-400">Action</button>
+</div>
+```
+
+---
+
+## 유용한 리소스
 
 - **색상 도구**: [OKLCH Color Picker](https://oklch.com)
 - **Tailwind OKLCH**: [Tailwind CSS v4 Color System](https://tailwindcss.com/docs/colors)

@@ -2,14 +2,21 @@
 title: "디자인 시스템의 컬러: 16가지 핵심 팁"
 sidebar_label: "컬러 시스템"
 sidebar_position: 1
-tags: [color, palette, accessibility]
+audience: both
+tags: [color, palette, accessibility, oklch]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#555
 
-## 디자인 시스템의 컬러: 16가지 핵심 팁 (Nathan Curtis)
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-### 📌 핵심 개념
+<DevQuickStart
+  what="A systematic color architecture (palette, tints, feedback, contrast) replaces ad-hoc color picking with scalable, accessible tokens"
+  learn="16 practical tips for building color systems covering primary palettes, tint/shade scales, feedback colors, and WCAG contrast"
+  able="Define a color system with CSS custom properties, contrast-checking utilities, and modern color formats (oklch)"
+/>
+
+## 핵심 개념
 
 컬러는 단순히 "예쁜 색 고르기"가 아니라, **확장 가능하고 접근 가능하며 일관된 시스템을 구축하는 과정**
 
@@ -32,10 +39,22 @@ tags: [color, palette, accessibility]
 - 조정 전 반드시 협의
 
 #### #3. 중간 중립색을 버려라
-```
-밝은 그레이 (05, 10, 20, 30) ✅
-중간 그레이 (40~60) ❌ 접근성 위험
-어두운 그레이 (70, 80, 90) ✅
+
+```css
+:root {
+  /* 밝은 그레이 - 안전 */
+  --color-gray-50: oklch(97% 0 0);
+  --color-gray-100: oklch(93% 0 0);
+  --color-gray-200: oklch(87% 0 0);
+  --color-gray-300: oklch(80% 0 0);
+
+  /* 중간 그레이 (40~60) - 접근성 위험 지대, 최소한으로 */
+
+  /* 어두운 그레이 - 안전 */
+  --color-gray-700: oklch(37% 0 0);
+  --color-gray-800: oklch(27% 0 0);
+  --color-gray-900: oklch(18% 0 0);
+}
 ```
 
 #### #4. "디지털 블루"를 채택하라
@@ -45,21 +64,25 @@ tags: [color, palette, accessibility]
 ### Tints & Shades
 
 #### #5. 명암 단계를 스택으로 시각화하라
-```
-INDIGO
-050  #E8EAF6
-100  #C5CAE9
-200  #9FA8DA
-500  #3F51B5  ← Base
-900  #1A237E
+
+```css
+:root {
+  --color-indigo-50:  oklch(95% 0.03 280);
+  --color-indigo-100: oklch(88% 0.06 280);
+  --color-indigo-200: oklch(78% 0.09 280);
+  --color-indigo-500: oklch(50% 0.18 280); /* Base */
+  --color-indigo-900: oklch(25% 0.12 280);
+}
 ```
 
 #### #6. Lightness 기준으로 명명하라
-```scss
-// 올바른 방식
-$color-gray-05   // HSL Lightness 기반
-$color-gray-10
-$color-gray-20   // 새로 추가: $color-gray-15 가능
+
+```css
+/* CSS custom properties with numeric scale */
+--color-gray-05: oklch(97% 0 0);  /* Lightness 기반 */
+--color-gray-10: oklch(93% 0 0);
+--color-gray-15: oklch(90% 0 0);  /* 중간값 추가 용이 */
+--color-gray-20: oklch(87% 0 0);
 ```
 
 #### #7. 명암 단계 수량을 제한하라
@@ -73,11 +96,18 @@ $color-gray-20   // 새로 추가: $color-gray-15 가능
 ### Secondary Palettes
 
 #### #9. 피드백 컬러 세트를 정의하라
-```
-SUCCESS (녹색)
-WARNING (노란색)
-ERROR (빨간색)
-INFORMATIONAL (파란색)
+
+```css
+:root {
+  --color-success: oklch(65% 0.18 145);     /* Green */
+  --color-success-bg: oklch(95% 0.04 145);
+  --color-warning: oklch(75% 0.15 85);      /* Yellow */
+  --color-warning-bg: oklch(96% 0.04 85);
+  --color-error: oklch(55% 0.22 25);        /* Red */
+  --color-error-bg: oklch(95% 0.04 25);
+  --color-info: oklch(60% 0.15 250);        /* Blue */
+  --color-info-bg: oklch(95% 0.03 250);
+}
 ```
 
 #### #10. 테마 다양성을 보여라
@@ -129,13 +159,55 @@ INFORMATIONAL (파란색)
 - [ ] 반전 조합 검토
 - [ ] 범위 시각화 문서 추가
 
-## 💡 핵심 인용구
+## 대비 체크 유틸리티
 
-> "브랜드 컬러는 브랜드팀의 영역이다. 조정 전 그들과 논의하고 판단을 존중하라."
+```javascript title="contrast-checker.js"
+/**
+ * WCAG 2.0 contrast ratio calculator
+ * Returns ratio like 4.5, 7.0, etc.
+ */
+function getContrastRatio(rgb1, rgb2) {
+  const luminance = (rgb) => {
+    const [r, g, b] = rgb.map((c) => {
+      c = c / 255;
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  };
 
-> "선택지가 많을수록 조화로운 조합과 일관된 느낌을 유지하기 어렵다."
+  const l1 = luminance(rgb1);
+  const l2 = luminance(rgb2);
+  const lighter = Math.max(l1, l2);
+  const darker = Math.min(l1, l2);
 
-> "접근성 대비는 단순히 통과/실패가 아니다. 스펙트럼을 보여주면 대화가 빨라진다."
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+// Usage
+const ratio = getContrastRatio([255, 255, 255], [51, 65, 85]);
+console.log(`Contrast ratio: ${ratio.toFixed(2)}:1`);
+// AA normal text requires >= 4.5:1
+// AA large text requires >= 3.0:1
+```
+
+## Modern CSS: color-mix() 활용
+
+```css
+:root {
+  --color-primary: oklch(55% 0.2 250);
+
+  /* color-mix()로 hover/active 자동 생성 */
+  --color-primary-hover: color-mix(
+    in oklch, var(--color-primary), black 15%
+  );
+  --color-primary-active: color-mix(
+    in oklch, var(--color-primary), black 25%
+  );
+  --color-primary-subtle: color-mix(
+    in oklch, var(--color-primary), white 85%
+  );
+}
+```
 
 ---
 *출처: Nathan Curtis (EightShapes)*

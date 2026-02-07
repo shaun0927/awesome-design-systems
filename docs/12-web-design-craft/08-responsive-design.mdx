@@ -2,424 +2,488 @@
 title: "반응형 웹사이트 구축 노하우 정리 - The Easy Way to Build Responsive Websites"
 sidebar_label: "반응형 디자인"
 sidebar_position: 8
+audience: developer
 tags: ["responsive", "mobile-first", "CSS", "layout", "breakpoints"]
 ---
 
-> Original issue: shaun0927/stocktitan-crawler#515
+import DevQuickStart from '@site/src/components/DevQuickStart';
+import CrossRef from '@site/src/components/CrossRef';
 
-## 반응형 웹사이트 구축 노하우 정리
+<DevQuickStart
+  what="모던 반응형 디자인은 Media Queries + Container Queries + CSS Clamp()입니다"
+  learn="Container Queries, clamp(), 반응형 토큰, 모바일 퍼스트"
+  able="Container Queries로 컴포넌트 기반 반응형 디자인을 구현할 수 있습니다"
+/>
 
-**출처**: The Easy Way to Build Responsive Websites 영상 분석
-**관점**: 디자인 시스템 효율성 및 실전 노하우 중심
+## Think Inside the Box
 
----
+웹사이트의 모든 요소는 박스입니다. 반응형 설계는 이 박스들을 화면 크기에 따라 행/열로 재배치하는 과정입니다.
 
-## 핵심 철학: 모든 것은 박스다 (Think Inside the Box)
-
-웹사이트의 모든 요소는 본질적으로 **박스(box)**입니다. 반응형 레이아웃 설계는 이 박스들을 **부모-자식 관계**로 이해하고, **행과 열**로 재배치하는 과정입니다.
-
-**핵심 개념:**
-- 반응형 = 화면 크기에 따라 박스를 다른 행/열로 동적 재배치
-- 부모-자식 관계를 명확히 이해해야 올바른 CSS 적용 가능
-- 레이아웃 계획 시 항상 "몇 개의 열이 필요한가?"를 먼저 질문
-
----
-
-## 5대 반응형 설계 규칙
-
-### Rule 1: Think Inside the Box (박스로 사고하라)
-
-모든 레이아웃을 박스의 계층 구조로 분해합니다.
-
-**설계 질문:**
-- 이 레이아웃에 몇 개의 직계 자식이 필요한가?
-- 모바일에서는 몇 개의 열로 축소되는가?
-- 어떤 요소가 숨겨지거나 토글되는가?
-
----
-
-### Rule 2: Everything is Rows and Columns (모든 것은 행과 열이다)
-
-| 화면 크기 | 열 개수 | 박스 동작 |
-|-----------|---------|-----------|
-| 모바일 (< 768px) | 1열 | 모든 박스가 세로 스택 |
-| 태블릿 (768-1024px) | 2-3열 | 중요 박스가 가로 배치 |
-| 데스크톱 (> 1024px) | 3-6열 | 최대 열 활용, 여백 증가 |
-
----
-
-### Rule 3: Design Before You Code (코드 전 설계)
-
-**문제:**
-- 코드 에디터에서 직접 작업 → 시행착오 → 침몰 비용 오류 → 나쁜 타협
-
-**해결:**
-- 프로젝트 시작 전 반드시 **러프 스케치** 작성
-- 모바일/태블릿/데스크톱 각각의 레이아웃 계획
-- Figma 불필요 → 손그림/화이트보드만으로 충분
-
-**필수 질문:**
-- 사이드바는 모바일에서 어떻게 표시되는가? (토글? 숨김? 다른 UI?)
-- 3열 카드가 모바일에서는 몇 열인가?
-- 중단점(breakpoint)마다 무엇이 변하는가?
-
----
-
-### Rule 4: Use Descriptive Class Names (설명적인 클래스명 사용)
-
-**Best Practice:**
-```html
-<header class="main-header">
-  <div class="logo">...</div>
-  <div class="search-bar">...</div>
-  <nav class="user-menu">...</nav>
-</header>
+```tsx
+// 박스의 계층 구조 이해
+<Layout>           {/* 부모 박스 */}
+  <Header />       {/* 자식 박스 1 */}
+  <Main>           {/* 자식 박스 2 */}
+    <Sidebar />    {/* 손자 박스 1 */}
+    <Content />    {/* 손자 박스 2 */}
+  </Main>
+  <Footer />       {/* 자식 박스 3 */}
+</Layout>
 ```
 
-**장점:**
-- 디버깅 용이
-- 네이밍 충돌 방지
-- 코드 가독성 향상
-- 부모-자식 관계 명확화
-
 ---
 
-### Rule 5: Master Media Queries (미디어 쿼리 마스터)
+## CSS Grid로 반응형 레이아웃
 
-Flexbox/Grid로 해결 불가능한 복잡한 반응형 동작은 미디어 쿼리로 해결합니다.
-
-**핵심 원칙:**
-- 모든 미디어 쿼리를 **CSS 파일 하단**에 배치 (캐스케이딩 충돌 방지)
-- 모바일 우선 설계 (기본 스타일 = 모바일, 미디어 쿼리 = 확장)
-
----
-
-## Flexbox vs Grid 전략
-
-### Display 속성 완전 가이드
-
-| 속성 | 동작 | 사용 사례 |
-|------|------|-----------|
-| display: none | 완전 제거 | 반응형 요소 숨김 |
-| display: inline | 같은 줄, 필요한 공간만 | 텍스트, 링크 |
-| display: block | 새 줄, 전체 너비 | 기본 레이아웃 |
-| display: inline-block | 인라인 + 크기 제어 | 버튼, 아이콘 |
-| display: flex | 유연한 1차원 레이아웃 | 네비게이션, 카드 목록 |
-| display: grid | 구조화된 2차원 레이아웃 | 대시보드 그리드, 복잡한 템플릿 |
-
----
-
-### Flexbox: 유연한 레이아웃의 왕
-
-**핵심 속성 3종 세트:**
-
-```css
-.flex-container {
-  display: flex;
-  flex-wrap: wrap; /* 줄바꿈 허용 */
-  gap: 1rem; /* 자식 간 여백 */
-}
-
-.flex-item {
-  flex-grow: 1;    /* 빈 공간 채우기 (0 = false, 1+ = true) */
-  flex-shrink: 1;  /* 공간 부족 시 축소 (0 = false, 1 = true) */
-  flex-basis: auto; /* 초기 크기 (%, px, auto) */
-}
-
-/* 축약형 */
-.flex-item {
-  flex: 1 1 auto; /* grow shrink basis */
-}
-```
-
-**실전 Flexbox 패턴:**
-
-**패턴 1: 균등 분배**
-```css
-.card { flex: 1 1 0; }
-```
-
-**패턴 2: 가변 크기**
-```css
-.sidebar { flex: 0 0 250px; }
-.main-content { flex: 1 1 auto; }
-```
-
-**패턴 3: 비율 기반 성장**
-```css
-.stats { flex-grow: 1; }
-.main-chart { flex-grow: 3; }
-.cards { flex-grow: 1; }
-```
-
-**Flexbox Gotcha:**
-- `flex-basis: auto`는 예측 불가능
-- `flex-basis: 0`으로 균등 성장 보장
-
----
-
-### Grid: 정밀한 2차원 레이아웃
-
-**반응형 Grid (Auto-Fit + MinMax):**
+### Auto-Fit + MinMax 패턴
 
 ```css
 .cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 2rem;
 }
 ```
 
 **작동 원리:**
 - `auto-fit`: 가능한 많은 열 생성, 빈 열 제거
-- `minmax(400px, 1fr)`: 최소 400px, 최대 1fr
-- `min(400px, 100%)`: 모바일 오버플로 방지
+- `minmax(300px, 1fr)`: 최소 300px, 최대 1fr
+- `min(300px, 100%)`: 모바일 오버플로 방지
 
----
-
-### Flexbox vs Grid 의사결정
-
-- **Flexbox**: 유연한 배치 필요 (자식이 크기 결정)
-- **Grid**: 정밀한 구조 필요 (부모가 크기 결정)
-
-**Bonus Rule**: 구조화된 그리드가 명확히 필요할 때까지 기본적으로 Flexbox 사용
-
----
-
-## 실전 반응형 패턴
-
-### 패턴 1: 헤더
+### 복잡한 레이아웃 템플릿
 
 ```css
-.main-header {
+.dashboard {
+  display: grid;
+  grid-template-areas:
+    "header header header"
+    "sidebar main main"
+    "footer footer footer";
+  grid-template-columns: 250px 1fr 1fr;
+  gap: 1rem;
+}
+
+.header { grid-area: header; }
+.sidebar { grid-area: sidebar; }
+.main { grid-area: main; }
+.footer { grid-area: footer; }
+
+@media (max-width: 768px) {
+  .dashboard {
+    grid-template-areas:
+      "header"
+      "main"
+      "sidebar"
+      "footer";
+    grid-template-columns: 1fr;
+  }
+}
+```
+
+---
+
+## Container Queries (모던 반응형)
+
+Container Queries는 **부모 컨테이너 크기**에 따라 스타일을 변경합니다. Media Queries는 **뷰포트 크기**에 반응합니다.
+
+```css
+/* 컨테이너 정의 */
+.card-container {
+  container-type: inline-size;
+  container-name: card;
+}
+
+/* 좁은 컨테이너: 세로 레이아웃 */
+.card {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 넓은 컨테이너 (400px+): 가로 레이아웃 */
+@container card (min-width: 400px) {
+  .card {
+    flex-direction: row;
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+  }
+}
+```
+
+### React 적응형 카드
+
+```tsx
+interface CardProps {
+  title: string;
+  description: string;
+  image: string;
+}
+
+export function AdaptiveCard({ title, description, image }: CardProps) {
+  return (
+    <div className="card-container">
+      <div className="card">
+        <img src={image} alt={title} className="card-image" />
+        <div className="card-content">
+          <h3 className="card-title">{title}</h3>
+          <p className="card-description">{description}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+```css
+.card-container {
+  container-type: inline-size;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.card-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+/* 컨테이너가 500px 이상일 때 가로 레이아웃 */
+@container (min-width: 500px) {
+  .card {
+    flex-direction: row;
+  }
+
+  .card-image {
+    width: 40%;
+    height: auto;
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+  }
+}
+```
+
+---
+
+## Flexbox 반응형 패턴
+
+### 균등 분배
+
+```css
+.flex-container {
+  display: flex;
+  gap: 1rem;
+}
+
+.flex-item {
+  flex: 1 1 0; /* grow shrink basis */
+}
+```
+
+### 가변 크기
+
+```css
+.layout {
+  display: flex;
+  gap: 1rem;
+}
+
+.sidebar {
+  flex: 0 0 250px; /* 고정 너비 */
+}
+
+.main-content {
+  flex: 1 1 auto; /* 남은 공간 채우기 */
+}
+
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    flex: 1 1 auto; /* 전체 너비 */
+  }
+}
+```
+
+### 비율 기반 성장
+
+```css
+.dashboard {
+  display: flex;
+  gap: 1rem;
+}
+
+.stats { flex-grow: 1; flex-basis: 0; }       /* 1/5 */
+.main-chart { flex-grow: 3; flex-basis: 0; }  /* 3/5 */
+.cards { flex-grow: 1; flex-basis: 0; }       /* 1/5 */
+
+@media (max-width: 1024px) {
+  .dashboard {
+    flex-direction: column;
+  }
+}
+```
+
+---
+
+## Clamp() 유동적 타이포그래피
+
+```css
+:root {
+  /* 뷰포트에 따라 자동 조절 */
+  font-size: clamp(14px, 1.5vw, 16px);
+}
+
+h1 {
+  /* 최소 1.5rem, 최대 3rem, 중간값은 4vw */
+  font-size: clamp(1.5rem, 4vw, 3rem);
+}
+
+h2 {
+  font-size: clamp(1.25rem, 3vw, 2rem);
+}
+
+p {
+  font-size: clamp(0.875rem, 2vw, 1rem);
+  line-height: 1.6;
+}
+```
+
+### Spacing Clamp
+
+```css
+section {
+  padding: clamp(2rem, 5vw, 4rem) clamp(1rem, 3vw, 2rem);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 4vw, 3rem);
+}
+```
+
+---
+
+## 중단점 전략
+
+```css
+/* Mobile First 설계 */
+/* 기본 스타일 = 모바일 */
+.element {
+  font-size: 1rem;
+  padding: 1rem;
+}
+
+/* 스마트폰 (가로) */
+@media (min-width: 576px) {
+  .element {
+    font-size: 1.125rem;
+  }
+}
+
+/* 태블릿 */
+@media (min-width: 768px) {
+  .element {
+    font-size: 1.25rem;
+    padding: 1.5rem;
+  }
+}
+
+/* 노트북 */
+@media (min-width: 1024px) {
+  .element {
+    font-size: 1.5rem;
+    padding: 2rem;
+  }
+}
+
+/* 대형 모니터 */
+@media (min-width: 1440px) {
+  .element {
+    font-size: 1.75rem;
+    padding: 3rem;
+  }
+}
+```
+
+---
+
+## 반응형 페이지 템플릿
+
+```tsx
+export function ResponsivePage() {
+  return (
+    <div className="page-layout">
+      <header className="header">
+        <div className="header-content">
+          <Logo />
+          <nav className="nav">
+            <a href="#home">Home</a>
+            <a href="#about">About</a>
+            <a href="#contact">Contact</a>
+          </nav>
+          <button className="menu-toggle">☰</button>
+        </div>
+      </header>
+
+      <main className="main-layout">
+        <aside className="sidebar">
+          <nav>...</nav>
+        </aside>
+        <article className="content">
+          <h1>Page Title</h1>
+          <p>Content goes here...</p>
+        </article>
+      </main>
+
+      <footer className="footer">
+        <p>&copy; 2026 Company</p>
+      </footer>
+    </div>
+  );
+}
+```
+
+```css
+.page-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.header {
+  padding: 1rem;
+  background: var(--color-bg);
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
-.search-bar {
-  flex-grow: 1;
-  max-width: 600px;
+.nav {
+  display: none;
 }
 
-@media (max-width: 768px) {
-  .search-bar {
-    flex-grow: 0;
-    margin-left: auto;
-  }
-}
-```
-
----
-
-### 패턴 2: 사이드바 + 메인 콘텐츠
-
-```css
-.sidebar {
-  flex: 0 0 250px;
-  position: sticky;
-  top: 80px;
-  align-self: flex-start; /* 필수! */
+.menu-toggle {
+  display: block;
 }
 
-@media (max-width: 768px) {
-  .sidebar {
-    position: absolute;
-    z-index: 10;
-  }
-}
-```
-
----
-
-### 패턴 3: 대시보드 레이아웃
-
-```css
-.dashboard-main {
-  display: flex;
-  gap: 1rem;
-}
-
-.stats { flex-grow: 1; flex-basis: 0; }
-.main-chart { flex-grow: 3; flex-basis: 0; }
-.cards { flex-grow: 1; flex-basis: 0; }
-
-@media (max-width: 1024px) {
-  .dashboard-main { flex-direction: column; }
-}
-```
-
----
-
-## Position 속성 완전 정복
-
-| 값 | 동작 | 사용 사례 |
-|---|------|-----------|
-| static | 기본 흐름 | 기본값 |
-| relative | 기본 흐름 + 오프셋 | 약간의 위치 조정 |
-| absolute | 흐름 제거 + 부모 기준 | 오버레이, 툴팁 |
-| fixed | 흐름 제거 + 뷰포트 기준 | 고정 헤더 |
-| sticky | 스크롤 시 고정 | 스티키 헤더 |
-
-**Position Gotchas:**
-
-| 문제 | 해결 |
-|------|------|
-| Absolute 요소가 뷰포트 기준 | 부모에 `position: relative` |
-| Sticky 작동 안 함 (Flexbox) | `align-self: flex-start` |
-
----
-
-## 미디어 쿼리 전략
-
-### 중단점 가이드
-
-| 중단점 | 화면 크기 | 권장 열 수 |
-|--------|-----------|-----------|
-| < 576px | 스마트폰 (세로) | 1열 |
-| 576-768px | 스마트폰 (가로) | 1-2열 |
-| 768-1024px | 태블릿 | 2-3열 |
-| 1024-1440px | 노트북 | 3-4열 |
-| > 1440px | 대형 모니터 | 4-6열 |
-
----
-
-## 반응형 체크리스트
-
-**설계 단계:**
-- 모바일/태블릿/데스크톱 러프 스케치 완료
-- 각 중단점마다 열 개수 결정
-- 부모-자식 계층 구조 문서화
-
-**코드 작성 단계:**
-- 모바일 우선 스타일 작성
-- 설명적인 클래스명 사용
-- Flexbox vs Grid 선택 기준 적용
-- `flex-basis: 0` 사용 (균등 성장)
-- Sticky 요소에 `align-self: flex-start`
-
-**미디어 쿼리 단계:**
-- 모든 미디어 쿼리를 CSS 파일 하단에 배치
-- 중단점마다 레이아웃 테스트
-
-**검증 단계:**
-- 4K 모니터/데스크톱/태블릿/스마트폰 테스트
-
-**UX 개선 단계:**
-- 다크 모드 토글
-- 터치 타겟 최소 44x44px
-- 유동적 타이포그래피 (`clamp()`)
-
----
-
-## AlphaView 적용 포인트
-
-### 1. Admin 대시보드 Grid 반응형
-
-```css
-.dashboard-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
-  gap: 1.5rem;
-}
-
-@media (max-width: 768px) {
-  .dashboard-grid { grid-template-columns: 1fr; }
-  .chart-container { height: 250px; }
-}
-```
-
-### 2. 기사 모달 SEC 섹션 모바일 최적화
-
-```css
-.tabs {
-  display: flex;
-  overflow-x: auto;
-}
-
-@media (max-width: 768px) {
-  .sec-data-section { flex-direction: column; }
-  .sec-card { width: 100%; }
-}
-```
-
-### 3. 네비게이션 헤더 햄버거 메뉴
-
-```tsx
-<header className="flex items-center justify-between gap-4 p-4">
-  <Logo />
-  <SearchBar className="hidden md:flex flex-grow max-w-2xl" />
-  <nav className="hidden md:flex gap-4">
-    <WatchlistButton />
-    <ProfileMenu />
-  </nav>
-  <button className="md:hidden" onClick={toggleMenu}>
-    <HamburgerIcon />
-  </button>
-</header>
-```
-
-### 4. 크롤러 테이블 모바일 카드 변환
-
-```css
-@media (max-width: 768px) {
-  .crawler-table { overflow-x: auto; }
-  
-  .crawler-table tbody tr {
+@media (min-width: 768px) {
+  .nav {
     display: flex;
-    flex-direction: column;
-    border: 1px solid #ddd;
-    margin-bottom: 1rem;
-    padding: 1rem;
+    gap: 2rem;
   }
+
+  .menu-toggle {
+    display: none;
+  }
+}
+
+.main-layout {
+  display: flex;
+  flex: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+  gap: 2rem;
+  padding: 2rem 1rem;
+}
+
+.sidebar {
+  display: none;
+}
+
+.content {
+  flex: 1;
+}
+
+@media (min-width: 1024px) {
+  .sidebar {
+    display: block;
+    flex: 0 0 250px;
+  }
+}
+
+.footer {
+  padding: 2rem 1rem;
+  text-align: center;
+  background: var(--color-bg);
+  border-top: 1px solid #e0e0e0;
 }
 ```
 
-### 5. 유동적 타이포그래피
+---
+
+## Position 속성 (Sticky 활용)
 
 ```css
-:root { font-size: clamp(14px, 1.5vw, 16px); }
-h1 { font-size: clamp(1.5rem, 4vw, 3rem); }
-h2 { font-size: clamp(1.25rem, 3vw, 2rem); }
+/* Sticky Header */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Sticky Sidebar (Flexbox 환경) */
+.sidebar {
+  position: sticky;
+  top: 80px; /* Header 높이만큼 offset */
+  align-self: flex-start; /* 필수! */
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
+}
 ```
 
 ---
 
-## 요약
+## 체크리스트
 
-### 5가지 핵심 규칙
-1. **Think Inside the Box** - 부모-자식 박스 계층
-2. **Rows and Columns** - 동적 행/열 재배치
-3. **Design Before Code** - 러프 스케치 필수
-4. **Descriptive Names** - 설명적 클래스명
-5. **Master Media Queries** - 복잡한 동작은 미디어 쿼리로
+### 설계 단계
+- [ ] 모바일/태블릿/데스크톱 스케치
+- [ ] 각 중단점마다 열 개수 결정
+- [ ] 부모-자식 계층 구조 문서화
 
-### Flexbox vs Grid
-- **Flexbox**: 유연한 1차원 레이아웃 (기본)
-- **Grid**: 구조화된 2차원 레이아웃 (명확한 그리드 시)
+### 코드 작성
+- [ ] 모바일 우선 스타일 작성
+- [ ] Container Queries로 컴포넌트 적응형 동작
+- [ ] `clamp()`로 유동적 타이포그래피
+- [ ] Flexbox vs Grid 선택 기준 적용
 
-### AlphaView 우선 적용 항목
-1. Admin 대시보드 Grid 반응형
-2. 기사 모달 SEC 섹션 모바일 최적화
-3. 네비게이션 헤더 햄버거 메뉴
-4. 크롤러 테이블 모바일 카드 변환
-5. 유동적 타이포그래피 (clamp)
+### 미디어 쿼리
+- [ ] 모든 미디어 쿼리를 CSS 파일 하단에 배치
+- [ ] 중단점마다 레이아웃 테스트
 
----
-
-**이 노하우를 AlphaView 프론트엔드에 단계적으로 적용하여 모든 디바이스에서 최적의 사용자 경험을 제공합니다.**
+### 검증
+- [ ] 4K/데스크톱/태블릿/스마트폰 테스트
+- [ ] 터치 타겟 최소 44x44px
+- [ ] 접근성 검증 (키보드 탐색)
 
 ---
-
-## Related Articles
-
-import CrossRef from '@site/src/components/CrossRef';
 
 <CrossRef
   related={[
     { path: "/docs/category/02-visual-foundations", label: "Visual Foundations" },
-    { path: "/docs/category/08-scaling-architecture", label: "Scaling & Architecture" },
     { path: "/docs/category/03-component-design", label: "Component Design" },
+    { path: "/docs/category/06-accessibility", label: "Accessibility" },
   ]}
 />

@@ -3,7 +3,16 @@ title: "IKEA 디자인 시스템 Skapa 분석 - 스마트 카드 컴포넌트 �
 sidebar_label: "IKEA Skapa 카드 분석"
 sidebar_position: 11
 tags: [case-study, ikea, card, accessibility, cross-platform]
+audience: developer
 ---
+
+import DevQuickStart from '@site/src/components/DevQuickStart';
+
+<DevQuickStart
+  what="IKEA Skapa 디자인 시스템은 React Compound Component 패턴과 체계적 토큰의 실제 사례입니다"
+  learn="대규모 디자인 시스템 구축 사례, 토큰 체계, Compound Component 패턴"
+  able="Skapa의 컴포넌트 아키텍처 패턴을 자신의 디자인 시스템에 적용할 수 있습니다"
+/>
 
 > Original issue: shaun0927/stocktitan-crawler#528
 
@@ -62,30 +71,25 @@ tags: [case-study, ikea, card, accessibility, cross-platform]
 
 ---
 
-## 카드 컴포넌트 설계 프로세스
+## 카드 컴포넌트 설계 전략
 
-### Phase 1: 현실 파악 (Reality Check)
-```
-문제 상황:
-- 카드가 IKEA 전 제품에 산재
-- 각 팀마다 "카드"의 정의가 다름
-- 접근성 미준수 다수 발견
-- 기존 컴포넌트는 유연성 부족
-```
+### 설계 원칙
 
-**액션**:
+**최소 필수 요소 (MVP)**:
+- **필수**: Title + Action
+- **선택**: Badge, Body, Media, Icon
+- **목표**: 80% 커버리지 (커스텀 빌드 없이)
+
+**조직 접근 방식**:
 1. 전사 카드 변형 조사 (수십 개 발견)
-2. Miro 워크샵으로 분류 작업
-3. 제품팀과 정의 워크샵: "카드란 무엇이고, 무엇이 아닌가?"
-4. 실제 사례 외부 벤치마킹
+2. Miro 워크샵으로 분류
+3. 제품팀 워크샵: "카드란 무엇이고, 무엇이 아닌가?"
+4. 외부 벤치마킹
+5. Alpha 버전 Figma + 코드 동시 배포
 
-### Phase 2: 요구사항 정의
-**핵심 결정**:
-- **최소 필수 요소**: Title + Action만 강제
-- **목표 커버리지**: 80% (커스텀 빌드 없이)
-- **얼리 피드백 루프**: Alpha 버전을 Figma + 코드로 동시 배포
+### 세 가지 카드 타입
 
-**도출된 3가지 카드**:
+Skapa는 단일 카드 컴포넌트 대신 **목적별 세 가지 카드**를 제공합니다:
 
 #### 1. Content Card (메인 카드)
 - **용도**: 제품 리스팅, 에디토리얼 콘텐츠, 정보 표시
@@ -96,10 +100,93 @@ tags: [case-study, ikea, card, accessibility, cross-platform]
   - Action (필수)
 - **특징**: 21개 컬러 테마 지원 (브랜드팀 추가 요구사항)
 
+**구현 예시 (React Compound Component)**:
+
+```tsx
+import { Card } from '@ikea/skapa';
+
+function ProductCard() {
+  return (
+    <Card variant="content" theme="primary" responsive>
+      <Card.Media>
+        <img src="/product.jpg" alt="Product" />
+        <Card.Badge>Sale</Card.Badge>
+      </Card.Media>
+      <Card.Content>
+        <Card.Title>Elegant Living Chair</Card.Title>
+        <Card.Body>Modern design with sustainable materials</Card.Body>
+        <Card.Action href="/products/chair">
+          Shop Now
+        </Card.Action>
+      </Card.Content>
+    </Card>
+  );
+}
+```
+
+**토큰 구조**:
+
+```css
+/* Layer 1: Primitive Tokens (색상 팔레트) */
+:root {
+  --color-theme-primary-base: #0051ba;
+  --color-theme-primary-dark: #003d8a;
+  --color-theme-primary-light: #cce5ff;
+}
+
+/* Layer 2: Semantic Tokens (Content Card 공통) */
+:root {
+  --card-content-bg: var(--color-white);
+  --card-content-border-color: var(--color-gray-200);
+  --card-content-title-font-size: 18px;
+  --card-content-title-line-height: 1.4;
+  --card-content-body-font-size: 14px;
+  --card-content-body-color: var(--color-gray-700);
+}
+
+/* Layer 3: Component Tokens (Content Card 테마별) */
+:root[data-card-theme="primary"] {
+  --card-badge-bg: var(--color-theme-primary-base);
+  --card-badge-text: var(--color-white);
+  --card-action-bg: var(--color-theme-primary-base);
+  --card-action-text: var(--color-white);
+}
+
+:root[data-card-theme="secondary"] {
+  --card-badge-bg: var(--color-gray-200);
+  --card-badge-text: var(--color-gray-900);
+  --card-action-bg: transparent;
+  --card-action-text: var(--color-theme-primary-base);
+}
+```
+
 #### 2. Compact Card
 - **용도**: 밀집 레이아웃, 모바일 그리드, 빠른 네비게이션
 - **차별점**: Body 텍스트 없음, 경량화
 - **제한**: Shoppable Image 미지원 (작은 사이즈에서 작동 안 함)
+
+**구현 예시**:
+
+```tsx
+import { Card } from '@ikea/skapa';
+
+function CompactProductCard() {
+  return (
+    <Card variant="compact" size="small">
+      <Card.Media aspectRatio="1:1">
+        <img src="/product-thumb.jpg" alt="Product" />
+      </Card.Media>
+      <Card.Content>
+        <Card.Title>Chair</Card.Title>
+        {/* Body 제외 - 자동으로 숨겨짐 */}
+        <Card.Action href="/products/chair">
+          View
+        </Card.Action>
+      </Card.Content>
+    </Card>
+  );
+}
+```
 
 #### 3. Text Overlay Card
 - **용도**: 수직 공간 절약, 모바일 최적화
@@ -107,194 +194,367 @@ tags: [case-study, ikea, card, accessibility, cross-platform]
   - 텍스트 길이에 따라 그라디언트 자동 확장
   - 항상 충분한 대비 보장 (접근성)
 
-### Phase 3: Media Container 혁신
-**기존**: 정적 이미지 슬롯
-**개선**: 동적 인터랙티브 공간
+**구현 예시**:
 
-지원 콘텐츠:
-- 이미지 (다양한 aspect ratio: 1:1, 16:9, 9:16)
-- 비디오 (자체 플레이어 + 최근 transcript 버튼 추가)
-- Commercial Messages
-- Shoppable Markers (제품 페이지 직링크)
+```tsx
+import { Card } from '@ikea/skapa';
 
-**연동 시스템**:
-- IKEA Media Factory에서 다중 포맷 이미지 자동 제공
+function ActionCard() {
+  return (
+    <Card variant="overlay" overlayPosition="bottom">
+      <Card.Media aspectRatio="16:9">
+        <img src="/campaign.jpg" alt="Campaign" />
+        <Card.GradientOverlay
+          direction="top"
+          intensity="medium"
+          minHeight="auto"
+        />
+      </Card.Media>
+      <Card.OverlayContent>
+        <Card.Title>Limited Time Offer</Card.Title>
+        <Card.Body>Save up to 50% on selected items</Card.Body>
+        <Card.Action href="/sale">
+          Shop Sale
+        </Card.Action>
+      </Card.OverlayContent>
+    </Card>
+  );
+}
+```
+
+**토큰 구조 (Overlay Card)**:
+
+```css
+/* 동적 그라디언트 토큰 */
+:root {
+  --card-overlay-gradient-start: rgba(0, 0, 0, 0);
+  --card-overlay-gradient-end: rgba(0, 0, 0, 0.8);
+  --card-overlay-min-height-sm: 40px;
+  --card-overlay-min-height-md: 60px;
+  --card-overlay-min-height-lg: 80px;
+}
+
+/* 텍스트 길이별 자동 확장 */
+[data-overlay-text-length="short"] {
+  --card-overlay-actual-height: var(--card-overlay-min-height-sm);
+}
+
+[data-overlay-text-length="medium"] {
+  --card-overlay-actual-height: var(--card-overlay-min-height-md);
+}
+
+[data-overlay-text-length="long"] {
+  --card-overlay-actual-height: var(--card-overlay-min-height-lg);
+}
+```
+
+### Media Container 아키텍처
+
+Card.Media는 단순한 이미지 슬롯을 넘어 **동적 인터랙티브 공간**입니다.
+
+**지원되는 콘텐츠 타입**:
+
+| 타입 | Aspect Ratio | 특징 |
+|------|-------------|------|
+| Image | 1:1, 16:9, 9:16 | IKEA Media Factory 통합 |
+| Video | 16:9 | 자체 플레이어 + Transcript 버튼 |
+| Commercial Message | 1:1 | 캠페인 배너 |
+| Shoppable Markers | 16:9 | 제품 핫스팟 → 직링크 |
+
+**최적화 전략**:
+- IKEA Media Factory: 다중 포맷 이미지 자동 제공
 - 뷰포트/캐러셀 위치에 따라 최적 aspect ratio 선택
+- 응답형 레이아웃에서 자동 전환
+
+**구현 예시**:
+
+```tsx
+<Card.Media
+  aspectRatio="16:9"
+  responsive
+  sources={[
+    { breakpoint: 'mobile', src: '/img-400w.jpg' },
+    { breakpoint: 'tablet', src: '/img-800w.jpg' },
+    { breakpoint: 'desktop', src: '/img-1200w.jpg' }
+  ]}
+>
+  <img src="/img-1200w.jpg" alt="Product" />
+</Card.Media>
+```
 
 ---
 
-## 확장성 전략
+## 확장성 아키텍처
 
-### 1. 테마 시스템
-- **21개 컬러 테마**: 브랜드팀 요구사항 (개발 중간에 추가!)
-- **다크/라이트 모드**: 각 카드가 테마 파일 포함
-- **자동 텍스트 색상 조정**: 테마 전환 시 가독성 보장
-- **용도**: CMS 콘텐츠 크리에이터가 캠페인/이미지에 맞춰 색상 조정
+### 테마 시스템
 
-### 2. 반응형 설계
-- **지원 범위**: 소형 핸드헬드 디바이스 → 75인치 디스플레이
-- **자동 레이아웃 전환**:
-  - 작은 화면: 세로 스택
-  - 큰 화면: 이미지-콘텐츠 가로 배치 (Leading/Trailing 선택 가능)
-- **잠금 옵션**: 특정 레이아웃 고정 가능
+Skapa는 **21개 컬러 테마**를 통해 CMS 콘텐츠 크리에이터가 캠페인/이미지에 맞춰 색상을 조정할 수 있습니다.
 
-### 3. 크로스 플랫폼
-**기존 카드**: 웹만 지원, 106,000 월간 다운로드
-**신규 카드**: iOS + Android 추가 → 진정한 크로스 플랫폼
+**구현 패턴**:
+
+```tsx
+<Card theme="primary" darkMode>
+  {/* 자동으로 다크모드 컬러 적용 */}
+</Card>
+
+// 사용 가능한 테마
+type CardTheme =
+  | 'primary'
+  | 'secondary'
+  | 'success'
+  | 'warning'
+  | 'error'
+  | 'brand-1' | 'brand-2' // ... up to 21 themes
+```
+
+**주의사항**:
+- Figma에서 테마 중간 추가 시 변형 수가 기하급수적으로 증가 (1,024개)
+- **해결책**: Figma Variables 기능으로 동적 테마 관리 (62개로 축소 예정)
+
+### 반응형 설계
+
+**지원 범위**: 핸드헬드 디바이스 → 75인치 디스플레이
+
+```tsx
+<Card
+  responsive
+  layoutMode="auto"  // 화면에 따라 자동 전환
+  // 또는
+  layoutMode="locked-vertical"  // 특정 레이아웃 고정
+>
+  {/* 작은 화면: 세로 스택 */}
+  {/* 큰 화면: 이미지-콘텐츠 가로 배치 (Leading/Trailing) */}
+</Card>
+```
+
+**레이아웃 모드**:
+- `auto`: 반응형 자동 전환
+- `locked-vertical`: 항상 세로 스택
+- `locked-horizontal-leading`: 이미지 좌측 고정
+- `locked-horizontal-trailing`: 이미지 우측 고정
+
+### 크로스 플랫폼 배포
+
+**플랫폼 지원**:
+
+| 플랫폼 | 상태 | 월간 다운로드 |
+|-------|------|-------------|
+| Web | ✅ 80% 채택 (2024-08) | 106,000+ |
+| iOS | ✅ 동시 개발 | - |
+| Android | ✅ 동시 개발 | - |
+| React Native | 계획 중 | - |
 
 **배포 전략**:
-- 모든 플랫폼 동시 개발 (Skapa의 기본 방침)
+- 모든 플랫폼 동시 개발 (선택 아님, 기본 방침)
 - 플랫폼별 Storybook 제공
-- 2024년 8월: 웹 80% 채택률 달성
+- 크로스 플랫폼 테스트 자동화
 
 ---
 
-## 접근성 구현 (No WCAG Pattern)
+## 접근성 아키텍처
 
-### 문제: 카드는 공식 WCAG 패턴이 없음
-**해결**: 자체 접근성 전략 수립
+카드는 공식 WCAG 패턴이 없으므로 Skapa는 **자체 접근성 전략**을 수립했습니다.
 
-### 키보드 네비게이션 설계
-1. **카드 전체를 단일 링크로 처리**
-   - 스크린 리더: "Link, [Title]" 발음
-   - Body 텍스트는 읽지 않음
-2. **이유**: 10개 카드 캐러셀에서 Title+Body 모두 읽으면 사용자 피로
-3. **결과**: 빠른 탐색 가능
+### 키보드 네비게이션
 
-### 테스트 프로세스
-- **내부 시각장애 직원과 협업**
-- **전담 Accessibility Team 리뷰**
-- **Day 1부터 포함** (나중이 아님)
+**설계 결정**: 카드 전체를 단일 링크로 처리
+
+```tsx
+<Card
+  role="link"
+  tabIndex={0}
+  aria-label="Product card: Elegant Living Chair"
+  onKeyDown={handleCardKeydown}
+>
+  <Card.Media>
+    <img src="/product.jpg" alt="" aria-hidden="true" />
+  </Card.Media>
+  <Card.Content>
+    <Card.Title>Elegant Living Chair</Card.Title>
+    {/* Body는 스크린 리더에서 건너뜀 */}
+    <Card.Body aria-hidden="true">Details...</Card.Body>
+    <Card.Action aria-hidden="true">Shop</Card.Action>
+  </Card.Content>
+</Card>
+```
+
+**근거**:
+- 10개 카드 캐러셀에서 Title+Body 모두 읽으면 사용자 피로
+- 스크린 리더: "Link, [Title]만 발음
+- 빠른 탐색 가능
+
+### 테스트 프로세스 (모범 사례)
+
+| 단계 | 담당자 | 시점 |
+|------|-------|------|
+| 1. 내부 협업 | 시각장애 직원 | Day 1 |
+| 2. 전담 검토 | Accessibility Team | 개발 중 |
+| 3. 자동 테스트 | 레귤러 CI/CD | 매 커밋 |
+| 4. 수동 테스트 | QA | 배포 전 |
+
+**중요**: 접근성은 나중이 아니라 **처음부터** 포함해야 합니다.
 
 ---
 
-## 실전 팁 & 교훈
+## 구현 및 채택 전략
 
-### 채택 관련
+### 얼리 피드백 루프 (필수)
+
+**DO**:
+- ✅ Alpha 버전 조기 배포 (Figma + 코드 동시)
+- ✅ 주요 사용자(CMS, 제품팀)와 밀접 협업
+- ✅ 점진적 채택 수용 (거대 조직에서는 정상)
+- ✅ 실제 제품팀 데이터로 검증
+
+**DON'T**:
+- ❌ 100% 완벽 후 출시
+- ❌ 일방적 배포 (피드백 루프 필수)
+- ❌ 마지막에 접근성 추가
+- ❌ 문서화 미루기
+
+### Figma 변형 관리
+
+**주의: Compound 속성은 변형 폭발을 초래합니다**
+
+| 시나리오 | 변형 수 | 해결책 |
+|---------|-------|--------|
+| 색상 5개 × 크기 3개 | 15개 | OK |
+| 색상 5개 × 크기 3개 × 레이아웃 3개 | 45개 | OK |
+| **색상 21개** × 크기 3개 × 레이아웃 3개 | **189개** | Variables 사용 |
+| 테마 추가 시 기하급수 증가 | 1,024+ | 즉시 리팩토링 |
+
+**Content Card 사례**: 개발 중간에 21개 테마 추가 → 1,024개 변형 → 매우 느림
+
+**해결책**: Figma Variables (동적 색상) + 컴포넌트 세트 분리
+
+### 문서화 = 설계 검증
+
+> "문서를 쓰다 보면 설계에서 놓친 부분을 발견한다" - Yunatan (Senior Designer)
+
+**Skapa Hub 지식 허브 구성**:
+
 ```
-DO:
-- Alpha 버전 조기 배포 (Figma + 코드 동시)
-- 주요 사용자(CMS, 제품팀)와 밀접 협업
-- 점진적 채택 수용 (거대 조직에서는 정상)
-
-DON'T:
-- 100% 완벽 후 출시
-- 일방적 배포 (피드백 루프 필수)
+Skapa Hub/
+├── 가이드라인/
+│   ├── 컴포넌트별 사용 시기
+│   └── 금지 패턴
+├── 컴포넌트 문서/
+│   ├── Card 완전 가이드
+│   ├── Props 레퍼런스
+│   └── 접근성 체크리스트
+├── 파운데이션/
+│   ├── 디자인 토큰
+│   └── 색상 시스템
+├── 디자인 패턴/
+├── 플랫폼별 Storybook/
 ```
 
-### 변형 관리
-**Figma의 함정**:
-- Content Card 현재 상태: **1,024개 변형**
-- 원인: 21개 컬러 테마 중간 추가
-- 결과: 느리고 유지보수 지옥
-- **해결 예정**: 새 Variables 기능으로 62개로 축소
+**투자 이유**: 문서화 = 사용자 지원 부담 감소 (1,700명 커뮤니티)
 
-**교훈**: 테마 시스템은 Variables 같은 동적 방식으로 설계해야 함
+### 조직 구조 (성공 요인)
 
-### 문서화 우선순위
-> "디자이너로서 내 시간의 80%는 협업과 문서화다" - Yunatan
+**PedEx 체계** (Product-Engineering-Data-Experience 통합):
 
-**Skapa Hub (지식 허브) 구성**:
-- 가이드라인
-- 컴포넌트 문서
-- 파운데이션
-- 디자인 패턴
-- 플랫폼별 Storybook
-
-**투자 이유**: 문서화 = 사용자 지원 부담 감소
-
-### 조직 구조
 ```
-성공 요인:
-- PedEx 체계 (Product-Engineering-Data-Experience 통합)
+Design System Team (23명)
+├── Product Manager
+├── Designers (8명)
+│   └── 일일 지원: Slack (1,700명 커뮤니티)
+├── Engineers (10명)
+│   └── 크로스플랫폼 (Web, iOS, Android, Vue, Web Components)
+└── Data & UX Research
+```
+
+**성공 요인**:
 - 처음부터 모든 직군 참여
 - 작은 팀 → 기능 전체 소유 → 책임감 상승
 - 풀스택 팀 구성
+- 도메인별 책임 명확화
 
-실패 요인 (과거):
+**실패 패턴** (피할 것):
 - 디자이너/개발자 분리 작업
 - 혼합 프로젝트 배정
-- 소유권 부재
-```
-
-### AI 챗봇 지원
-**현재 상태**: 없음 (Spotify에 조언 요청 중)
-**필요성**: 1,700명 커뮤니티 지원 부담 완화
+- 소유권 부재 (공동 책임 = 책임 없음)
 
 ---
 
-## 체크리스트 - 복잡한 컴포넌트 설계 시
+## 체크리스트: 복잡한 컴포넌트 설계
 
-### 사전 조사 단계
-- [ ] 전사 변형 조사 (최대한 많이 수집)
-- [ ] 제품팀과 정의 워크샵 ("X란 무엇이고, 무엇이 아닌가?")
-- [ ] 외부 벤치마킹 (다른 디자인 시스템 참고)
-- [ ] 공통 패턴 맵핑 (80% 커버리지 목표)
+Skapa 카드 설계에서 검증된 10단계 체크리스트입니다.
 
-### 설계 단계
-- [ ] 최소 필수 요소만 강제 (Title + Action)
-- [ ] 나머지는 옵션으로 설계
-- [ ] 접근성을 처음부터 고려 (Day 1)
-- [ ] 반응형을 컴포넌트 내부에 내장 (사용자가 신경 안 쓰게)
+### Phase 1: 조사 &amp; 정의 (1-2주)
 
-### 개발 단계
-- [ ] 모든 플랫폼 동시 개발 (웹만 먼저 X)
-- [ ] Alpha 버전 조기 배포 (Figma + 코드)
-- [ ] Storybook으로 라이브 테스트 환경 제공
-- [ ] 풀스택 팀 구성 (디자이너-개발자 통합)
+- [ ] **조사**: 전사 변형 수집 (Miro 보드로 분류)
+- [ ] **워크샵**: 제품팀과 "X란 무엇이고, 무엇이 아닌가?" 정의
+- [ ] **벤치마킹**: 외부 디자인 시스템 3-5개 분석
+- [ ] **커버리지**: 80% 목표로 공통 패턴 맵핑
 
-### 문서화 단계
-- [ ] 문서 작성하며 설계 재검토
-- [ ] 속성(Properties) 전부 문서화
-- [ ] 반응형 동작 명시
-- [ ] 접근성 가이드 포함
+### Phase 2: 설계 (2-4주)
 
-### 배포 단계
-- [ ] 얼리 피드백 루프 설정
-- [ ] 주요 사용자 그룹과 협업 (CMS, 주요 제품팀)
-- [ ] 점진적 채택 계획 수립
-- [ ] 채택률 모니터링 (목표: 80%)
+- [ ] **최소화**: 필수 요소만 강제 (Title + Action)
+- [ ] **옵션화**: 나머지는 모두 선택 사항
+- [ ] **접근성**: Day 1부터 포함 (나중 X)
+- [ ] **반응형**: 컴포넌트 내부에 내장 (사용자 몰라도 됨)
+- [ ] **테마**: Variables로 동적 관리 (하드코딩 변형 X)
 
-### 유지보수 단계
-- [ ] Variables로 테마 관리 (하드코딩 변형 X)
-- [ ] 정기 내부 장애인 테스트
-- [ ] 플랫폼 간 동기화 유지
+### Phase 3: 개발 &amp; 배포 (4-8주)
 
----
+- [ ] **병렬화**: 모든 플랫폼 동시 개발 (웹만 먼저 금지)
+- [ ] **Alpha**: Figma + 코드 동시 배포 (얼리 피드백)
+- [ ] **팀**: 풀스택 구성 (디자이너-개발자 통합)
+- [ ] **테스트**: Storybook 라이브 테스트 환경
+- [ ] **접근성**: 시각장애 직원 + Accessibility Team 검토
 
-## 핵심 지표
+### Phase 4: 문서화 &amp; 출시 (2-4주)
 
-| 지표 | IKEA Skapa | 참고 목표 |
-|------|------------|-----------|
-| 팀 규모 | 23명 | 효율성 극대화 필요 |
-| 컴포넌트 수 | 60+ | 20~30 (초기) |
-| 플랫폼 | 5개 | 1개 (웹, 향후 확장) |
-| 채택률 목표 | 80% | 90% (작은 팀 강점) |
-| 문서화 비중 | 80% | 50% (초기), 70% (성숙기) |
+- [ ] **문서**: 작성하며 설계 재검토 (누락 발견)
+- [ ] **Props**: 모든 속성 레퍼런스화
+- [ ] **반응형**: 레이아웃 동작 명시
+- [ ] **A11y**: 접근성 체크리스트 제공
+- [ ] **피드백**: 얼리 루프 설정 (주요 사용자)
+
+### Phase 5: 모니터링 &amp; 유지보수
+
+- [ ] **채택률**: 80% 목표로 모니터링
+- [ ] **이슈**: 주요 사용자 피드백 수집
+- [ ] **점진적**: 대규모 조직 = 느린 채택 정상
+- [ ] **정기 테스트**: 장애인 접근성 검증
 
 ---
 
-## 참고 링크
+## 핵심 지표 &amp; 벤치마크
 
-- [Material Design Cards](https://material.io/components/cards)
-- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
-- [Figma Variables 가이드](https://help.figma.com/hc/en-us/articles/15339657135383-Guide-to-variables-in-Figma)
+Skapa 프로젝트 규모와 목표:
+
+| 지표 | Skapa | 초기 팀 목표 | 성숙기 목표 |
+|------|-------|-----------|-----------|
+| **팀 규모** | 23명 (3개 도시) | 5-8명 | 15-20명 |
+| **지원 팀** | 200+ 제품팀 | 10-20팀 | 50-100팀 |
+| **컴포넌트** | 60+ | 10-15개 | 30-50개 |
+| **플랫폼** | 5개 (Web, iOS, Android, Vue, Web Components) | 1개 (웹) | 2-3개 |
+| **채택률** | 80% (2024-08) | 50% (Month 6) | 80-90% |
+| **문서화 시간** | 디자이너 80% | 50-60% | 70-80% |
+| **Slack 커뮤니티** | 1,700명 | 100-200명 | 500-1,000명 |
+
+## 성공 사례 요약
+
+**Skapa Card 설계의 핵심 성공 요인**:
+
+1. **MVP 마인드셋**: 필수 요소만 강제 (Title + Action) → 80% 커버리지 달성
+2. **목적별 분리**: 단일 "Card" 대신 3가지 타입 (Content, Compact, Overlay)
+3. **조직 통합**: PedEx 체계로 모든 직군 Day 1부터 참여
+4. **얼리 피드백**: Alpha 배포 (Figma + 코드) → 빠른 피드백 루프
+5. **접근성 우선**: 나중이 아닌 처음부터 시각장애인 협업
+6. **문서화 투자**: 80% 문서화 = 1,700명 커뮤니티 자립
 
 ---
-
-**작성일**: 2026-02-05
-**태그**: #design-system #components #accessibility #scalability #ikea-case-study
-
----
-
-## 📎 Related Articles
 
 import CrossRef from '@site/src/components/CrossRef';
 
 <CrossRef
   related={[
-    { path: "/docs/component-design/cards-composability", label: "Cards and Composability - 컴포저블 컴포넌트 설계" },
-    { path: "/docs/governance-operations/core-principles", label: "거버넌스 운영 기초" },
-    { path: "/docs/accessibility/accessible-systems", label: "접근성 기초" },
+    { path: "/docs/component-design/cards-composability", label: "Cards & Composability" },
+    { path: "/docs/component-design/subcomponents", label: "Subcomponents" },
+    { path: "/docs/design-tokens/token-tips", label: "Design Token Tips" },
   ]}
 />

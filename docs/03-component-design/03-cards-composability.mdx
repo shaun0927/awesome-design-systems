@@ -2,14 +2,21 @@
 title: "Cards and Composability - 컴포저블 컴포넌트 설계"
 sidebar_label: "카드와 컴포저빌리티"
 sidebar_position: 3
-tags: [cards, composability, components]
+audience: developer
+tags: [cards, composability, components, react, typescript, accessibility]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#568
 
-## 디자인 시스템에서 카드와 컴포저빌리티
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-## 📌 핵심 개념
+<DevQuickStart
+  what="Cards are the first complex composable component in any design system - how you handle them defines system maturity"
+  learn="4 design areas (structure, content, style, behavior) for card components, zone-based architecture, and click area strategies"
+  able="Implement a TypeScript Card component with named zones, accessibility markup, and composable subcomponents"
+/>
+
+## 핵심 개념
 
 **카드의 본질**:
 - "스캔 가능한 객체의 핵심 정보 스냅샷"
@@ -157,9 +164,89 @@ tags: [cards, composability, components]
 **핵심 메시지**:
 > "카드는 디자인 시스템이 성장하면서 만나는 첫 번째 복잡한 컴포넌트이며, 이를 어떻게 다루느냐가 시스템의 성숙도와 방향성을 결정한다"
 
----
+## TypeScript Card Implementation
 
-*출처: Nathan Curtis (EightShapes), 2018-04*
+```tsx title="Card.tsx"
+interface CardProps {
+  as?: 'article' | 'div' | 'li';
+  href?: string;
+  children: React.ReactNode;
+  className?: string;
+}
+
+interface CardImageProps {
+  src: string;
+  alt: string;
+  aspectRatio?: '16:9' | '4:3' | '1:1';
+}
+
+interface CardContentProps {
+  children: React.ReactNode;
+}
+
+export function Card({ as: Tag = 'article', href, children, className }: CardProps) {
+  const content = (
+    <Tag className={`card ${className ?? ''}`} role={Tag === 'div' ? 'group' : undefined}>
+      {children}
+    </Tag>
+  );
+
+  if (href) {
+    return <a href={href} className="card__link">{content}</a>;
+  }
+  return content;
+}
+
+export function CardImage({ src, alt, aspectRatio = '16:9' }: CardImageProps) {
+  return (
+    <div className={`card__media card__media--${aspectRatio.replace(':', '-')}`}>
+      <img src={src} alt={alt} loading="lazy" />
+    </div>
+  );
+}
+
+export function CardContent({ children }: CardContentProps) {
+  return <div className="card__content">{children}</div>;
+}
+
+export function CardActions({ children }: { children: React.ReactNode }) {
+  return <div className="card__actions" role="group">{children}</div>;
+}
+```
+
+```css title="card-zones.css"
+.card {
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg, 1rem);
+  overflow: hidden;
+  background: var(--surface-elevated);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.2s;
+}
+
+.card:hover { box-shadow: var(--shadow-card-hover); }
+
+/* Media zone aspect ratios */
+.card__media { position: relative; overflow: hidden; }
+.card__media--16-9 { aspect-ratio: 16 / 9; }
+.card__media--4-3 { aspect-ratio: 4 / 3; }
+.card__media--1-1 { aspect-ratio: 1 / 1; }
+.card__media img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Content zone */
+.card__content { padding: var(--space-m); flex: 1; }
+
+/* Actions zone */
+.card__actions {
+  padding: var(--space-s) var(--space-m) var(--space-m);
+  display: flex;
+  gap: var(--space-s);
+}
+
+/* Full-card clickable link */
+.card__link { text-decoration: none; color: inherit; display: contents; }
+```
 
 ---
 

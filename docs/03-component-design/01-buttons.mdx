@@ -2,14 +2,21 @@
 title: "디자인 시스템의 버튼: 12가지 핵심 팁"
 sidebar_label: "버튼 컴포넌트 12가지 팁"
 sidebar_position: 1
-tags: [buttons, components, interaction]
+audience: developer
+tags: [buttons, components, interaction, react, typescript]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#559
 
-## 디자인 시스템의 버튼: 12가지 핵심 팁 (Nathan Curtis, 2016)
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-## 📌 핵심 개념
+<DevQuickStart
+  what="Buttons are the most important design system component - getting color, typography, spacing, and interaction states right sets the tone for everything else"
+  learn="12 practical tips covering primary/secondary/ghost variants, 6 interaction states, size scales, and semantic HTML requirements"
+  able="Implement a complete React Button component with TypeScript props, CSS custom properties, and all interaction states"
+/>
+
+## 핵심 개념
 
 > "Buttons are arguably a design system's most important component."
 
@@ -19,9 +26,17 @@ tags: [buttons, components, interaction]
 3. **더 복잡한 컴포넌트의 기반**: 버튼 속성이 전체 시스템으로 파급
 
 ### 버튼의 핵심 속성
-```
-색상 (Color) + 타이포그래피 (Typography) + 아이콘 (Iconography)
-+ 공간 (Space) + 모서리 둥글기 (Roundedness) + 입체감 (Lift)
+
+```mermaid
+graph LR
+    A["Color"] --> F["Button"]
+    B["Typography"] --> F
+    C["Iconography"] --> F
+    D["Space"] --> F
+    E["Roundedness"] --> F
+    G["Lift/Shadow"] --> F
+
+    style F fill:#d1fae5,stroke:#059669
 ```
 
 ## 🎯 12가지 버튼 팁
@@ -193,8 +208,92 @@ Toolbar: [Primary] [Secondary] [Toggle] [Menu ▼]
 - 스크린 리더가 버튼으로 인식
 - 브라우저 기본 동작 지원
 
----
-*출처: Nathan Curtis (EightShapes, 2016)*
+## React Button Component
+
+```tsx title="Button.tsx"
+import React from 'react';
+
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger';
+type ButtonSize = 'sm' | 'md' | 'lg';
+
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  loading?: boolean;
+  icon?: React.ReactNode;
+  children: React.ReactNode;
+}
+
+const sizeMap: Record<ButtonSize, string> = {
+  sm: 'btn--sm',
+  md: 'btn--md',
+  lg: 'btn--lg',
+};
+
+export function Button({
+  variant = 'primary',
+  size = 'md',
+  loading = false,
+  icon,
+  disabled,
+  children,
+  ...props
+}: ButtonProps) {
+  return (
+    <button
+      className={`btn btn--${variant} ${sizeMap[size]}`}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      {...props}
+    >
+      {loading ? (
+        <span className="btn__spinner" aria-hidden="true" />
+      ) : icon ? (
+        <span className="btn__icon" aria-hidden="true">{icon}</span>
+      ) : null}
+      <span className="btn__label">{children}</span>
+    </button>
+  );
+}
+```
+
+```css title="button.css"
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 500;
+  border: none;
+  border-radius: var(--radius-md, 0.5rem);
+  cursor: pointer;
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+/* Sizes */
+.btn--sm { font-size: 0.875rem; padding: 0.375rem 0.75rem; min-height: 1.75rem; }
+.btn--md { font-size: 1rem; padding: 0.625rem 1rem; min-height: 2.375rem; }
+.btn--lg { font-size: 1.125rem; padding: 0.875rem 1.25rem; min-height: 2.875rem; }
+
+/* Variants */
+.btn--primary { background: var(--color-primary); color: white; }
+.btn--primary:hover:not(:disabled) { background: var(--color-primary-hover); }
+.btn--primary:active:not(:disabled) { background: var(--color-primary-active); }
+
+.btn--secondary {
+  background: transparent;
+  color: var(--color-primary);
+  box-shadow: inset 0 0 0 2px var(--color-primary);
+}
+
+.btn--ghost { background: transparent; color: var(--color-primary); }
+.btn--ghost:hover:not(:disabled) { background: var(--color-primary-subtle); }
+
+.btn--danger { background: var(--color-error); color: white; }
+
+/* States */
+.btn:focus-visible { outline: 2px solid var(--color-focus); outline-offset: 2px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+```
 
 ---
 

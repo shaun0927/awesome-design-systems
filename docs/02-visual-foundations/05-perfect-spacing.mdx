@@ -2,19 +2,21 @@
 title: "완벽한 간격(Spacing) 선택 노하우"
 sidebar_label: "간격 선택 노하우"
 sidebar_position: 5
-tags: [spacing, layout, css]
+audience: developer
+tags: [spacing, layout, css, tailwind]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#513
 
-## 완벽한 간격(Spacing) 선택 노하우 정리
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-> 출처: "The Easy Way to Pick Perfect Spacing" 영상 transcript 분석
-> 관점: 디자인 시스템 효율성 및 실전 노하우
+<DevQuickStart
+  what="80% of spacing decisions can be covered by just 3 values (8px, 16px, 24px) following inner < outer and start-big-reduce rules"
+  learn="6 practical spacing rules with Tailwind mapping, visual balance techniques, and the grouping strategy for UI hierarchy"
+  able="Apply a consistent spacing system using CSS custom properties or Tailwind utility classes"
+/>
 
----
-
-## 📌 핵심 철학
+## 핵심 철학
 
 ### 1. Rem 단위 사용의 중요성
 - **픽셀 대신 rem을 사용하는 이유**: 폰트 크기에 따라 간격이 자동으로 스케일됨
@@ -162,7 +164,18 @@ tags: [spacing, layout, css]
 
 ---
 
-## 📚 핵심 요약
+## Tailwind CSS 매핑
+
+| Token | CSS Value | Tailwind | 용도 |
+|-------|-----------|----------|------|
+| `--spacing-1` | 0.25rem (4px) | `gap-1`, `p-1` | 아이콘-텍스트 |
+| `--spacing-2` | 0.5rem (8px) | `gap-2`, `p-2` | 밀접한 관계 |
+| `--spacing-3` | 0.75rem (12px) | `gap-3`, `p-3` | 작은 padding |
+| `--spacing-4` | 1rem (16px) | `gap-4`, `p-4` | **기본 간격** |
+| `--spacing-6` | 1.5rem (24px) | `gap-6`, `p-6` | **그룹 분리** |
+| `--spacing-8` | 2rem (32px) | `gap-8`, `p-8` | **섹션 분리** |
+
+## 핵심 요약
 
 ### 꼭 기억할 3가지
 
@@ -172,11 +185,11 @@ tags: [spacing, layout, css]
 
 ### 80% 케이스를 커버하는 핵심 값
 
-| 값 | 용도 |
-|----|------|
-| **0.5rem** | 밀접한 관계 (제목-부제, 아이콘-텍스트) |
-| **1rem** | 기본 간격 (버튼 그룹, 리스트, padding) |
-| **1.5rem** | 그룹 분리 (섹션 간) |
+| 값 | Tailwind | 용도 |
+|----|----------|------|
+| **0.5rem** | `gap-2` | 밀접한 관계 (제목-부제, 아이콘-텍스트) |
+| **1rem** | `gap-4` | 기본 간격 (버튼 그룹, 리스트, padding) |
+| **1.5rem** | `gap-6` | 그룹 분리 (섹션 간) |
 
 ---
 

@@ -2,12 +2,19 @@
 title: "Variants Analysis - 데이터 기반 컴포넌트"
 sidebar_label: "베리언트 분석"
 sidebar_position: 10
-tags: [variants, data-driven, figma, automation]
+audience: developer
+tags: [variants, data-driven, figma, automation, css]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#552
 
-## 베리언트 분석 (Variants Analysis)
+import DevQuickStart from '@site/src/components/DevQuickStart';
+
+<DevQuickStart
+  what="Systematically analyze all Figma variants into structured YAML data - deterministic, complete, succinct, and human-readable"
+  learn="4 principles (deterministic extraction, completeness, CSS-cascade compression, human-readability) and 7 practical use cases"
+  able="Implement CSS cascade-style variant layering and generate Storybook stories from variant data"
+/>
 
 ### 핵심 개념
 
@@ -123,9 +130,77 @@ variants:
 | 문서 자동 생성 | Storybook/Docs 자동 생성 | 문서 작업 90% 단축 |
 | Round-trip | 데이터에서 Figma Asset 생성 | 디자인-코드 동기화 자동화 |
 
----
+## CSS Cascade Variant Implementation
 
-*출처: Nathan Curtis, Medium 2025-10*
+```css title="alert-variants.css"
+/* Default styles (base layer) */
+.alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-s);
+  padding: var(--space-m);
+  border-radius: var(--radius-md);
+  border-left: 4px solid var(--color-info);
+  background: var(--color-info-subtle);
+  color: var(--color-text-primary);
+}
+
+/* Appearance variants (cascade layer 1) */
+.alert[data-appearance="success"] {
+  border-left-color: var(--color-success);
+  background: var(--color-success-subtle);
+}
+.alert[data-appearance="warning"] {
+  border-left-color: var(--color-warning);
+  background: var(--color-warning-subtle);
+}
+.alert[data-appearance="critical"] {
+  border-left-color: var(--color-error);
+  background: var(--color-error-subtle);
+}
+
+/* Size variants (cascade layer 2 - overrides padding/font) */
+.alert[data-size="small"] {
+  padding: var(--space-xs) var(--space-s);
+  font-size: var(--text-sm);
+}
+.alert[data-size="large"] {
+  padding: var(--space-l);
+  font-size: var(--text-lg);
+}
+
+/* Compound variants (specific combination overrides) */
+.alert[data-appearance="critical"][data-size="large"] {
+  border-left-width: 6px;
+}
+```
+
+```typescript title="generate-stories.ts"
+// Generate Storybook stories from variant YAML data
+import { parse } from 'yaml';
+
+interface VariantSpec {
+  props: Record<string, { enum?: string[]; type: string; default?: unknown }>;
+}
+
+function generateStories(spec: VariantSpec): string {
+  const stories: string[] = [];
+
+  for (const [propName, propDef] of Object.entries(spec.props)) {
+    if (!propDef.enum) continue;
+
+    for (const value of propDef.enum) {
+      const storyName = `${propName}_${value}`.replace(/[^a-zA-Z0-9]/g, '_');
+      stories.push(`
+export const ${storyName}: Story = {
+  args: { ${propName}: '${value}' },
+};`);
+    }
+  }
+
+  return stories.join('\n');
+}
+```
 
 ---
 

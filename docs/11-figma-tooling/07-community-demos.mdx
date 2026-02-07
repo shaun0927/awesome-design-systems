@@ -1,388 +1,136 @@
 ---
-title: "디자인 시스템 커뮤니티 데모 정리 - Tokens, Tooling & Accessibility (2025)"
+title: "디자인 시스템 커뮤니티 데모 - Tokens, Tooling & Accessibility"
 sidebar_label: "Community Demos"
 sidebar_position: 7
+audience: both
 tags: ["tokens", "tooling", "accessibility", "WCAG", "community"]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#527
 
-## 디자인 시스템 커뮤니티 데모 정리 - Tokens, Tooling & Accessibility
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-> **출처**: Into Design Systems 2025 Conference - Community Demos Session
-> **발표자**: Marta K (Tokens Glossary), Maxim & Thomas (Quantum), Johannes (WCAG Card Deck)
-> **핵심 주제**: 디자인 토큰 명명 규칙, AI 기반 자동화 툴, 접근성 실무 도구
-
----
+<DevQuickStart
+  what="Three community demos covering token naming strategies (Tokens Glossary), AI-powered handoff automation (Quantum Plugin), and physical WCAG Card Decks for accessibility audits"
+  learn="How to resolve token naming conflicts with a synonym database, automate Figma-to-GitHub issue creation with GPT-4, and run structured WCAG audits with card-based triage"
+  able="Build a semantic token glossary, set up AI-driven change detection for design-dev handoff, and conduct a prioritized accessibility audit using the WCAG Card Deck method"
+/>
 
 ## 핵심 인사이트
 
-### 1. 디자인 토큰 명명은 기술 부채가 아닌 전략적 투자
-- **현실**: 팀이 1명 디자이너 + 1명 엔지니어일 때 토큰 명명에 투자할 시간을 확보하는 것이 첫 번째 과제
-- **해결책**: 빠른 MVP(리브랜딩)로 가치를 먼저 입증 → 시간 확보 → 체계적 명명 구조 구축
-- **교훈**: "토큰 명명이 중요하다"는 주장보다 "3주 만에 새 룩앤필 완성"이라는 결과가 더 강력한 설득 도구
-
-### 2. AI는 토큰 명명의 보조 도구, 단독 해결책이 아님
-- ChatGPT로 토큰 제안을 받을 수 있지만, 디자이너들의 실제 질문을 학습시킨 커스텀 챗봇이 더 유용
-- 성공 포인트: **실제 제약사항을 프롬프트에 포함**
-
-### 3. 디자인-개발 핸드오프 자동화는 "누가 책임지나"를 명확히 해야 작동
-- Quantum 플러그인: Figma 변경사항 → AI가 GitHub/Linear 이슈 생성 → 개발자 체크리스트 자동 생성
-- 핵심 가치: **"디자이너는 귀찮아서 이슈 안 쓴다"는 현실을 인정하고 자동화**
-
-### 4. 접근성은 장애인만의 문제가 아니다
-- Johannes의 실험: "I0lOl" 읽기 실험
-- 비유: 흐릿한 시야는 당뇨, 숙취, 편두통 모두에서 발생 → **원인이 아닌 장애 자체에 집중**
+1. **토큰 명명은 전략적 투자** -- 빠른 MVP로 가치 입증 후 시간 확보
+2. **AI는 토큰 명명의 보조 도구** -- 실제 제약사항을 학습시킨 커스텀 챗봇이 유용
+3. **핸드오프 자동화는 책임 명확화** -- "디자이너는 이슈 안 쓴다"는 현실 인정
+4. **접근성은 모두의 문제** -- 숙취, 편두통, 당뇨 모두 흐릿한 시야 유발
 
 ---
 
-## 데모 1: Marta K - Tokens Glossary
-
-### 배경
-- **소속**: Sosafe (6개월 전 입사)
-- **팀**: 디자이너 1명 + 엔지니어 1명
-- **과제**: 100개 컴포넌트가 "bluish"하다는 피드백
-- **제약**: 30일 안에 임팩트
+## Demo 1: Tokens Glossary (Marta K)
 
 ### 4단계 프로세스
 
-**Step 1: 생태계 이해**
-- 도구: Dammo의 "90 Days Canvas" (19블록)
-- Mantine 라이브러리 제약사항 파악
-- 이해관계자 30분 인터뷰
+```mermaid
+graph LR
+    A["생태계 이해<br/>90 Days Canvas"] --> B["MVP 리브랜딩<br/>15개 컴포넌트"]
+    B --> C["구조 분석<br/>Border/BG/Icon/Text"]
+    C --> D["제약사항 문서화"]
 
-**Step 2: MVP 리브랜딩**
-- 15개 컴포넌트만 선별
-- Primary 토큰 값만 변경
-- 3주 만에 새 룩앤필 → 시간 확보 성공
-
-**Step 3: 컴포넌트 구조 분석**
-- Border, Background, Icon, Text 레이어 분해
-
-**Step 4: 제약사항 문서화**
-- Visual Requirements
-- System Structure
-- Development Constraints
-- Design Constraints
-
-### Tokens Glossary 도구
-
-**구조**:
-- 토큰 타입별 분류
-- **동의어 DB**: Warning = Alert = Caution = Attention
-- 다양한 디자인 시스템 명명 규칙 수집
-
-### Custom GPT 제작
-
-**실제 질문 예시**:
-
-Q1: "Typography에서 Body-medium(size)-medium(weight) 충돌 해결?"
-- Size를 숫자로: Body-200-medium
-- Size를 스케일로: Body-md-medium
-
-Q2: "Neutral 배경색 2개 (흰색/회색) 구분?"
-- neutral-default (흰색)
-- neutral-low / neutral-high
-- neutral-subtle (회색)
-
-Q3: "이미지에서 색상 토큰 추출"
-- AI가 자동으로 토큰 명명 제안
-
----
-
-## 데모 2: Maxim & Thomas - Quantum Plugin
-
-### Quantum Design System (무료)
-- 50개+ 컴포넌트
-- 600개+ Variables
-- 2레벨 토큰: Primitive → Semantic
-
-### Quantum Plugin (AI 자동 이슈 생성)
-
-**핵심 가치**:
-> "디자이너는 게을러서 이슈 안 쓴다. 그래서 자동화했다."
-
-**워크플로우**:
-
-1. 디자이너: Figma에서 컴포넌트 수정 → 저장만
-2. 개발자: 플러그인 실행 → AI 분석 (GPT-4 Turbo)
-3. 자동 생성된 이슈 (GitHub/Linear):
-   - 변경 요약
-   - Before/After Diff
-   - 개발자 체크리스트
-   - Figma 직접 링크
-
-**기술 스택**:
-- Figma API: 마지막 2개 버전 비교
-- OpenAI GPT-4 Turbo
-- GitHub API, Linear API
-
-**베타 계획**:
-- Jira, ClickUp, Slack, Discord, Teams 연동 예정
-- 완전 무료 (베타)
-
----
-
-## 데모 3: Johannes - WCAG Card Deck
-
-### 발표자 배경
-- UX Engineer, Accessibility Advocate
-- 간질 3가지 유형 보유
-- 디자인 시스템 이름: Tobi (강아지) + Daisy (동료 고양이)
-
-### 접근성 게임
-```
-화면: "I0lOl"
-질문: "이게 뭐라고 읽히나요?"
-정답: 대문자 I + 숫자 0 + 소문자 l + 대문자 O + 소문자 l
-→ 비밀번호/바우처 코드라면?
+    style B fill:#d1fae5,stroke:#059669
 ```
 
-### WCAG Card Deck 구조
+### 토큰 충돌 해결 패턴
 
-**카드 구성**:
-- WCAG 번호 + 제목
-- Level: A / AA / AAA
-- 핵심 요약 (Martin Underhill 간소화 버전)
-- Short Link: wcag.kim/X.X.X
-- QR Code
-- 관련 기준 연결
-- Disability Indicators
-- Responsibility: Design / Code / Content
+```typescript title="tokens/naming-conflicts.ts"
+// 충돌: Body-medium(size)-medium(weight)
+const TYPOGRAPHY_SOLUTIONS = {
+  numericSize: 'body-200-medium',     // Size를 숫자로
+  scaledSize: 'body-md-medium',       // Size를 스케일로
+} as const;
 
-### 실무 활용 (6단계)
+// 충돌: Neutral 배경색 2개 (흰색/회색)
+const BACKGROUND_SOLUTIONS = {
+  defaultSubtle: {
+    white: 'neutral-default',
+    gray: 'neutral-subtle',
+  },
+  lowHigh: {
+    white: 'neutral-low',
+    gray: 'neutral-high',
+  },
+} as const;
 
-1. **필터링**: 목표 레벨 카드만 선별
-2. **관련성 식별**: IBM Decision Trees
-3. **테마별 그룹화**: Andrew Hick's Subway Map
-4. **수동 테스트**
-5. **우선순위**: Blocking → High → Medium → Low
-6. **책임 할당**: 카드를 해당 팀에 물리적 전달
-
-### 리소스
-- Braille 버전 (Kimberly 제작)
-- 15개 이상 언어 번역
-- Figma Deck (2025년 여름)
-- Miro Template (여름)
-- 원가 판매 (수익 목적 아님)
+// 동의어 DB: 하나의 개념에 여러 이름
+const SYNONYM_DB: Record<string, string[]> = {
+  warning: ['alert', 'caution', 'attention'],
+  danger: ['error', 'critical', 'destructive'],
+  info: ['notice', 'informational', 'help'],
+};
+```
 
 ---
 
-## 도구 비교
+## Demo 2: Quantum Plugin (AI 이슈 자동 생성)
 
-### 토큰 명명
-| 도구 | 용도 | 시점 |
-|------|------|------|
-| 90 Days Canvas | 생태계 파악 | 초기 |
-| Tokens Glossary | 수동 명명 참조 | 명명 중 |
-| Tokens Glossary GPT | AI 제안 | 충돌 해결 |
-| 일반 ChatGPT | 브레인스토밍 | 초기 |
+### 워크플로우
 
-### 핸드오프 자동화
+1. 디자이너: Figma에서 컴포넌트 수정 후 저장
+2. 개발자: 플러그인 실행 -- GPT-4 Turbo가 변경사항 분석
+3. 자동 생성: GitHub/Linear 이슈 (요약 + Before/After Diff + 체크리스트 + Figma 링크)
+
+### 도구 비교
+
 | 도구 | 자동화 범위 | 비용 |
-|------|-------------|------|
-| Quantum Plugin | 변경 감지 → AI 이슈 | 무료 (베타) |
+|------|------------|------|
+| Quantum Plugin | 변경 감지 + AI 이슈 생성 | 무료 (베타) |
 | Figma Dev Mode | 수동 Inspect | $12/월 |
 | Zeplin | 문서화만 | $8+/월 |
 
-### 접근성 감사
-| 도구 | 형태 | 협업 |
+---
+
+## Demo 3: WCAG Card Deck (Johannes)
+
+### 카드 구성
+- WCAG 번호 + Level (A/AA/AAA)
+- 핵심 요약 + QR Code (wcag.kim/X.X.X)
+- Disability Indicators
+- Responsibility: Design / Code / Content
+
+### 6단계 감사 프로세스
+
+```typescript title="a11y/wcag-audit.ts"
+interface WCAGCard {
+  id: string;            // e.g., "1.4.3"
+  title: string;
+  level: 'A' | 'AA' | 'AAA';
+  responsibility: ('design' | 'code' | 'content')[];
+  priority: 'blocking' | 'high' | 'medium' | 'low';
+}
+
+const AUDIT_STEPS = [
+  '1. 필터링: 목표 레벨 카드만 선별',
+  '2. 관련성 식별: IBM Decision Trees',
+  '3. 테마별 그룹화: Keyboard, Forms, Color & Contrast',
+  '4. 수동 테스트',
+  '5. 우선순위: Blocking → High → Medium → Low',
+  '6. 책임 할당: 카드를 해당 팀에 전달',
+] as const;
+```
+
+---
+
+## 실전 타임라인 (3개월)
+
+| 기간 | 항목 | 도구 |
 |------|------|------|
-| WCAG Card Deck | 물리 카드 / Figma | 카드 전달 |
-| axe DevTools | 브라우저 확장 | GitHub |
-| WAVE | 웹 도구 | 보고서 |
-| Lighthouse | Chrome 내장 | JSON |
+| Month 1 Week 1-2 | MVP 리브랜딩 + 생태계 파악 | 90 Days Canvas |
+| Month 1 Week 3-4 | 체계적 토큰 명명 | Tokens Glossary + GPT |
+| Month 2 Week 1-2 | 핸드오프 자동화 설정 | Quantum Plugin (베타) |
+| Month 2 Week 3-4 | 임시 자동화 보완 | Zapier (Figma → GitHub) |
+| Month 3 Week 1 | WCAG 감사 | Card Deck |
+| Month 3 Week 2-4 | Blocking/High 수정 + 재테스트 | axe DevTools |
 
 ---
-
-## 실전 워크플로우
-
-### 소규모 팀 토큰 시스템 (4주)
-
-**Week 1-2: 생태계 + MVP**
-- 90 Days Canvas (축약)
-- 15개 컴포넌트 리브랜딩
-- Primary 토큰만 변경
-- 이해관계자 데모
-
-**Week 3-4: 체계적 명명**
-- 컴포넌트 구조 분해
-- 제약사항 문서화
-- Tokens Glossary 활용
-- GPT로 충돌 해결
-
-### Quantum Plugin 도입
-
-**초기 설정**:
-1. Quantum UI Kit 복제
-2. Variables 구조 맞추기
-3. 베타 신청
-4. GitHub/Linear 연동
-
-**일상 워크플로우**:
-- 디자이너: 변경 → 저장
-- 개발자: 아침에 플러그인 실행 → 이슈 확인
-
-### 접근성 감사 (WCAG Card Deck)
-
-**Phase 1: 준비 (1시간)**
-- 목표 레벨 확인
-- 카드 필터링
-
-**Phase 2: 관련성 식별 (2시간)**
-- IBM Decision Trees
-
-**Phase 3: 테마별 테스트 (4-8시간)**
-- Keyboard, Forms, Color & Contrast
-
-**Phase 4: 우선순위 + 할당 (1시간)**
-- 심각도 매트릭스
-- Responsibility Indicator
-
-**Phase 5: 재테스트 (2시간)**
-
----
-
-## AlphaView 적용 포인트
-
-### 1. 토큰 시스템 (TailwindCSS)
-
-**빠른 MVP**:
-```typescript
-// tailwind.config.js - Primary만 변경
-theme: {
-  extend: {
-    colors: {
-      primary: {
-        500: '#0ea5e9',  // 더 modern
-      }
-    }
-  }
-}
-```
-
-**체계적 설계**:
-```typescript
-// tokens/semantic.ts
-export const semanticTokens = {
-  bg: { default, subtle, emphasis },
-  text: { default, subtle, accent },
-  border: { default, emphasis },
-}
-```
-
-**금융 특화 토큰**:
-- status-bullish-default (상승)
-- status-bearish-default (하락)
-- status-neutral-default (중립)
-
-### 2. 핸드오프 자동화
-
-**현재**: Slack 모호한 메시지 → 수동 Inspect
-
-**Quantum 적용 시**: 
-- 변경 자동 감지
-- GitHub Issue 자동 생성
-- 체크리스트 포함
-
-**단기 대안**: Zapier (Figma Comment → GitHub Issue)
-
-### 3. 접근성 개선 (WCAG AA)
-
-**예상 이슈**:
-- 색상 대비 (AlphaFilterBar)
-- Focus indicator (Modal)
-- Form label
-
-**개선 예시**:
-```tsx
-// Before
-<button className="bg-gray-200 text-gray-700">All</button>
-
-// After
-<button
-  className="bg-button-secondary-bg-default focus:ring-2"
-  aria-pressed={isActive}
-  aria-label="Filter by all categories"
->
-  All
-</button>
-```
-
-### 4. 타임라인 (3개월)
-
-**Month 1: 토큰 기초**
-- Week 1: 생태계 + MVP
-- Week 2-3: 체계적 토큰
-- Week 4: 컴포넌트 적용
-
-**Month 2: 핸드오프**
-- Week 1: Quantum 베타 신청
-- Week 2: 임시 자동화
-- Week 3-4: Quantum 도입
-
-**Month 3: 접근성**
-- Week 1: WCAG 감사
-- Week 2-3: Blocking/High 수정
-- Week 4: 재테스트
-
----
-
-## 참고 자료
-
-### Marta K
-- Tokens Glossary: [출시 예정]
-- Tokens Glossary GPT: [컨퍼런스 후 공개]
-- 90 Days Canvas: designsystemsforfigma.com
-- LinkedIn: Marta K (Spain)
-
-### Maxim & Thomas
-- Quantum UI Kit: [Figma Community]
-- Quantum Plugin: 베타 신청 (LinkedIn)
-- 지원: GitHub, Linear, Jira, ClickUp, Slack, Discord, Teams
-
-### Johannes
-- WCAG Card Deck: [Figma - 2025년 여름]
-- Miro Template: [여름]
-- GitHub: [업데이트 예정]
-- Braille: Kimberly
-- 번역: 15개 언어
-- LinkedIn: Johannes (Austria)
-
----
-
-## 핵심 요약
-
-### 3가지 교훈
-
-1. **토큰 명명은 정치적 문제**
-   - 빠른 가치 입증 → 시간 확보 → 체계적 명명
-
-2. **자동화는 현실 인정**
-   - "디자이너는 이슈 안 쓴다" → 자동화
-   - "개발자는 Figma 안 본다" → 체크리스트 전달
-
-3. **접근성은 모두의 문제**
-   - I0lOl 실험
-   - 숙취, 편두통, 당뇨 → 모두 흐릿한 시야
-
-### 실무 우선순위
-
-| 우선순위 | 항목 | 시간 | ROI |
-|----------|------|------|-----|
-| 1순위 | MVP 리브랜딩 | 1주 | 즉시 가시적 |
-| 2순위 | Tokens Glossary | 2-3주 | 체계적 명명 |
-| 3순위 | WCAG 빠른 감사 | 1주 | 법적 리스크 |
-| 4순위 | Quantum Plugin | 베타+1주 | 핸드오프 50% 절감 |
-| 5순위 | GPT 커스터마이징 | 2-3주 | 반복 질문 자동화 |
-
----
-
-**작성일**: 2025-02-05
-**작성자**: Claude (Sonnet 4.5)
-**출처**: Into Design Systems 2025
-**라이선스**: 각 프로젝트별 라이선스 참조
-
+> 출처: Into Design Systems 2025 Conference - Community Demos Session
 
 ---
 

@@ -2,20 +2,21 @@
 title: "디자인 토큰 네이밍 & 자동화 노하우"
 sidebar_label: "네이밍 자동화"
 sidebar_position: 4
-tags: [tokens, naming, automation]
+audience: developer
+tags: [tokens, naming, automation, style-dictionary]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#531
 
-## 디자인 토큰 네이밍 & 자동화 노하우 정리
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-> **출처**: Into Design Systems Conference - "How to name and automate Design Tokens"
-> **발표자**: Samantha Gordashko (Token Studio), Romina Kavcic (Design System Guide)
-> **관점**: 디자인 시스템 효율성 및 실무 적용 노하우
+<DevQuickStart
+  what="Token naming conventions and automation pipelines reduce manual work and prevent naming inconsistencies across platforms"
+  learn="3-tier naming templates (Primitive/Semantic/Component), W3C DTCG spec basics, and Style Dictionary transform automation"
+  able="Set up an automated pipeline from token JSON to platform-specific outputs with consistent naming"
+/>
 
----
-
-## 📌 핵심 원칙
+## 핵심 원칙
 
 ### 1. 디자인 토큰의 본질
 - **디자인 토큰 = 디자인 결정의 표현**
@@ -110,84 +111,31 @@ tags: [tokens, naming, automation]
 
 ## 🔧 실무 워크플로우
 
-### Romina의 Airtable 기반 접근법
+### 토큰 관리 도구 선택
 
-#### 1. Airtable 데이터베이스 구조
-**테이블 1: Tokens**
-- 자동 생성된 token name (formula)
-- value (foundations 테이블 참조)
-- category, subcategory, component, role, state, surface
-- status (active/deprecated), themeable 여부
-- 설명
+팀 규모와 기술 수준에 따라 적절한 관리 도구를 선택합니다.
 
-**테이블 2: Components**
-- 컴포넌트 목록
-- 적용된 토큰 자동 연결 (lookup)
-- Figma 링크, 문서 링크
-- 구현 상태 (design/web/mobile/iOS/Android)
-- 담당자 할당
+| 도구 | 장점 | 적합한 팀 |
+|------|------|----------|
+| **JSON/YAML + Git** | 버전 관리, CI/CD 통합, 코드 리뷰 | 개발자 중심 팀 |
+| **Spreadsheet/DB** | 비기술자 친화적, 시각적 관리 | 디자이너-개발자 혼합 팀 |
+| **Token Studio** | Figma 네이티브, 실시간 동기화 | Figma 중심 워크플로우 |
 
-**테이블 3: Foundations**
-- 원시 값 (색상, 간격 등)
-- hex/RGB 값 자동 표시
-- 연결된 토큰 역참조 (어느 토큰이 이 값을 사용하는가?)
+### 자동화 파이프라인 구축
 
-#### 2. Airtable 자동화 (3가지)
-| 트리거 | 액션 | 효과 |
-|--------|------|------|
-| 값 변경 감지 | GitHub Issue 생성 | [토큰명] updated by [사용자] |
-| 레코드 업데이트 | 이메일 발송 | 팀원에게 변경 알림 |
-| 레코드 업데이트 | Slack/Teams 메시지 | 실시간 알림 채널 |
+토큰 변경을 감지하고 자동으로 코드와 문서를 업데이트하는 파이프라인입니다.
 
-#### 3. 양방향 동기화
-- **디자이너 → 개발자**: Airtable 변경 → GitHub Issue 자동 생성
-- **개발자 → 디자이너**: Zapier로 GitHub commit → Airtable에 링크 자동 추가
+```mermaid
+graph LR
+    A["Token Source<br/>(JSON/Figma)"] --> B["Git PR<br/>(변경 추적)"]
+    B --> C["Style Dictionary<br/>(변환)"]
+    C --> D["CSS / iOS / Android<br/>(플랫폼 출력)"]
+    D --> E["npm publish<br/>(배포)"]
 
-#### 4. Airtable 장점
-- **비기술자 친화적**: 코딩 없이 시각적 관리
-- **Interface 기능**: 스테이크홀더용 읽기 전용 뷰 제공
-- **Extensions**: 색상 팔레트 시각화, 검색/필터 강력
-- **단일 데이터베이스**: 모든 토큰 검색 가능 (JSON 파일 스크롤 불필요)
-
-### Samantha의 FigJam 기반 접근법
-
-#### 1. FigJam 템플릿 구조
-**Part 1: 디자인 결정 맵핑**
-- 컴포넌트 중심 사고 (container + label + asset)
-- 정보 흐름 시각화 (primitive → semantic → component)
-- 삼각형 모양 분석: 넓을수록 component token 필요성 ↑
-
-**Part 2: 협업 노트**
-- 팀과 합의할 질문 목록 (용어, 상태명, 스케일 규칙)
-- 의사결정 기록 공간
-
-**Part 3: 네이밍 템플릿 (은행/뱅크 방식)**
-- 각 계층별 sticky note 템플릿
-- 좌우에 선택 가능한 옵션 은행
-- 드래그 앤 드롭으로 이름 조합 실험
-
-#### 2. FigJam 워크플로우
-1. 컴포넌트 선택 (예: 버튼)
-2. 정보 흐름 그리기 (화살표로 연결)
-   - 컴포넌트 ← theme colors ← brand colors ← primitives
-3. 복잡도 판단
-   - 수직 컬럼형 → semantic만으로 충족
-   - 넓은 삼각형 → component token 필요
-4. 템플릿에서 sticky note 가져와 조합
-5. 최종 이름 복사 → GPT 도구로 정리
-
-#### 3. GPT 자동화 도구
-**기능**:
-- FigJam sticky note → 토큰 이름 자동 정리
-- W3C DTCG spec 기반 오류 검증 (예약어 제거: $, {} 등)
-- 대소문자 규칙 적용
-- 테이블 형식 출력 (Airtable/스프레드시트 붙여넣기 가능)
-- 템플릿 커스터마이징 대화형 지원
-
-**사용 사례**:
-입력: `button.$primary.{bg-color}`
-출력: `button.primary.bg.color`
-오류 설명: $ 기호는 코드에서 특수 용도로 예약됨
+    style A fill:#f3e8ff,stroke:#7c3aed
+    style C fill:#dbeafe,stroke:#2563eb
+    style E fill:#d1fae5,stroke:#059669
+```
 
 ---
 
@@ -214,14 +162,52 @@ tags: [tokens, naming, automation]
 **Border composite 예시**:
 - color + width + style 결합
 
-### 3. 도구 통합 자동화
-**워크플로우**:
-Token Studio → JSON → GitHub → Style Dictionary → CSS/iOS/Android → 개발자 코드
+### 3. Style Dictionary 자동 변환
 
-**실시간 동기화**:
-- Push & Pull API: Token Studio, Tokens Studio Sync
-- Git 기반: PR로 변경 추적, 버전 관리
-- Figma Variables: Native 변수 시스템
+Style Dictionary를 사용하면 JSON 토큰을 플랫폼별 출력으로 자동 변환할 수 있습니다.
+
+```javascript title="style-dictionary.config.js"
+module.exports = {
+  source: ['tokens/**/*.json'],
+  platforms: {
+    css: {
+      transformGroup: 'css',
+      buildPath: 'dist/css/',
+      files: [{
+        destination: 'tokens.css',
+        format: 'css/variables',
+        options: { outputReferences: true },
+      }],
+    },
+    ios: {
+      transformGroup: 'ios-swift',
+      buildPath: 'dist/ios/',
+      files: [{
+        destination: 'Tokens.swift',
+        format: 'ios-swift/class.swift',
+        className: 'DesignTokens',
+      }],
+    },
+    android: {
+      transformGroup: 'android',
+      buildPath: 'dist/android/',
+      files: [{
+        destination: 'tokens.xml',
+        format: 'android/resources',
+      }],
+    },
+  },
+};
+```
+
+```bash
+# 빌드 실행
+npx style-dictionary build
+
+# CI/CD에서 자동화
+# package.json에 추가:
+# "scripts": { "build:tokens": "style-dictionary build" }
+```
 
 ---
 
@@ -286,12 +272,8 @@ Token Studio → JSON → GitHub → Style Dictionary → CSS/iOS/Android → �
 
 ---
 
-**마지막 조언** (발표자들의 말):
-"디자인 토큰은 무섭게 보일 수 있지만, 커뮤니티에 물어보세요. LinkedIn에 연락하면 모두가 도와줄 겁니다. 그리고 너무 쉽게 만들어서 디자이너가 복잡한 구조를 인식하지 못하게 하세요. 모든 게 마법처럼 작동해야 합니다."
-
 ---
-
-_정리 완료: 2026-02-05_
+*출처: EightShapes, Tokens Studio*
 
 ---
 

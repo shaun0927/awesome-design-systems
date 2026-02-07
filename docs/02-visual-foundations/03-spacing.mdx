@@ -2,14 +2,21 @@
 title: "Space in Design Systems: 6가지 핵심 개념"
 sidebar_label: "스페이싱 시스템"
 sidebar_position: 3
-tags: [spacing, layout, components]
+audience: developer
+tags: [spacing, layout, components, gap, css]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#569
 
-## Space in Design Systems: 6가지 핵심 개념 (Nathan Curtis, 2016)
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-### 📌 핵심 개념
+<DevQuickStart
+  what="Space tokens (inset, stack, inline) replace arbitrary pixel values with a consistent, reusable spacing vocabulary"
+  learn="6 spacing concepts (Inset, Squish, Stretch, Stack, Inline, Grid) and how to implement them with CSS custom properties and gap"
+  able="Build a complete spacing token system using CSS custom properties with modern gap-based layouts"
+/>
+
+## 핵심 개념
 
 #### Space의 중요성
 - **CSS 속성 사용 빈도**: Space 관련 속성이 Color 다음으로 가장 많이 사용됨
@@ -115,46 +122,55 @@ XXS, XS, S, M (기준점), L, XL, XXL
 
 ## 💡 실무 구현 예시
 
-### Phase 1: Foundation
-```scss
-$space-base: 16px;
+### Phase 1: Foundation (CSS Custom Properties)
 
-$space-xxs: 2px;
-$space-xs:  4px;
-$space-s:   8px;
-$space-m:   16px;
-$space-l:   32px;
-$space-xl:  64px;
+```css
+:root {
+  --space-base: 1rem;    /* 16px */
+
+  --space-xxs: 0.125rem; /* 2px */
+  --space-xs:  0.25rem;  /* 4px */
+  --space-s:   0.5rem;   /* 8px */
+  --space-m:   1rem;     /* 16px */
+  --space-l:   2rem;     /* 32px */
+  --space-xl:  4rem;     /* 64px */
+}
 ```
 
 ### Phase 2: Concepts
-```scss
-// Inset (정사각형)
-$space-inset-m:   $space-m;
 
-// Inset Squish (세로 50%)
-$space-inset-squish-m:  $space-s $space-m;  // 8px 16px
+```css
+/* Inset (정사각형 padding) */
+.inset-m { padding: var(--space-m); }
 
-// Stack (수직 간격)
-$space-stack-m:   0 0 $space-m 0;
+/* Squish Inset (세로 50% 감소) */
+.inset-squish-m { padding: var(--space-s) var(--space-m); }
 
-// Inline (수평 간격)
-$space-inline-m:  0 $space-m 0 0;
+/* Stack (수직 간격 - modern: use gap) */
+.stack-m { display: flex; flex-direction: column; gap: var(--space-m); }
+
+/* Inline (수평 간격 - modern: use gap) */
+.inline-s { display: flex; flex-wrap: wrap; gap: var(--space-s); }
 ```
 
-### Phase 3: Application
-```scss
+### Phase 3: Application (Modern CSS with gap)
+
+```css
 .card {
-  padding: $space-inset-m;  // 16px 전방향
-  margin: $space-stack-m;   // 아래 16px
+  padding: var(--space-m);  /* Inset M: 16px 전방향 */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-m);      /* Stack M: 자식 요소 간 16px */
+}
 
-  &__title {
-    margin: $space-stack-m;
-  }
+.card__button {
+  padding: var(--space-s) var(--space-m); /* Squish M: 8px 16px */
+}
 
-  &__button {
-    padding: $space-inset-squish-m;  // 8px 16px
-  }
+.card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-s);      /* Inline S: 태그 간 8px */
 }
 ```
 
@@ -182,13 +198,15 @@ Card Component 구조:
 .card { padding: 22px; margin-bottom: 18px; }
 .title { margin-bottom: 14px; }
 ```
-**문제**: 재사용 불가, 소통 비용 ↑, QA 논쟁
+**문제**: 재사용 불가, 소통 비용 높음, QA 논쟁
 
 ### After (시스템 적용)
-```scss
+```css
 .card {
-  padding: $space-inset-m;      // 16px
-  margin-bottom: $space-stack-m; // 16px
+  padding: var(--space-m);           /* 16px */
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-m);               /* 16px between children */
 }
 ```
 **효과**:
@@ -196,19 +214,25 @@ Card Component 구조:
 - 디자이너도 이해 가능 → 소통 비용 ↓
 - QA 간소화 → "시스템 규칙대로만 확인"
 
-## 🚀 고급 활용: Density Control
+## 고급 활용: Density Control
 
-```scss
-// Base System
-$space-m: 16px;
+```css
+/* Density via CSS custom properties override */
+:root {
+  --space-density-factor: 1;
+}
 
-// Compact Theme
-$space-m-compact: 12px;  // 25% 감소
+[data-density="compact"] {
+  --space-density-factor: 0.75;  /* 25% 감소 */
+}
 
-.theme-compact {
-  .card {
-    padding: $space-inset-m-compact;
-  }
+[data-density="comfortable"] {
+  --space-density-factor: 1.25;  /* 25% 증가 */
+}
+
+.card {
+  padding: calc(var(--space-m) * var(--space-density-factor));
+  gap: calc(var(--space-s) * var(--space-density-factor));
 }
 ```
 

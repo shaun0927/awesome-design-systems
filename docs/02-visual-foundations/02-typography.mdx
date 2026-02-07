@@ -2,14 +2,21 @@
 title: "디자인 시스템의 타이포그래피"
 sidebar_label: "타이포그래피"
 sidebar_position: 2
-tags: [typography, hierarchy, responsive]
+audience: developer
+tags: [typography, hierarchy, responsive, clamp]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#562
 
-## 디자인 시스템의 타이포그래피 (Nathan Curtis, EightShapes)
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-### 📌 핵심 개념
+<DevQuickStart
+  what="Typography tokens (font family, size scale, line height, color) form the foundation of readable, consistent UIs"
+  learn="How to build a type scale with CSS custom properties, fluid typography with clamp(), and heading level vs HTML tag separation"
+  able="Implement a complete typography token system with responsive scaling and component-level resets"
+/>
+
+## 핵심 개념
 
 #### 타이포그래피의 중요성
 - 디지털 인터페이스는 **이미지보다 텍스트로 구성**됨
@@ -17,11 +24,15 @@ tags: [typography, hierarchy, responsive]
 - 단순한 폰트 선택을 넘어 **계층 구조, 색상, 반응형**까지 포함
 
 #### 타이포그래피 시스템 구성
-```
-폰트 선택 → 계층 구조 설정 → 컴포넌트 통합
-   ↓              ↓                ↓
-Family/Weight   Size/Color      Header/Article
-Fallbacks       Line-height     Tools for Teams
+
+```mermaid
+graph LR
+    A["Font Selection<br/>Family / Weight / Fallbacks"] --> B["Hierarchy<br/>Size / Color / Line-height"]
+    B --> C["Components<br/>Header / Article / Card"]
+
+    style A fill:#f3e8ff,stroke:#7c3aed
+    style B fill:#dbeafe,stroke:#2563eb
+    style C fill:#d1fae5,stroke:#059669
 ```
 
 ## 🎯 핵심 실무 노하우
@@ -95,27 +106,53 @@ xs → small → medium → large → xl
 - **Cropping 적용**: 정밀한 spacing 필요
 - **No Cropping**: 빠른 개발, 유연성 우선
 
-### 5. 반응형 타이포그래피
+### 5. Fluid Typography with clamp()
 
-```scss
-// 반응형 크기 조정
+```css
+:root {
+  /* Fluid type scale using clamp() */
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.6vw, 1.25rem);
+  --text-xl: clamp(1.25rem, 1rem + 1.25vw, 1.75rem);
+  --text-2xl: clamp(1.5rem, 1rem + 2.5vw, 2.5rem);
+  --text-3xl: clamp(1.875rem, 1rem + 4vw, 3.5rem);
+}
+
+/* Usage */
 .heading-level-1 {
-  font-size: 34px;  // 모바일
+  font-size: var(--text-3xl);
+  line-height: 1.2;
+}
 
-  @media (min-width: 768px) {
-    font-size: 48px;  // 데스크탑
-  }
+.body-text {
+  font-size: var(--text-base);
+  line-height: 1.6;
 }
 ```
 
-**권장**: Optional + Default OFF
+:::info text-box-trim (Emerging)
+`text-box-trim` and `text-box-edge` are emerging CSS properties that will replace line-height cropping hacks. Currently available in Chrome 133+.
+```css
+.heading {
+  text-box-trim: both;
+  text-box-edge: cap alphabetic;
+}
+```
+:::
 
 ### 6. Component-level Reset
 
-```scss
+```css
 .system-button {
-  @include component-font-reset();
-  // font-family, font-size, line-height 등 초기화
+  font-family: var(--font-family-sans);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  font-weight: 500;
+  /* Reset inherited styles */
+  letter-spacing: normal;
+  text-transform: none;
 }
 ```
 
@@ -124,29 +161,46 @@ xs → small → medium → large → xl
 - 다른 시스템과 충돌 가능
 - 제어 가능한 경계에서만 관리
 
-## 📊 3계층 모델
+## 완전한 Typography Token 시스템
 
-```
-┌─────────────────────────────────────┐
-│ Layer 1: Foundation (기초)          │
-│  - Font Family & Weights            │
-│  - Fallback Cascades                │
-└─────────────────────────────────────┘
-          ↓
-┌─────────────────────────────────────┐
-│ Layer 2: Hierarchy (계층)           │
-│  - Body Text (S/M/L + Lead)         │
-│  - Heading Levels (1-6)             │
-│  - Text Colors                      │
-│  - Line-height & Properties         │
-└─────────────────────────────────────┘
-          ↓
-┌─────────────────────────────────────┐
-│ Layer 3: Components (적용)          │
-│  - Header Component                 │
-│  - Article Component                │
-│  - Card, Modal, Alert...            │
-└─────────────────────────────────────┘
+```css title="typography-tokens.css"
+:root {
+  /* Layer 1: Foundation */
+  --font-family-sans: "Inter", -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+  --font-family-mono: "JetBrains Mono", "Fira Code", monospace;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-bold: 700;
+
+  /* Layer 2: Type Scale (fluid) */
+  --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+  --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+  --text-base: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
+  --text-lg: clamp(1.125rem, 1rem + 0.6vw, 1.25rem);
+  --text-xl: clamp(1.25rem, 1rem + 1.25vw, 1.75rem);
+  --text-2xl: clamp(1.5rem, 1rem + 2.5vw, 2.5rem);
+  --text-3xl: clamp(1.875rem, 1rem + 4vw, 3.5rem);
+
+  /* Layer 2: Line Heights */
+  --leading-tight: 1.2;
+  --leading-snug: 1.375;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+
+  /* Layer 2: Text Colors */
+  --text-primary: var(--color-gray-900);
+  --text-secondary: var(--color-gray-600);
+  --text-muted: var(--color-gray-400);
+  --text-on-primary: white;
+
+  /* Layer 3: Component Tokens */
+  --heading-1-size: var(--text-3xl);
+  --heading-1-weight: var(--font-weight-bold);
+  --heading-1-leading: var(--leading-tight);
+  --body-size: var(--text-base);
+  --body-leading: var(--leading-relaxed);
+}
 ```
 
 ## 💡 구현 체크리스트

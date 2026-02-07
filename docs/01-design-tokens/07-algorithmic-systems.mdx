@@ -2,20 +2,21 @@
 title: "알고리즘 기반 디자인 시스템"
 sidebar_label: "알고리즘 시스템"
 sidebar_position: 7
-tags: [tokens, algorithms, automation]
+audience: developer
+tags: [tokens, algorithms, automation, css]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#524
 
-## 알고리즘 기반 디자인 시스템 - Into Design Systems 2025
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-> **발표자**: Marco (Graph Engine Wizard, Token Studio)
-> **출처**: Into Design Systems Conference 2025
-> **핵심 주제**: 디자인 시스템에서 수학적 패턴과 알고리즘을 활용한 자동화 및 확장성
+<DevQuickStart
+  what="Algorithmic design systems replace hundreds of manual token values with a few mathematical rules that generate consistent outputs"
+  learn="How to implement color lightness curves, type scale algorithms, and context-driven token systems with CSS data attributes"
+  able="Build a context-driven token system using CSS custom properties and data-* attributes for automatic theming"
+/>
 
----
-
-## 📌 핵심 철학: 우주의 법칙처럼 디자인도 법칙이 있다
+## 핵심 철학
 
 ### 핵심 메시지
 - **디자인은 마법이 아니라 패턴이다**: 우주의 법칙을 이해하면 행성의 움직임을 예측할 수 있듯이, 디자인의 알고리즘을 이해하면 시스템이 어떻게 작동하고 확장될지 예측할 수 있다.
@@ -204,15 +205,70 @@ background
 - 사용자 노출 색상 선택기: 스크롤 가능한 간결한 팔레트
 
 ### 코드 통합 (CSS)
-```html
-<div data-appearance="accent" data-surface="surface">
-  <!-- 자동으로 접근 가능한 on-color 적용 -->
+
+```css title="context-tokens.css"
+/* Base surface tokens */
+[data-surface="canvas"] {
+  --surface-bg: var(--color-neutral-0);
+  --surface-fg: var(--color-neutral-900);
+  --surface-border: var(--color-neutral-200);
+}
+
+[data-surface="surface"] {
+  --surface-bg: var(--color-neutral-50);
+  --surface-fg: var(--color-neutral-900);
+  --surface-border: var(--color-neutral-300);
+}
+
+/* Appearance modifiers */
+[data-appearance="default"] {
+  --appearance-bg: var(--surface-bg);
+  --appearance-fg: var(--surface-fg);
+  --appearance-border: var(--surface-border);
+}
+
+[data-appearance="accent"] {
+  --appearance-bg: var(--color-brand-primary);
+  --appearance-fg: var(--color-text-on-primary);
+  --appearance-border: transparent;
+}
+
+[data-appearance="success"] {
+  --appearance-bg: var(--color-feedback-success-bg);
+  --appearance-fg: var(--color-feedback-success);
+  --appearance-border: var(--color-feedback-success);
+}
+
+[data-appearance="subtle"] {
+  --appearance-bg: transparent;
+  --appearance-fg: var(--surface-fg);
+  --appearance-border: var(--surface-border);
+}
+
+/* Component uses context tokens */
+.card {
+  background: var(--appearance-bg);
+  color: var(--appearance-fg);
+  border: 1px solid var(--appearance-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+}
+```
+
+```html title="Usage"
+<div data-surface="surface" data-appearance="accent">
+  <div class="card">Accent card with automatic on-color</div>
+</div>
+
+<div data-surface="canvas" data-appearance="success">
+  <div class="card">Success card with green theme</div>
 </div>
 ```
 
-```javascript
-element.setAttribute('data-appearance', 'success');
-// → 녹색 배경 + 대비 텍스트 색상 자동 계산
+```javascript title="Dynamic context switching"
+// Change appearance programmatically
+element.dataset.appearance = 'success';
+// All child components automatically update colors
 ```
 
 ---
@@ -315,8 +371,11 @@ After: 12 → 13 → 16 → 20 → 26 → 35 → 96 (자연스러움)
 ### 4. "AI 시대 대비"
 > 정적 값으로는 AI가 작동 불가. 기계 판독 가능한 알고리즘이 있어야 AI가 디자인 시스템을 이해하고 수정 가능.
 
-### 5. "미래: 음성으로 알고리즘 구축"
-> Gemini 같은 음성 모델로 Graph Engine과 대화하며 "어두운 쪽 채도를 좀 낮춰줘" → 자동으로 노드 추가/수정.
+### 5. "Context is King"
+> 수백 개 토큰을 수동 관리하지 말고, 시스템에 올바른 컨텍스트를 주면 올바른 값을 반환하게 하라.
+
+---
+*출처: Token Studio, EightShapes*
 
 ---
 

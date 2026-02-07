@@ -2,14 +2,21 @@
 title: "Figma Slots for Repeating Items"
 sidebar_label: "Figma Slots 패턴"
 sidebar_position: 6
-tags: [figma, slots, components]
+audience: both
+tags: [figma, slots, components, react, typescript]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#542
 
-## Figma Slots for Repeating Items
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-## 📌 핵심 개념
+<DevQuickStart
+  what="Figma native slots solve repeating item patterns (checkbox groups, tabs, breadcrumbs) with better composability than instance swapping or hidden layers"
+  learn="Slot naming conventions, default item quantity rules, min/max constraints, and how Figma slot properties map to React component props"
+  able="Map Figma slot definitions to TypeScript component interfaces with proper type constraints"
+/>
+
+## 핵심 개념
 
 - **Repeating items는 가장 흔한 패턴**: Checkbox Group, Radio Button Group, Tabs, Breadcrumbs 등
 - **기존 방식의 한계**: Instance swapping (불편), Hidden layers (성능 저하), Count props (variant 폭발)
@@ -68,9 +75,51 @@ checkboxGroup:
 3. "Preferred" 탭에서 `DS Checkbox` 선택
 4. 검색도 가능 (`Search preferred values`)
 
----
+## Figma Slots to TypeScript Mapping
 
-*출처: Nathan Curtis (EightShapes)*
+```typescript title="figma-to-react-mapping.ts"
+// Figma slot definition (YAML spec)
+// items:
+//   type: slot
+//   anyOf: checkbox
+//   minItems: 1
+//   maxItems: undefined
+
+// Equivalent React TypeScript interface
+interface CheckboxGroupProps {
+  /** Slot: accepts only Checkbox children (min 1) */
+  children: React.ReactElement<CheckboxProps> | React.ReactElement<CheckboxProps>[];
+  label: string;
+  error?: string;
+}
+
+// With runtime validation
+function CheckboxGroup({ children, label, error }: CheckboxGroupProps) {
+  const items = React.Children.toArray(children);
+
+  if (items.length < 1) {
+    console.warn('CheckboxGroup requires at least 1 Checkbox child');
+  }
+
+  return (
+    <fieldset className="checkbox-group" role="group" aria-labelledby={`${label}-label`}>
+      <legend id={`${label}-label`}>{label}</legend>
+      <div className="checkbox-group__items">{children}</div>
+      {error && <span className="checkbox-group__error" role="alert">{error}</span>}
+    </fieldset>
+  );
+}
+
+// Figma "preferred values" → TypeScript generic constraint
+interface SlotConfig<T extends React.ElementType> {
+  component: T;
+  minItems?: number;
+  maxItems?: number;
+}
+
+// Example: Tab slot only accepts TabItem
+type TabSlot = SlotConfig<typeof TabItem>;
+```
 
 ---
 

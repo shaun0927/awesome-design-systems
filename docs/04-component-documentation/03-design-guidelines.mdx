@@ -2,59 +2,232 @@
 title: "Component Design Guidelines - Writing Effective Component Documentation"
 sidebar_label: "디자인 가이드라인 작성"
 sidebar_position: 3
+audience: both
 tags: [guidelines, documentation, writing, structure]
 ---
 
-> Original issue: shaun0927/stocktitan-crawler#586
+import DevQuickStart from '@site/src/components/DevQuickStart';
+
+<DevQuickStart
+  what="컴포넌트 디자인 가이드라인의 5대 섹션 구조와 코드 번역 방법을 배웁니다."
+  learn="Use When / Visual Style / Behavior / Editorial / Accessibility 각 섹션을 코드로 구현하는 기법"
+  able="디자인 가이드라인을 읽고 즉시 코드로 번역할 수 있습니다."
+/>
 
 ## 핵심 개념
 - **가이드라인은 참조 자료**: 즐거운 읽기가 아닌 빠른 학습과 빠른 검색을 위한 레퍼런스
-- **명확성과 구조**: 무작위 메모가 아닌, 명확하고 조직화된 문서. 디자인 커뮤니티의 포괄적 대화로 결정
+- **명확성과 구조**: 무작위 메모가 아닌, 명확하고 조직화된 문서
 - **단어부터 시작**: 디자인 가이드라인은 글쓰기 작업으로 시작 (나중에 이미지/데모 추가)
-- **일관된 섹션 구조**: Use When → Visual Style → Behavior → Editorial → Accessibility
+- **일관된 섹션 구조**: Use When, Visual Style, Behavior, Editorial, Accessibility
 - **이미지와 데모**: Material Design처럼 글만이 아닌 시각적 설명으로 더 강력한 전달
 
-## 실무 노하우
-- **섹션 순서 (권장)**:
-  1. **Use When** (+ Don't Use When): 언제 사용하고 언제 사용하지 말아야 하는지
-  2. **Visual Style**: 색상, 타이포그래피, 간격 등 시각적 판단 기준
-  3. **Behavior**: 이벤트, 결과, 전환 처리 방법
-  4. **Editorial**: 컴포넌트에 들어가는 카피와 이미지 가이드
-  5. **Accessibility**: 접근성 고려사항
-- **대체 헤딩 옵션**:
-  - Visual Style → Visual Language / Design Language / Foundations
-  - Behavior → Interaction
-  - Use When → When to Use
-- **일관성 확보**: 모든 컴포넌트에 동일한 섹션 구조 적용으로 독자 친숙도 향상
-- **작성자 가이드**: 섹션별로 고려해야 할 디자인 측면 제시하여 품질 향상
-- **이미지 어노테이션**: 시각 언어 표준화 (예: 오렌지 색상으로 주석, 일관된 이미지 크기)
+## 가이드라인 5대 섹션
 
-## 주요 구조
-```
-Component Documentation
-├─ Use When (+ Don't Use When)
-├─ Visual Style
-│  ├─ Color
-│  ├─ Typography
-│  └─ Spacing
-├─ Behavior
-│  ├─ Events
-│  ├─ States
-│  └─ Transitions
-├─ Editorial
-│  ├─ Copy guidelines
-│  └─ Image guidelines
-└─ Accessibility
-   ├─ ARIA properties
-   └─ WCAG compliance
+```mermaid
+graph TD
+    A[Component Design Guidelines] --> B[1. Use When]
+    A --> C[2. Visual Style]
+    A --> D[3. Behavior]
+    A --> E[4. Editorial]
+    A --> F[5. Accessibility]
+
+    B --> B1["언제 사용 / 언제 사용하지 말 것"]
+    C --> C1["색상 / 타이포그래피 / 간격"]
+    D --> D1["이벤트 / 상태 전환 / 결과"]
+    E --> E1["카피 가이드 / 이미지 가이드"]
+    F --> F1["ARIA / WCAG / 키보드"]
 ```
 
-## Material Design 영감
-> "I remember that morning. September 2014. McLean, Virginia... It was so, so good. By the end, I didn't just know Material better. I was a better designer."
+## Button 가이드라인 완전 예제
 
-- 90분 몰입 경험으로 디자인 스킬 향상
-- 가이드라인이 단순 레퍼런스를 넘어 교육 도구로 기능
-- 명확한 구조와 시각적 설명의 결합
+실제 Button 컴포넌트의 각 가이드라인 섹션을 코드로 번역하는 방법입니다.
+
+### 1. Use When (+ Don't Use When)
+
+**가이드라인:**
+> 사용자가 명시적 액션을 수행해야 할 때 Button을 사용하세요.
+
+**코드 번역:**
+
+```tsx
+{/* Use When: 폼 제출 */}
+<form onSubmit={handleSubmit}>
+  <Button type="submit">저장하기</Button>
+</form>
+
+{/* Use When: 대화상자 열기 */}
+<Button onClick={() => setModalOpen(true)}>설정</Button>
+
+{/* DON'T: 페이지 이동에는 Link 사용 */}
+{/* Bad */}
+<Button onClick={() => router.push('/about')}>About</Button>
+{/* Good */}
+<a href="/about">About</a>
+```
+
+### 2. Visual Style
+
+**가이드라인:**
+> Primary 버튼은 페이지당 1개만, Secondary는 여러 개 가능. Ghost는 보조 액션에만.
+
+**코드 번역:**
+
+```tsx
+// Visual Style 가이드라인의 코드 구현
+const buttonStyles = {
+  primary: {
+    background: 'var(--color-brand-500)',
+    color: 'var(--color-white)',
+    border: 'none',
+    fontWeight: 600,
+  },
+  secondary: {
+    background: 'transparent',
+    color: 'var(--color-brand-500)',
+    border: '1px solid var(--color-brand-500)',
+    fontWeight: 500,
+  },
+  ghost: {
+    background: 'transparent',
+    color: 'var(--color-text-secondary)',
+    border: 'none',
+    fontWeight: 400,
+  },
+};
+
+// 크기별 토큰
+const sizeTokens = {
+  sm: { padding: 'var(--space-1) var(--space-3)', fontSize: 'var(--font-size-sm)' },
+  md: { padding: 'var(--space-2) var(--space-4)', fontSize: 'var(--font-size-md)' },
+  lg: { padding: 'var(--space-3) var(--space-5)', fontSize: 'var(--font-size-lg)' },
+};
+```
+
+### 3. Behavior
+
+**가이드라인:**
+> 클릭 시 즉각적 피드백, 로딩 상태 표시, 더블 클릭 방지.
+
+**코드 번역:**
+
+```tsx
+const Button: React.FC<ButtonProps> = ({ onClick, children, ...props }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleClick = async (e: React.MouseEvent) => {
+    if (isLoading) return; // 더블 클릭 방지
+
+    setIsLoading(true);
+    try {
+      await onClick?.(e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      disabled={isLoading}
+      aria-busy={isLoading}
+      {...props}
+    >
+      {isLoading ? (
+        <>
+          <Spinner size="sm" aria-hidden="true" />
+          <span>처리 중...</span>
+        </>
+      ) : (
+        children
+      )}
+    </button>
+  );
+};
+```
+
+### 4. Editorial
+
+**가이드라인:**
+> 버튼 라벨은 동사로 시작. 2-3 단어 이내. 구체적 액션 명시.
+
+**코드 번역:**
+
+```tsx
+// Editorial 가이드라인: 버튼 라벨 패턴
+const BUTTON_LABELS = {
+  // Good: 동사로 시작, 구체적
+  save: '저장하기',
+  delete: '삭제하기',
+  confirm: '확인',
+  cancel: '취소',
+  submit: '제출하기',
+
+  // Bad: 모호하거나 너무 길다
+  // 'OK', 'Yes', 'No' (모호)
+  // '이 항목을 저장하시겠습니까?' (너무 길다)
+};
+
+// 라벨 길이 검증 유틸리티
+function validateButtonLabel(label: string): boolean {
+  const words = label.trim().split(/\s+/);
+  if (words.length > 3) {
+    console.warn(`Button label too long: "${label}" (${words.length} words)`);
+    return false;
+  }
+  return true;
+}
+```
+
+### 5. Accessibility
+
+**가이드라인:**
+> 키보드 접근 가능, 포커스 표시, 스크린리더에 상태 전달.
+
+**코드 번역:**
+
+```tsx
+// 접근성 완비된 Button
+<button
+  type="button"
+  role="button"
+  tabIndex={0}
+  aria-label={ariaLabel || undefined}
+  aria-disabled={disabled}
+  aria-busy={loading}
+  aria-pressed={toggle ? pressed : undefined}
+  className={cn(
+    'btn',
+    'focus-visible:outline focus-visible:outline-2',
+    'focus-visible:outline-offset-2 focus-visible:outline-brand-500'
+  )}
+>
+  {children}
+</button>
+```
+
+```css
+/* 포커스 표시 CSS */
+.btn:focus-visible {
+  outline: 3px solid var(--color-brand-500);
+  outline-offset: 2px;
+}
+
+/* 비활성화 상태 */
+.btn[aria-disabled="true"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+```
+
+## 대체 헤딩 옵션
+
+| 기본 | 대안 1 | 대안 2 |
+|------|--------|--------|
+| Visual Style | Visual Language | Design Language |
+| Behavior | Interaction | Patterns |
+| Use When | When to Use | Usage |
+| Editorial | Content | Copy Guidelines |
 
 ## 피해야 할 것
 - 무지한 단독 작업자의 낙서 같은 메모
@@ -69,7 +242,7 @@ Component Documentation
 
 ---
 
-## 📎 Related Articles
+## Related Articles
 
 import CrossRef from '@site/src/components/CrossRef';
 

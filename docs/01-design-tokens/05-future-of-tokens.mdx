@@ -1,461 +1,223 @@
 ---
-title: "디자인 토큰의 미래 - Tokens Studio의 Graph Engine 혁명"
+title: "디자인 토큰의 미래 - W3C DTCG와 Graph Engine"
 sidebar_label: "토큰의 미래"
 sidebar_position: 5
-tags: [tokens, graph-engine, automation]
+audience: developer
+tags: [tokens, graph-engine, automation, dtcg]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#536
 
-## 디자인 토큰의 미래 - Tokens Studio의 Graph Engine 혁명
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-> **출처**: "The Future of Design Tokens - Jam with Tokens Studio" 세션 (2시간 온라인 워크샵)
-> **발표자**: Marco Ochsner (Token Studio Graph Engine Wizard), Jan Six (Figma Tokens 창시자), Mike (Humã CEO)
-> **날짜**: 2025년 1월 추정
-> **핵심**: 디자인 시스템의 효율성을 극대화하는 알고리즘 기반 토큰 생성 방법론
+<DevQuickStart
+  what="The W3C DTCG spec standardizes token formats across tools, while Graph Engines automate token generation from algorithmic rules"
+  learn="W3C DTCG token format, Graph Engine concepts for algorithmic token generation, and multi-brand scaling strategies"
+  able="Write tokens in W3C DTCG format and understand how graph-based token generation reduces manual maintenance"
+/>
 
----
+## W3C DTCG 표준 토큰 포맷
 
-## 🎯 핵심 비전: 왜 Graph Engine인가?
+W3C Design Token Community Group(DTCG)은 플랫폼 독립적 토큰 형식을 표준화합니다. 이 형식을 사용하면 도구 간 토큰 교환이 가능합니다.
 
-### 문제 인식
-**현재 디자인 토큰 생태계의 근본적 한계**:
-- 🔴 **지식 손실**: 색상 팔레트를 Atmos/Leonardo로 만들었는데, 2개월 후 회사가 문을 닫으면? → 로직 전부 증발
-- 🔴 **토큰 폭발**: 멀티브랜드 × 플랫폼 × 다크모드 × 밀도 = 수백만 개 토큰 (Adobe Spectrum 사례)
-- 🔴 **재현 불가능**: "이 색상이 왜 #7034EA인가?" → 답변 불가. 누가 만들었는지, 어떤 로직인지 알 수 없음
-- 🔴 **변경 지옥**: 타이포그래피 스케일 변경 시 50개 토큰 수작업 업데이트
-
-**Graph Engine의 답변**:
-```
-디자인 토큰 = 디자인 결정의 "결과값"만 저장 (X)
-디자인 토큰 = 디자인 결정의 "과정(로직)"까지 저장 (O)
-```
-
-→ **기계가 읽을 수 있는 형식으로 결정 과정을 저장**하면:
-- ✅ 로직 재현 가능
-- ✅ 입력값 1개 변경 → 전체 스케일 자동 재계산
-- ✅ AI가 문서화 자동 생성 가능
-- ✅ 팀원 퇴사해도 지식 유지
-
----
-
-## 🧮 현재 토큰 생태계의 작동 방식 (알고리즘 디자인)
-
-### 실제 사용 중인 도구들
-
-#### 1. **Proportio** (Nate Baldwin) - 타이포그래피 스케일
-```
-입력값:
-- 기본 폰트 크기: 16px
-- 스케일 비율: 1.2 (Major Second)
-- 작은 크기: 2단계 아래 (-2)
-- 큰 크기: 6단계 위 (+6)
-
-로직: Geometric Series (등비급수)
-결과: 자동 생성된 폰트 스케일 토큰
-```
-
-**문제점**:
-- 고정된 네이밍 (text-size-90, 100, 200...)
-- 토큰만 내보내짐 → 로직은 Proportio 안에 갇힘
-
-#### 2. **Atmos** - 색상 생성
-```
-입력값:
-- 브랜드 색상 6개 (Primary, Secondary, Neutral, Success, Caution, Danger)
-- 셰이드 개수: 15단계
-- 보간 방법: Linear / Ease-in-out (Cubic Bezier)
-- 색공간: LCH / Oklab / OkLCH
-- 색역: sRGB / Display P3
-
-로직:
-- Lightness 곡선 샘플링
-- Chroma 조정
-- Hue 회전
+```json title="tokens.json (W3C DTCG format)"
+{
+  "color": {
+    "brand": {
+      "primary": {
+        "$value": "#2563EB",
+        "$type": "color",
+        "$description": "Main brand color used for primary actions"
+      }
+    },
+    "feedback": {
+      "error": {
+        "$value": "#EF4444",
+        "$type": "color",
+        "$description": "Error state indicator"
+      }
+    }
+  },
+  "spacing": {
+    "base": {
+      "$value": "16px",
+      "$type": "dimension"
+    },
+    "compact": {
+      "$value": "8px",
+      "$type": "dimension"
+    }
+  },
+  "typography": {
+    "body": {
+      "$value": {
+        "fontFamily": "Inter",
+        "fontSize": "16px",
+        "fontWeight": 400,
+        "lineHeight": 1.5
+      },
+      "$type": "typography"
+    }
+  }
+}
 ```
 
-**문제점**:
-- 브랜드 색상이 500번 스텝에 정확히 안 맞음 (실제 프로젝트 현실)
-- 페이월 뒤 + 로직 비공개 → 회사 망하면 재현 불가
+### DTCG vs Figma Variables
 
-#### 3. **색공간의 복잡성**
-- RGB: 큐브 (3차원 벡터)
-- HSL: 원뿔형
-- LCH: 원통형 (Lightness-Chroma-Hue)
-- OkLCH: 비선형 Chroma 범위 (0~37, not 0~100)
-- Display P3: sRGB보다 초록 영역 30% 넓음
+| 항목 | Figma Variables | DTCG Tokens |
+|------|----------------|-------------|
+| **타입** | Color, Number, String, Boolean (4) | Color, Dimension, Typography, Shadow 등 (20+) |
+| **포맷** | Figma 전용 | 플랫폼 독립적 JSON |
+| **메타데이터** | 제한적 | `$description`, `$extensions` 풍부 |
+| **도구 호환** | Figma only | Style Dictionary, Tokens Studio 등 |
 
-**핵심 인사이트**:
-> 색상 이론만 해도 토끼굴 깊이 = 무한대.
-> 대부분 디자이너는 이걸 다 이해할 필요 없음.
-> → **전문가가 만든 그래프를 재사용**하면 됨 (Marketplace 개념)
+## 현재 토큰 생태계의 한계
 
----
+정적 토큰 관리의 근본적 문제점:
 
-## 🕸️ Graph Engine 실전 사용법
+| 문제 | 설명 |
+|------|------|
+| **지식 손실** | 색상 팔레트의 생성 로직이 도구 안에 갇힘 |
+| **토큰 폭발** | 브랜드 x 플랫폼 x 모드 x 밀도 = 수만 개 토큰 |
+| **재현 불가** | "이 색상이 왜 #7034EA인가?" 답변 불가 |
+| **변경 지옥** | 타이포그래피 스케일 변경 시 수십 개 토큰 수동 업데이트 |
 
-### 기본 개념
-```
-Node = 작업 단위 (Constant, Add, Multiply, Array Map 등)
-Edge = 데이터 흐름 (출력 → 입력)
-Subgraph = 복잡한 로직을 캡슐화한 재사용 가능 노드
-```
+Graph Engine은 토큰의 "결과값"이 아닌 "생성 로직"을 저장하여 이 문제를 해결합니다.
 
-### 실습 1: 타이포그래피 스케일 (5분 구현)
-```
-1. Constant 노드 3개
-   - 기본 크기: 16 (px)
-   - 스텝 다운: -2
-   - 스텝 업: +6
-   - 비율: 1.2
+## Graph Engine 기본 개념
 
-2. Geometric Series 노드
-   → 자동으로 스케일 생성 [11.11, 13.33, 16, 19.2, 23.04, 27.65, 33.18, 39.81, 47.78]
+Graph Engine은 노드 기반 시각적 프로그래밍으로 토큰 생성 로직을 정의합니다.
 
-3. Array Map 노드 (각 값마다 토큰 생성)
-   - T-shirt 사이즈 네이밍: 2XS, XS, S, M, L, XL, 2XL...
-   - Dimension 타입 변환 (Number → String)
-   - 단위 추가: "px"
+```mermaid
+graph LR
+    A["Input Nodes<br/>baseSize: 16, ratio: 1.2"] --> B["Geometric Series<br/>등비급수 계산"]
+    B --> C["Array Map<br/>네이밍 + 단위 추가"]
+    C --> D["Output<br/>DTCG JSON 토큰"]
 
-4. 결과: dimension.2xl: "39.81px" 같은 토큰 자동 생성
+    style A fill:#fef3c7,stroke:#d97706
+    style B fill:#dbeafe,stroke:#2563eb
+    style D fill:#d1fae5,stroke:#059669
 ```
 
-**마법의 순간**:
-```
-기본 크기를 16 → 20으로 변경하면?
-→ 전체 스케일이 1초 안에 재계산됨 (수동 작업 0)
+| 구성 요소 | 설명 | 예시 |
+|-----------|------|------|
+| **Node** | 작업 단위 | Constant, Add, Multiply, Array Map |
+| **Edge** | 데이터 흐름 (출력 → 입력) | baseSize → Geometric Series |
+| **Subgraph** | 재사용 가능한 캡슐화된 로직 | Color Scale Generator |
 
-4픽셀 그리드 필요?
-→ Snap 노드 1개 추가하면 모든 값이 4의 배수로 반올림됨
-```
+### 지금 바로 시도하기: 타이포그래피 스케일 생성
 
-### 실습 2: 색상 스케일 (고급)
-Marco의 실제 프로덕션 그래프:
-```
-입력:
-- 브랜드 색상 6개 (Inline Token Sets - Light/Dark 모드)
-- 스텝 수: 11 (또는 15, 100도 가능)
-- 색공간: LCH
-- 색역: sRGB / P3
-- Lightness 곡선 (Cubic Bezier)
-- Chroma 시작/끝점 (Vector2)
+JavaScript로 Graph Engine의 핵심 로직을 구현할 수 있습니다.
 
-로직:
-- Lightness 곡선 샘플링
-- Chroma 보간
-- 브랜드 색상 유지 (Color Persisting Scale)
-- 다크모드: 채도 -20% 자동 적용
-- APCA 대비를 사용한 On-Color 자동 생성
+```javascript title="generate-type-scale.js"
+function generateTypeScale(baseSize, ratio, stepsDown, stepsUp) {
+  const tokens = {};
+  const names = ['2xs', 'xs', 'sm', 'md', 'lg', 'xl', '2xl', '3xl', '4xl'];
 
-출력:
-- 1500개 토큰 (11 스텝 × 6 색상 × 2 모드 × semantic 레이어)
-```
+  for (let i = -stepsDown; i <= stepsUp; i++) {
+    const size = Math.round(baseSize * Math.pow(ratio, i) * 100) / 100;
+    const nameIndex = i + stepsDown;
+    const name = names[nameIndex] || `step-${i}`;
 
-**실시간 변경 데모**:
-```
-Primary 색상을 Red → Blue → Green 으로 변경
-→ 전체 스케일 + 시맨틱 토큰 + On-colors 모두 자동 재계산
-→ 시간: 20ms (UI 렌더링이 병목, 그래프는 즉시 실행)
-```
+    tokens[`dimension.${name}`] = {
+      $value: `${size}px`,
+      $type: 'dimension',
+    };
+  }
+  return tokens;
+}
 
-### 실습 3: 접근성 (Contrasting Color Node)
-```
-입력:
-- 배경색
-- 후보 전경색 A (예: White)
-- 후보 전경색 B (예: Black)
-- 알고리즘: APCA / WCAG 2.2
+// Usage
+const scale = generateTypeScale(16, 1.2, 2, 6);
+console.log(JSON.stringify(scale, null, 2));
+// → { "dimension.2xs": { "$value": "11.11px", "$type": "dimension" }, ... }
 
-출력:
-- 자동으로 대비 높은 색상 선택
-- 모든 색상 스텝마다 자동 적용
+// baseSize를 20으로 변경하면 전체 스케일 자동 재계산
+const largeScale = generateTypeScale(20, 1.25, 2, 6);
 ```
 
-→ **"접근성을 지키면서" 색상 시스템을 자동 생성**
+### 색상 스케일 자동 생성
 
----
+```javascript title="generate-color-scale.js"
+function generateColorScale(brandColors, steps = 11) {
+  const tokens = {};
 
-## 📐 W3C DTCG 표준과의 관계
+  for (const [name, hsl] of Object.entries(brandColors)) {
+    for (let i = 0; i < steps; i++) {
+      const lightness = 95 - (i * (90 / (steps - 1))); // 95% → 5%
+      const step = (i + 1) * 100;
 
-### Figma Variables vs Design Tokens
+      tokens[`color.${name}.${step}`] = {
+        $value: `hsl(${hsl.h}, ${hsl.s}%, ${Math.round(lightness)}%)`,
+        $type: 'color',
+      };
+    }
+  }
+  return tokens;
+}
+
+const colors = generateColorScale({
+  blue: { h: 220, s: 80 },
+  red: { h: 0, s: 75 },
+  green: { h: 140, s: 60 },
+});
 ```
-Figma Variables:
-- Color, Number, String, Boolean (4가지)
-- 피그마 네이티브 포맷
 
-Design Tokens (DTCG):
-- Dimension (값 + 단위), Color, Typography, Shadow, Border 등 (20+ 타입)
-- 플랫폼 독립적
-- 메타데이터 풍부 (scope, description 등)
-```
-
-**Marco의 인사이트**:
-> "Variables는 Tokens가 아니다. Variables는 Tokens의 단순화된 형태."
-> "Variables → Tokens 변환은 가능하지만 정보 손실 발생."
-
-### Graph Engine의 표준 지원
-- ✅ **DTCG 표준 출력** (JSON)
-- ✅ **Style Dictionary 통합** (Tokens Studio Platform에서)
-- ✅ **오픈소스** → 영원히 무료 실행 가능 (회사 망해도 OK)
-
----
-
-## 🚀 Tokens Studio Platform (통합 솔루션)
-
-### Graph Engine vs Platform 차이
+## Tokens Studio 도구 비교
 
 | 항목 | Graph Engine (오픈소스) | Studio Platform (SaaS) |
 |------|------------------------|------------------------|
-| **가격** | 완전 무료 | 유료 (조직 플랜, Individual 플랜 예정) |
+| **가격** | 무료 | 유료 (조직 플랜) |
 | **용도** | 로직 생성 단독 사용 | 전체 워크플로우 통합 |
-| **피그마 연동** | 수동 복붙 | 자동 동기화 (Companion 플러그인) |
-| **버전 관리** | 없음 (JSON 파일 다운로드) | Git 네이티브, 브랜치, PR |
-| **협업** | 개인 사용 | 팀 협업 (디자이너 + 개발자) |
-| **출력** | DTCG JSON | Figma Variables + 코드 + 다른 도구 |
+| **Figma 연동** | JSON 다운로드 | 자동 동기화 |
+| **버전 관리** | 없음 | Git 네이티브, 브랜치, PR |
+| **출력** | DTCG JSON | Figma Variables + 코드 |
 
-### Companion Plugin (Jan Six 데모)
+## 멀티브랜드 토큰 전략
+
+### 토큰 폭발 문제
+
 ```
-워크플로우:
-1. Studio Platform에서 Core 토큰 정의 (6가지 브랜드 색상)
-2. Graph Engine이 1500개 토큰 자동 생성
-3. Companion Plugin으로 Figma에 Variables 동기화 (1500개)
-4. Figma에서 색상 변경 → Import Variables → Studio 업데이트
-5. Graph 재실행 → Figma Variables 재생성
-
-특징:
-- 실시간 Watch Mode (Studio 변경 → Figma 자동 반영)
-- 양방향 동기화 (Figma Variables → Studio Tokens)
-- 무제한 플러그인 사용자 (조직 플랜 포함)
+Before (정적):  10 브랜드 x 3 플랫폼 x 2 모드 = 120,000개 토큰 수동 관리
+After (그래프):  20~50개 입력값 → 120,000개 토큰 자동 생성
 ```
 
-**놀라운 점**:
-- Figma에서 1개 색상 변경 → 1500개 Variables 자동 재생성
-- 기존 Figma Tokens 플러그인보다 훨씬 가벼움 (소비 전용)
+### 화이트라벨 구현 예시
 
----
-
-## 🎛️ Tokens Studio 로드맵
-
-### 단기 (2025 Q1~Q2)
-1. **튜토리얼 폭발**
-   - 2월부터 매주 Graph Engine 워크숍 (1~2시간)
-   - 주제: 색상, 타이포그래피, 접근성, CSS, Curves 등
-   - YouTube 채널에 모두 공개
-
-2. **Marketplace**
-   - Marco의 색상 그래프 같은 복잡한 로직을 "1개 노드"로 패키징
-   - Nate Baldwin의 Proportio 그래프 공개
-   - Leonardo 색상 도구 그래프 공개
-   - **커뮤니티 기여 활성화**
-
-3. **AI 통합**
-   - 그래프 설명 자동 생성 (이미 MVP 존재)
-   - 자연어 → 그래프 자동 생성 ("이 색상 스케일의 수식은?" → AI가 그래프 빌드)
-   - 실시간 설명 (작업 중 AI가 노드 설명)
-
-4. **UX 개선**
-   - 개발자 용어 → 디자이너 친화적 명명 (Sam 담당)
-   - Onboarding 경험 개선
-   - 시각적 프리뷰 패널 추가 (이미 베타)
-
-### 중기 (2025 Q3~Q4)
-1. **플랫폼 확장**
-   - Figma ✅
-   - Penpot ✅ (출시 임박, 완전 무료)
-   - Blender (이미 작동 중)
-   - PowerPoint
-   - Framer
-   - InDesign (데모 공개됨 - CMYK 지원!)
-
-2. **Penpot 통합 (중요!)**
-   - Pablo Stanley와 1.5년 협업
-   - **네이티브 DTCG 토큰 지원** (변환 불필요)
-   - Git 네이티브 스토리지
-   - Figma Variables 읽기 가능
-   - 2025년 = Penpot 프로덕션 레디 원년
-
-3. **개발자 경험**
-   - VS Code에서 그래프 실행 가능
-   - API 우선 설계
-   - Node.js 패키지로 사용 가능
-   - 테스트 케이스 작성 가능 (로직이 코드니까!)
-
-### 장기 비전
-1. **프로시저럴 UI**
-   - 컴포넌트도 그래프로 생성
-   - A/B 테스팅: 10개 디자인 버전 자동 생성
-   - 입력값만 바꾸면 전체 디자인 시스템 리브랜딩
-
-2. **Real-time Feedback Loop**
-   ```
-   사용자 데이터 → AI 분석 → 시스템이 허용하는 범위 내에서 UI 자동 조정
-   → 디자이너는 "큐레이터" 역할 (크리에이티브 디렉터)
-   ```
-
-3. **지식 영속화**
-   - 디자이너 퇴사해도 결정 과정 보존
-   - 기업 지식 손실 방지
-   - 신입이 와도 그래프 읽으면 이해 가능
-
----
-
-## 💼 실전 전략: 멀티브랜드 디자인 시스템
-
-### 토큰 폭발 문제 해결
-
-**Before (정적 토큰)**:
-```
-브랜드 × 플랫폼 × 모드 × 밀도 × 언어
-= 10 × 3 × 2 × 2 × 2 = 240개 조합
-→ 각 조합마다 500개 토큰 = 120,000개 토큰 관리 지옥
+```json title="brand-config.json"
+{
+  "brand": "acme",
+  "inputs": {
+    "primaryColor": "#2563EB",
+    "secondaryColor": "#7C3AED",
+    "fontFamily": "Inter",
+    "baseSize": 16,
+    "borderRadius": 8,
+    "density": "regular"
+  }
+}
 ```
 
-**After (그래프 기반)**:
-```
-입력 토큰: 20~50개 (브랜드 색상, 기본 스페이싱 등)
-그래프: 5~10개 (색상, 타이포, 스페이싱, 둥근 모서리 등)
-→ 출력: 120,000개 토큰 자동 생성
-→ 신규 브랜드 온보딩: 입력값 20개만 입력하면 끝
-```
+```javascript title="generate-brand-tokens.js"
+const { inputs } = require('./brand-config.json');
 
-**Mike의 사례**:
-> "20~50개 입력값으로 거의 모든 브랜드를 헤드리스 디자인 시스템에 온보딩 가능."
-> "ROI: 연간 수십만~수백만 달러 절감 (브랜드 수에 비례)"
-
-### 화이트라벨 솔루션
-```
-Boilerplate Graph:
-- 5개 핵심 그래프 (색상, 타이포, 스페이싱, 형태, 시맨틱)
-- 30개 입력 토큰 슬롯
-
-신규 고객:
-- 30개 입력값만 제공 (브랜드 색상, 로고, 기본 폰트 등)
-- 1시간 내 완전한 디자인 시스템 생성
+// 입력값 20개로 전체 디자인 시스템 토큰 생성
+const tokens = {
+  color: generateColorScale(inputs.primaryColor),     // → 66 color tokens
+  typography: generateTypeScale(inputs.baseSize),      // → 13 type tokens
+  spacing: generateSpacingScale(inputs.baseSize),      // → 13 spacing tokens
+  radius: generateRadiusScale(inputs.borderRadius),    // → 6 radius tokens
+};
+// Total: ~100 tokens from 6 inputs
 ```
 
----
+## 시작하기 체크리스트
 
-## 🤖 AI 시대에 디자이너가 살아남는 법
-
-### 질문: "AI가 디자이너를 대체하는 거 아닌가?"
-
-**Marco의 답변**:
-```
-AI의 문제점:
-- 랜덤 결과 생성 (일관성 없음)
-- 제약 조건 이해 불가 (브랜드 가이드 무시)
-- 5번 같은 결과 재현 불가능
-
-그래프의 강점:
-- 기계가 읽을 수 있는 결정 로직
-- AI가 문서 자동 생성 가능
-- AI가 그래프 설명 가능
-- AI가 그래프 빌드 도와줌 ("이 수식 구현해줘" → 노드 생성)
-
-결론:
-디자이너의 역할 = 임의 결정 만들기 (X)
-디자이너의 역할 = 결정에 이르는 "논리" 설계 (O)
-```
-
-**Mike의 비전**:
-```
-AI = 랜덤 생성기
-Graph = 브랜드 제약 조건 (허용 범위)
-
-AI + Graph = 제약 안에서 무한 탐색
-→ 디자이너 = 크리에이티브 디렉터 (큐레이터)
-```
-
-### 디자이너 업스킬 로드맵
-1. **색상 이론 깊이 이해** (모든 색공간 마스터 필요 X, 개념만)
-2. **알고리즘적 사고** (수식이 아니라 "로직 플로우")
-3. **플랫폼 기술 이해** (CSS, Flexbox, Grid → Figma보다 웹이 앞섬)
-4. **개발자와의 협업** (그래프는 개발자가 좋아하는 언어)
-
-**핵심 인사이트**:
-> "색상 전문가가 될 필요 없음. 전문가가 만든 그래프를 가져다 쓰면 됨."
-> "Blender의 Geometry Nodes처럼, 누군가 만든 노드를 조립하는 게 미래."
-
----
-
-## ✅ 실무 체크리스트 (당장 시작하기)
-
-### Graph Engine 시작 (무료)
-- [ ] [graph.tokens.studio](https://graph.tokens.studio) 접속
-- [ ] GitHub 로그인 (그래프 저장용)
+- [ ] [graph.tokens.studio](https://graph.tokens.studio) 접속 (무료)
 - [ ] Geometric Series로 타이포 스케일 만들어보기 (10분)
-- [ ] 다운로드 버튼 → DTCG JSON 파일 확인
-- [ ] VS Code로 열어서 토큰 구조 확인
-
-### 색상 실험 (중급)
-- [ ] [hueplot.ardov.me](https://hueplot.ardov.me) 에서 색공간 3D 시각화
-- [ ] LCH vs OkLCH 차이 체감
-- [ ] Display P3 색역 범위 확인
-- [ ] Marco의 색상 그래프 다운로드 (공유 예정)
-- [ ] 브랜드 색상 6개 입력 → 1500개 토큰 생성 경험
-
-### 커뮤니티 참여
-- [ ] Tokens Studio Slack 가입
-- [ ] Design Systems Slack (#graph-engine 채널)
-- [ ] YouTube 채널 구독 (weekly workshops)
-- [ ] Miro 보드에 토큰 챌린지 남기기
-- [ ] GitHub Issues로 피드백/버그 리포트
-
-### 프로덕션 준비 (조직)
-- [ ] Tokens Studio Platform Early Access 신청
-- [ ] Figma Companion Plugin 테스트
-- [ ] 현재 토큰 개수 카운트 (100개? 500개? 5000개?)
-- [ ] 멀티브랜드 여부 확인 → ROI 계산
-- [ ] 개발팀과 그래프 접근 방식 논의
-
----
-
-## 🔮 결론: 디자인 시스템의 패러다임 전환
-
-### Before (정적 토큰)
-```
-디자이너가 토큰 500개 손수 제작
-→ 변경 = 지옥
-→ 지식 = 디자이너 머릿속
-→ 퇴사 = 지식 증발
-→ 협업 = 버전 충돌 전쟁
-```
-
-### After (그래프 기반)
-```
-디자이너가 로직 설계 (5개 그래프)
-→ 변경 = 입력값 1개 수정
-→ 지식 = 기계가 읽을 수 있는 형식
-→ 퇴사 = 그래프만 있으면 OK
-→ 협업 = Git 브랜치 + PR (코드처럼)
-```
-
-### 핵심 메시지
-1. **"디자인 결정의 결과가 아니라 과정을 저장하라"**
-2. **"알고리즘은 이미 우리가 쓰고 있었다 (Proportio, Atmos)"**
-3. **"Graph Engine = 알고리즘을 시각화하고 재사용 가능하게"**
-4. **"Marketplace = 전문가의 지식을 1개 노드로"**
-5. **"AI 시대 = 로직 설계자가 살아남는다"**
-
-### 시작하는 법
-```
-1단계: graph.tokens.studio 접속 (5분)
-2단계: 타이포 스케일 만들어보기 (10분)
-3단계: Marco 색상 그래프 다운로드 (공유 대기)
-4단계: 실제 프로젝트에 적용 실험 (1주)
-5단계: Marketplace 그래프 조합으로 디자인 시스템 완성 (1개월)
-```
-
-### 마지막 한마디 (Marco)
-> "You don't need to be a color expert.
-> You don't need to understand every math formula.
-> Just use the graphs that experts built.
-> And if you want to go deep, you can spend 5 hours straight building your own surface logic.
-> But most people don't need to."
-
----
-
-**태그**: #DesignTokens #GraphEngine #TokensStudio #DesignSystems #AlgorithmicDesign #DTCG #Figma #Penpot #AI #Automation #ColorTheory #Typography #Accessibility #OpenSource
+- [ ] DTCG JSON 파일 다운로드 및 확인
+- [ ] 현재 프로젝트 토큰 개수 감사 (100개? 5000개?)
+- [ ] 멀티브랜드 여부 확인 후 ROI 계산
 
 ---
 

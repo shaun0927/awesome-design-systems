@@ -1,13 +1,18 @@
 ---
-title: "디자인 시스템 접근성 밋업 - 컴포넌트 리뷰 정리"
+title: "디자인 시스템 접근성 밋업 - 컴포넌트 리뷰 실전"
 sidebar_label: "접근성 밋업"
 sidebar_position: 2
-tags: [accessibility, meetup, component-review, screen-reader, wcag]
+audience: developer
+tags: [accessibility, meetup, component-review, screen-reader, wcag, testing]
 ---
 
-## 디자인 시스템 접근성 밋업 - 컴포넌트 리뷰 정리
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-> Original issue: shaun0927/stocktitan-crawler#537
+<DevQuickStart
+  what="접근성 전문가의 실제 컴포넌트 리뷰 사례와 스크린 리더 테스트 방법을 배웁니다."
+  learn="VoiceOver/NVDA 스크린 리더 테스트, axe-cli 자동 검사, 실제 접근성 수정 코드"
+  able="컴포넌트를 스크린 리더로 테스트하고 발견된 문제를 코드로 수정할 수 있습니다."
+/>
 
 ## 세션 개요
 
@@ -25,39 +30,302 @@ IntoDesignSystems에서 주최한 접근성 중심의 디자인 시스템 컴포
 - 전 세계 인구의 25% (4명 중 1명)가 장애인
 - 장애인 커뮤니티는 **모든 다른 커뮤니티와 교차하는 유일한 집단** (인종, 성별, 성적 지향 무관)
 
-**Frank Yan (Figma Config 2023)의 명언:**
-> "디자이너들은 자신들이 말하는 만큼 공감적이지 않다. 만약 그랬다면 우리 제품들이 더 접근 가능했을 것이다."
-
 ### 2. 접근성 리뷰 세션을 진행해야 하는 4가지 이유
 
 | 목적 | 설명 |
 |------|------|
 | **인식 (Awareness)** | 팀원들이 장애인이 겪는 장벽을 이해하도록 유도 |
 | **학습 (Learning)** | 함께 배우는 과정을 통한 역량 강화 |
-| **오해 해소 (Misconception)** | "접근 가능한 컴포넌트 라이브러리 다운로드 = 접근성 해결"과 같은 잘못된 믿음 제거 |
+| **오해 해소 (Misconception)** | "접근 가능한 컴포넌트 라이브러리 = 접근성 해결"이라는 잘못된 믿음 제거 |
 | **협업 (Collaboration)** | 지속적인 지식 교환 문화 형성 |
 
 ### 3. 접근성 구현의 현실
 
-**중요한 깨달음:**
-- "접근 가능한 컴포넌트 라이브러리를 사용한다고 해서 제품이 자동으로 접근 가능해지지 않는다"
+> "아무것도 접근 가능하지 않다 - 제대로 구현하기 전까지는"
+
 - Material UI 같은 라이브러리가 접근성을 주장하더라도, **구현 방식**에 따라 접근성이 깨질 수 있음
-- "아무것도 접근 가능하지 않다 - 제대로 구현하기 전까지는" (Nothing is accessible until you implement it)
 
 ---
 
-_이하 생략 (실제 내용은 알파뷰 적용 사항 포함)_
+## 실제 컴포넌트 리뷰 사례
+
+### 사례 1: Accordion 컴포넌트
+
+**발견된 문제:**
+- 아코디언 헤더가 `<div>` + `onClick`으로 구현됨 (키보드 접근 불가)
+- 확장/축소 상태가 스크린 리더에 전달되지 않음
+- 화살표 키 내비게이션 없음
+
+**수정 코드:**
+
+```tsx
+// BEFORE: 접근성 위반
+<div className="accordion-header" onClick={() => toggle(id)}>
+  <span>{title}</span>
+  <ChevronIcon direction={isOpen ? 'up' : 'down'} />
+</div>
+<div className={isOpen ? 'accordion-body open' : 'accordion-body'}>
+  {children}
+</div>
+
+// AFTER: WAI-ARIA Accordion 패턴 준수
+<h3>
+  <button
+    className="accordion-header"
+    onClick={() => toggle(id)}
+    aria-expanded={isOpen}
+    aria-controls={`panel-${id}`}
+    id={`header-${id}`}
+  >
+    <span>{title}</span>
+    <ChevronIcon direction={isOpen ? 'up' : 'down'} aria-hidden="true" />
+  </button>
+</h3>
+<div
+  id={`panel-${id}`}
+  role="region"
+  aria-labelledby={`header-${id}`}
+  hidden={!isOpen}
+>
+  {children}
+</div>
+```
+
+### 사례 2: Toast Notification
+
+**발견된 문제:**
+- 토스트가 나타나도 스크린 리더가 인지하지 못함
+- 자동 dismiss 시간이 너무 짧음 (3초)
+- 닫기 버튼에 라벨 없음
+
+**수정 코드:**
+
+```tsx
+// BEFORE
+<div className="toast">{message}</div>
+
+// AFTER
+<div
+  role="alert"
+  aria-live="polite"
+  aria-atomic="true"
+  className="toast"
+>
+  <span>{message}</span>
+  <button
+    onClick={dismiss}
+    aria-label="알림 닫기"
+    className="toast__close"
+  >
+    <CloseIcon aria-hidden="true" />
+  </button>
+</div>
+```
+
+```tsx
+// Toast 자동 dismiss - 접근성 고려
+const DISMISS_TIMEOUT = 10000; // 최소 10초 (WCAG 2.2.1)
+
+function Toast({ message, onDismiss }) {
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    if (isPaused) return;
+    const timer = setTimeout(onDismiss, DISMISS_TIMEOUT);
+    return () => clearTimeout(timer);
+  }, [isPaused, onDismiss]);
+
+  return (
+    <div
+      role="alert"
+      aria-live="polite"
+      onMouseEnter={() => setIsPaused(true)}   // 호버 시 타이머 정지
+      onMouseLeave={() => setIsPaused(false)}
+      onFocus={() => setIsPaused(true)}         // 포커스 시 타이머 정지
+      onBlur={() => setIsPaused(false)}
+    >
+      {message}
+      <button onClick={onDismiss} aria-label="알림 닫기">
+        <CloseIcon aria-hidden="true" />
+      </button>
+    </div>
+  );
+}
+```
+
+### 사례 3: Data Table
+
+**발견된 문제:**
+- 정렬 버튼에 현재 정렬 상태가 전달되지 않음
+- 페이지네이션에서 현재 위치를 알 수 없음
+
+**수정 코드:**
+
+```tsx
+// 정렬 가능한 테이블 헤더
+<th>
+  <button
+    onClick={() => sort('name')}
+    aria-sort={
+      sortColumn === 'name'
+        ? sortDirection === 'asc' ? 'ascending' : 'descending'
+        : 'none'
+    }
+  >
+    이름
+    <SortIcon direction={sortColumn === 'name' ? sortDirection : undefined} aria-hidden="true" />
+  </button>
+</th>
+
+// 페이지네이션
+<nav aria-label="테이블 페이지 네비게이션">
+  <span aria-live="polite">
+    전체 {totalItems}건 중 {startIndex}-{endIndex}번째 표시 중
+  </span>
+  <button
+    onClick={prevPage}
+    disabled={currentPage === 1}
+    aria-label="이전 페이지"
+  >
+    이전
+  </button>
+  <span aria-current="page">
+    {currentPage} / {totalPages} 페이지
+  </span>
+  <button
+    onClick={nextPage}
+    disabled={currentPage === totalPages}
+    aria-label="다음 페이지"
+  >
+    다음
+  </button>
+</nav>
+```
 
 ---
 
-## 📎 Related Articles
+## 스크린 리더 테스트 가이드
+
+### VoiceOver (macOS) 기본 명령어
+
+| 명령어 | 동작 |
+|--------|------|
+| `Cmd + F5` | VoiceOver 켜기/끄기 |
+| `Ctrl + Option + 오른쪽 화살표` | 다음 요소로 이동 |
+| `Ctrl + Option + 왼쪽 화살표` | 이전 요소로 이동 |
+| `Ctrl + Option + Space` | 현재 요소 활성화 (클릭) |
+| `Ctrl + Option + U` | 로터 열기 (제목/링크/폼 탐색) |
+| `Tab` | 다음 포커스 가능 요소로 이동 |
+| `Shift + Tab` | 이전 포커스 가능 요소로 이동 |
+
+### NVDA (Windows) 기본 명령어
+
+| 명령어 | 동작 |
+|--------|------|
+| `Insert + Space` | NVDA 포커스/탐색 모드 전환 |
+| `아래 화살표` | 다음 줄 읽기 |
+| `Tab` | 다음 폼 필드로 이동 |
+| `H` | 다음 제목으로 이동 |
+| `K` | 다음 링크로 이동 |
+| `F` | 다음 폼 필드로 이동 |
+| `Insert + F7` | 요소 목록 표시 |
+
+### 스크린 리더 테스트 체크리스트
+
+1. **VoiceOver/NVDA를 켜고 페이지를 처음부터 탐색**
+   - 모든 콘텐츠가 읽히는가?
+   - 읽히는 순서가 시각적 순서와 일치하는가?
+2. **Tab 키만으로 모든 인터랙션을 완료할 수 있는가?**
+3. **각 버튼/링크의 용도가 명확히 전달되는가?** ("여기 클릭" 대신 구체적 라벨)
+4. **모달/드롭다운이 열릴 때 포커스가 이동하는가?**
+5. **닫을 때 원래 위치로 포커스가 돌아오는가?**
+
+---
+
+## axe-core 자동 테스트 워크플로우
+
+```bash
+# 1. 설치
+npm install -D @axe-core/cli
+
+# 2. 단일 페이지 스캔
+npx axe https://your-app.com/login
+
+# 3. 여러 페이지 일괄 스캔
+npx axe https://your-app.com/login \
+        https://your-app.com/dashboard \
+        https://your-app.com/settings \
+        --tags wcag2a,wcag2aa
+
+# 4. 결과를 JSON으로 저장
+npx axe https://your-app.com --save results.json
+
+# 5. CI에서 사용 (위반 시 exit code 1)
+npx axe https://your-app.com --exit
+```
+
+### Playwright + axe-core E2E 통합
+
+```tsx
+// tests/accessibility.spec.ts
+import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+
+const pages = [
+  { name: 'Login', url: '/login' },
+  { name: 'Dashboard', url: '/dashboard' },
+  { name: 'Settings', url: '/settings' },
+  { name: 'Profile', url: '/profile' },
+];
+
+for (const { name, url } of pages) {
+  test(`${name} 페이지는 접근성 위반이 없다`, async ({ page }) => {
+    await page.goto(url);
+    await page.waitForLoadState('networkidle');
+
+    const results = await new AxeBuilder({ page })
+      .withTags(['wcag2a', 'wcag2aa', 'wcag22aa'])
+      .analyze();
+
+    // 위반 항목을 읽기 쉽게 출력
+    if (results.violations.length > 0) {
+      console.log(`${name} - ${results.violations.length} violations:`);
+      results.violations.forEach((v) => {
+        console.log(`  [${v.impact}] ${v.id}: ${v.description}`);
+        v.nodes.forEach((n) => {
+          console.log(`    - ${n.html.substring(0, 80)}...`);
+        });
+      });
+    }
+
+    expect(results.violations).toEqual([]);
+  });
+}
+```
+
+---
+
+## 핵심 교훈
+
+1. **접근성은 사후 작업이 아닌 설계 원칙** - 처음부터 고려해야 비용이 적음
+2. **스크린 리더 테스트는 수동으로** - 자동화 도구로는 30-40%만 감지 가능
+3. **장애인 사용자와 함께 테스트** - 가장 효과적인 피드백
+4. **접근 가능한 라이브러리 != 접근 가능한 제품** - 구현 방식이 결정적
+
+---
+*출처: IntoDesignSystems Accessibility Meetup*
+*리뷰어: Sarah Massingale, Marcelo Paiva*
+
+---
+
+## Related Articles
 
 import CrossRef from '@site/src/components/CrossRef';
 
 <CrossRef
   related={[
     { path: "/docs/accessibility/accessible-systems", label: "Accessible Design Systems Don't Guarantee Accessible Products" },
-    { path: "/docs/category/03-component-design", label: "Component Design" },
+    { path: "/docs/accessibility/wcag-cards", label: "WCAG 2.2 접근성 카드 덱" },
     { path: "/docs/quality-testing/figma-review", label: "Figma 컴포넌트 리뷰 가이드" },
   ]}
 />

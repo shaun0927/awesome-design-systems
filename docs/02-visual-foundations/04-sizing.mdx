@@ -2,20 +2,31 @@
 title: "Size in Design Systems: 컴포넌트 높이 통일"
 sidebar_label: "사이즈 시스템"
 sidebar_position: 4
-tags: [sizing, components, density]
+audience: developer
+tags: [sizing, components, density, css]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#566
 
-## Size in Design Systems: 컴포넌트 높이 통일 (Nathan Curtis, 2019)
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-### 📌 핵심 개념
+<DevQuickStart
+  what="Consistent component heights across Button, Input, Select, etc. come from shared typography + spacing tokens, not fixed height values"
+  learn="How to unify component sizing with min-height + flexbox instead of fixed heights, and how to separate size from density"
+  able="Implement a 3-level size system (S/M/L) with CSS custom properties that automatically aligns all interactive components"
+/>
+
+## 핵심 개념
 
 #### 사이즈의 정의
-```
-사이즈 = Typography + Padding + Border
-       ↓
-     Height (컴포넌트 높이)
+
+```mermaid
+graph LR
+    A["Typography<br/>font-size + line-height"] --> D["Height<br/>(computed)"]
+    B["Padding<br/>vertical + horizontal"] --> D
+    C["Border<br/>width"] --> D
+
+    style D fill:#d1fae5,stroke:#059669
 ```
 
 **목표**: 모든 컴포넌트가 **동일한 높이(Height)**를 공유하도록 통일
@@ -35,51 +46,61 @@ Medium: 기본값, 범용
 Large:  마케팅/온보딩 플로우
 ```
 
-### Step 2: Button/Input부터 시작
-```scss
-Small Button:
-  - font-size: 14px
-  - padding: 6px 12px
-  - height: 28px (자동 계산)
+### Step 2: CSS Custom Properties로 사이즈 토큰 정의
 
-Medium Button:
-  - font-size: 16px
-  - padding: 10px 16px
-  - height: 37px
+```css title="size-tokens.css"
+:root {
+  /* Size token system */
+  --size-sm-font: 0.875rem;    /* 14px */
+  --size-sm-padding-y: 0.375rem; /* 6px */
+  --size-sm-padding-x: 0.75rem;  /* 12px */
+  --size-sm-height: 1.75rem;     /* 28px (computed) */
 
-Large Button:
-  - font-size: 18px
-  - padding: 14px 20px
-  - height: 46px
-```
+  --size-md-font: 1rem;         /* 16px */
+  --size-md-padding-y: 0.625rem; /* 10px */
+  --size-md-padding-x: 1rem;     /* 16px */
+  --size-md-height: 2.375rem;    /* 38px (computed) */
 
-### Step 3: Typography 모델 통일
-```scss
-@mixin text-small() {
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-@mixin text-medium() {
-  font-size: 16px;
-  line-height: 1.5;
+  --size-lg-font: 1.125rem;     /* 18px */
+  --size-lg-padding-y: 0.875rem; /* 14px */
+  --size-lg-padding-x: 1.25rem;  /* 20px */
+  --size-lg-height: 2.875rem;    /* 46px (computed) */
 }
 ```
 
-### Step 4: Space 모델 통일
-```scss
-$inset-squish-half-x: 6px 12px;   // Small
-$inset-squish-3q-x: 10px 16px;    // Medium
-$inset-squish-1-x: 14px 20px;     // Large
-```
+### Step 3: Modern CSS - min-height + flexbox
 
-### Step 5: 컴포넌트별 미세 조정
-```scss
-// Select는 border 1px 때문에 padding 1px 줄임
-.select--small {
-  @include text-small();
-  padding: 5px 12px; // 6px - 1px
-  border: 1px solid;
+```css title="component-sizing.css"
+/* Use min-height + flexbox instead of fixed height */
+.button, .input, .select {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1.5;
+}
+
+.button--sm, .input--sm, .select--sm {
+  font-size: var(--size-sm-font);
+  padding: var(--size-sm-padding-y) var(--size-sm-padding-x);
+  min-height: var(--size-sm-height);
+}
+
+.button--md, .input--md, .select--md {
+  font-size: var(--size-md-font);
+  padding: var(--size-md-padding-y) var(--size-md-padding-x);
+  min-height: var(--size-md-height);
+}
+
+.button--lg, .input--lg, .select--lg {
+  font-size: var(--size-lg-font);
+  padding: var(--size-lg-padding-y) var(--size-lg-padding-x);
+  min-height: var(--size-lg-height);
+}
+
+/* Border compensation */
+.select--sm {
+  padding-top: calc(var(--size-sm-padding-y) - 1px);
+  padding-bottom: calc(var(--size-sm-padding-y) - 1px);
+  border: 1px solid var(--color-border);
 }
 ```
 
@@ -125,24 +146,22 @@ $inset-squish-1-x: 14px 20px;     // Large
 
 ## 🚨 흔한 실수와 해결
 
-### ❌ 실수 1: 높이를 직접 지정
-```scss
-// 나쁜 예
+### 실수 1: 높이를 직접 지정
+```css
+/* BAD: 고정 높이 - 텍스트가 2줄이면 잘림 */
 .button--small {
-  height: 28px; // 고정 높이
+  height: 28px;
   overflow: hidden;
 }
-```
-**문제**: 텍스트가 2줄로 늘어나면 잘림
 
-**해결**:
-```scss
-// 좋은 예
+/* GOOD: min-height + flexbox - 자연스럽게 확장 */
 .button--small {
-  font-size: 14px;
+  font-size: var(--size-sm-font);
   line-height: 1.5;
-  padding: 6px 12px;
-  // height는 자동 계산
+  padding: var(--size-sm-padding-y) var(--size-sm-padding-x);
+  min-height: var(--size-sm-height);
+  display: inline-flex;
+  align-items: center;
 }
 ```
 

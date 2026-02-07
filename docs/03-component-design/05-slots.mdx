@@ -2,14 +2,21 @@
 title: "Slots in Design Systems - 조합의 철학"
 sidebar_label: "Slots - 조합의 철학"
 sidebar_position: 5
-tags: [slots, composition, components]
+audience: developer
+tags: [slots, composition, components, react, vue, web-components]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#548
 
-## Slots in Design Systems
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-## 📌 핵심 개념
+<DevQuickStart
+  what="Slots are designated areas within components where users can inject custom content - balancing control with flexibility"
+  learn="3 slot types (general, named, repeating), progressive permissiveness strategy, and subcomponent parts pattern"
+  able="Implement slot patterns in React (children/render props), Vue (named slots), and Web Components (shadow DOM slots)"
+/>
+
+## 핵심 개념
 
 > **슬롯**: 컴포넌트 내부에서 사용자 정의 콘텐츠를 삽입할 수 있도록 지정된 공간. 커스텀 변형을 허용하는 개방 영역.
 
@@ -107,9 +114,98 @@ Action List
           └─ ...
 ```
 
----
+## Slot Implementations: React, Vue, Web Components
 
-*출처: Nathan Curtis (EightShapes), 2025-11*
+### React: children + render props
+
+```tsx title="SlottedRow.tsx"
+interface RowProps {
+  // Named slots as props
+  leadingVisual?: React.ReactNode;
+  trailingActions?: React.ReactNode;
+  // Default slot
+  children: React.ReactNode;
+}
+
+export function Row({ leadingVisual, trailingActions, children }: RowProps) {
+  return (
+    <div className="row">
+      {leadingVisual && <div className="row__leading">{leadingVisual}</div>}
+      <div className="row__content">{children}</div>
+      {trailingActions && <div className="row__trailing">{trailingActions}</div>}
+    </div>
+  );
+}
+
+// Usage:
+// <Row
+//   leadingVisual={<Avatar src="user.jpg" />}
+//   trailingActions={<IconButton icon="more" />}
+// >
+//   <Text variant="body">Row content here</Text>
+// </Row>
+```
+
+### Vue: Named Slots
+
+```vue title="SlottedRow.vue"
+<template>
+  <div class="row">
+    <div v-if="$slots.leading" class="row__leading">
+      <slot name="leading" />
+    </div>
+    <div class="row__content">
+      <slot />  <!-- default slot -->
+    </div>
+    <div v-if="$slots.trailing" class="row__trailing">
+      <slot name="trailing" />
+    </div>
+  </div>
+</template>
+
+<!-- Usage:
+<Row>
+  <template #leading><Avatar src="user.jpg" /></template>
+  Row content here
+  <template #trailing><IconButton icon="more" /></template>
+</Row>
+-->
+```
+
+### Web Components: Shadow DOM Slots
+
+```html title="slotted-row.html"
+<template id="row-template">
+  <style>
+    :host { display: flex; align-items: center; gap: 0.75rem; }
+    .leading, .trailing { flex-shrink: 0; }
+    .content { flex: 1; }
+  </style>
+  <div class="leading"><slot name="leading"></slot></div>
+  <div class="content"><slot></slot></div>
+  <div class="trailing"><slot name="trailing"></slot></div>
+</template>
+
+<script>
+class SlottedRow extends HTMLElement {
+  constructor() {
+    super();
+    const shadow = this.attachShadow({ mode: 'open' });
+    const template = document.getElementById('row-template');
+    shadow.appendChild(template.content.cloneNode(true));
+  }
+}
+customElements.define('slotted-row', SlottedRow);
+</script>
+
+<!-- Usage:
+<slotted-row>
+  <img slot="leading" src="avatar.jpg" />
+  <span>Row content</span>
+  <button slot="trailing">Action</button>
+</slotted-row>
+-->
+```
 
 ---
 

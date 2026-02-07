@@ -2,103 +2,348 @@
 title: "컴포넌트 테스팅 계획 수립"
 sidebar_label: "테스팅 계획"
 sidebar_position: 2
-tags: [testing, planning, quality, roadmap, visual-regression]
+audience: developer
+tags: [testing, planning, quality, visual-regression, ci-cd, jest-axe]
 ---
 
-## 컴포넌트 테스팅 계획 수립
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-> Original issue: shaun0927/stocktitan-crawler#553
+<DevQuickStart
+  what="NOW/NEXT/LATER 단계별 테스팅 로드맵과 CI 파이프라인 구성을 배웁니다."
+  learn="BackstopJS 시각적 회귀 테스트, jest-axe 접근성 통합, GitHub Actions CI 파이프라인 구축"
+  able="디자인 시스템의 품질 보증을 자동화하는 완전한 CI 파이프라인을 구축할 수 있습니다."
+/>
 
-## 📌 핵심 개념
+## 핵심 개념
 
-### 1. 품질 vs 수량의 패러다임 전환
-**핵심 질문의 변화**:
-- ❌ "우리 카탈로그에 컴포넌트가 몇 개나 필요한가?" (수량 중심)
-- ✅ "우리 컴포넌트의 품질이 충분한가?" (품질 중심)
-
-**주요 인사이트**: 완벽한 품질의 컴포넌트를 가진 시스템은 없습니다.
-
-### 2. 테스팅 계획의 정의
+### 품질 vs 수량의 패러다임 전환
+- 30개의 평범한 컴포넌트보다 10개의 완벽한 컴포넌트
 - 품질은 **구현된 테스팅 계획**에서 나옴
-- 릴리스 전 컴포넌트 검사 기준
 - 점진적으로 추가 가능한 능력(Capability)
 
-### 3. NOW → NEXT → LATER 로드맵
+### NOW / NEXT / LATER 로드맵
 
-| 단계 | 시기 | 테스팅 항목 |
-|------|------|-------------|
-| **NOW** | 개발 시작 시 | Visual Testing Page, Hostile Styles, Browser Testing, Coding Linting |
-| **NEXT** | 알파/베타 단계 | Functional Testing, Unit Testing, Visual Regression, Accessibility Audit |
-| **LATER** | 성숙 단계 | Dark Mode, Subbrand Themes, Right-to-Left, Analytics |
+```mermaid
+graph LR
+    subgraph NOW ["NOW - 개발 시작 시"]
+        A1[Kitchen Sink Page]
+        A2[Hostile Styles]
+        A3[Browser Testing]
+        A4[Code Linting]
+    end
 
-## 🎯 실무 노하우
+    subgraph NEXT ["NEXT - 알파/베타"]
+        B1[Unit Testing]
+        B2[Visual Regression]
+        B3[Accessibility Audit]
+        B4[Semantic Versioning]
+    end
 
-### 1. 테스팅 기본 원칙 (NOW)
+    subgraph LATER ["LATER - 성숙 단계"]
+        C1[Dark Mode]
+        C2[Subbrand Themes]
+        C3[RTL Support]
+        C4[Analytics]
+    end
 
-#### Visual Testing Page (Kitchen Sink)
-- 컴포넌트의 모든 변형, 상태, 행동 시각화
-- 다양한 배경 설정, 크기 변화, 반응형 특성
+    NOW --> NEXT --> LATER
+```
 
-#### Hostile Styles Environment
-- 컴포넌트가 외부 스타일의 영향을 받지 않는지 검증
-- 페이지 레벨 선택자로 CSS Cascade 오염 시키기
-```css
-* {
-  box-sizing: content-box !important;
-  font-family: Comic Sans MS;
+## BackstopJS 시각적 회귀 테스트
+
+```json
+// backstop.json
+{
+  "id": "design-system",
+  "viewports": [
+    { "label": "mobile", "width": 375, "height": 812 },
+    { "label": "tablet", "width": 768, "height": 1024 },
+    { "label": "desktop", "width": 1440, "height": 900 }
+  ],
+  "scenarios": [
+    {
+      "label": "Button - All Variants",
+      "url": "http://localhost:6006/iframe.html?id=components-button--all-variants",
+      "selectors": [".story-container"],
+      "delay": 500,
+      "misMatchThreshold": 0.1,
+      "requireSameDimensions": true
+    },
+    {
+      "label": "Button - Hover State",
+      "url": "http://localhost:6006/iframe.html?id=components-button--primary",
+      "selectors": ["button"],
+      "hoverSelector": "button",
+      "delay": 300
+    },
+    {
+      "label": "Alert - All Severities",
+      "url": "http://localhost:6006/iframe.html?id=components-alert--all-severities",
+      "selectors": [".story-container"],
+      "delay": 500
+    },
+    {
+      "label": "Card - Responsive",
+      "url": "http://localhost:6006/iframe.html?id=components-card--responsive",
+      "selectors": [".story-container"],
+      "delay": 500
+    }
+  ],
+  "paths": {
+    "bitmaps_reference": "backstop_data/bitmaps_reference",
+    "bitmaps_test": "backstop_data/bitmaps_test",
+    "html_report": "backstop_data/html_report"
+  },
+  "engine": "playwright",
+  "engineOptions": {
+    "args": ["--no-sandbox"]
+  },
+  "report": ["browser"],
+  "debug": false
 }
 ```
 
-#### Design Tokens 의존성
-- 처음부터 디자인 토큰 의존성 설정
-- 하드코딩 대신 토큰 사용
+```bash
+# BackstopJS 사용법
+npx backstop reference  # 기준 스크린샷 생성
+npx backstop test       # 현재 상태와 비교
+npx backstop approve    # 변경 사항 승인
+```
+
+## jest-axe 접근성 테스트 통합
+
+```tsx
+// test-utils/a11y.ts - 재사용 가능한 접근성 테스트 헬퍼
+import { render, RenderResult } from '@testing-library/react';
+import { axe, toHaveNoViolations, JestAxeConfigureOptions } from 'jest-axe';
+
+expect.extend(toHaveNoViolations);
+
+const axeConfig: JestAxeConfigureOptions = {
+  rules: {
+    // AA 수준 강제
+    'color-contrast': { enabled: true },
+    'link-name': { enabled: true },
+    'button-name': { enabled: true },
+    'image-alt': { enabled: true },
+    // 문서 구조 (컴포넌트 단위에서는 완화)
+    'region': { enabled: false },
+    'page-has-heading-one': { enabled: false },
+  },
+};
+
+/**
+ * 컴포넌트의 접근성을 자동 검증합니다.
+ * 모든 컴포넌트 테스트 파일에서 사용하세요.
+ */
+export async function expectAccessible(
+  ui: React.ReactElement,
+  options?: JestAxeConfigureOptions
+) {
+  const { container } = render(ui);
+  const results = await axe(container, options || axeConfig);
+  expect(results).toHaveNoViolations();
+  return results;
+}
+
+// 사용 예시:
+// it('접근성 위반이 없다', async () => {
+//   await expectAccessible(<Button>Click me</Button>);
+// });
+```
+
+### 컴포넌트별 접근성 테스트
+
+```tsx
+// __tests__/accessibility.test.tsx
+import { expectAccessible } from '../test-utils/a11y';
+import { Button, Alert, Input, Modal, Select } from '../components';
+
+describe('Accessibility - All Components', () => {
+  it('Button은 접근 가능하다', async () => {
+    await expectAccessible(<Button>Click me</Button>);
+    await expectAccessible(<Button variant="secondary">Cancel</Button>);
+    await expectAccessible(<Button disabled>Disabled</Button>);
+    await expectAccessible(<Button loading>Loading</Button>);
+  });
+
+  it('Alert은 접근 가능하다', async () => {
+    await expectAccessible(
+      <Alert severity="error" title="Error">Something went wrong</Alert>
+    );
+  });
+
+  it('Input은 접근 가능하다', async () => {
+    await expectAccessible(
+      <div>
+        <label htmlFor="email">Email</label>
+        <Input id="email" type="email" placeholder="you@example.com" />
+      </div>
+    );
+  });
+
+  it('Select는 접근 가능하다', async () => {
+    await expectAccessible(
+      <div>
+        <label htmlFor="country">Country</label>
+        <Select id="country">
+          <option value="kr">Korea</option>
+          <option value="us">United States</option>
+        </Select>
+      </div>
+    );
+  });
+});
+```
+
+## GitHub Actions CI 파이프라인
+
+```yaml
+# .github/workflows/design-system-ci.yml
+name: Design System CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+env:
+  NODE_VERSION: 20
+  PNPM_VERSION: 9
+
+jobs:
+  # 1. Lint & Type Check
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: '${{ env.PNPM_VERSION }}' }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+
+  # 2. Unit Tests + Coverage
+  test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: '${{ env.PNPM_VERSION }}' }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test -- --coverage --ci
+      - name: Check coverage threshold
+        run: |
+          COVERAGE=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
+          echo "Coverage: ${COVERAGE}%"
+          if (( $(echo "$COVERAGE < 80" | bc -l) )); then
+            echo "Coverage ${COVERAGE}% is below 80% threshold"
+            exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+
+  # 3. Accessibility Tests
+  a11y:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: '${{ env.PNPM_VERSION }}' }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm test:a11y
+
+  # 4. Visual Regression (Chromatic)
+  visual:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: pnpm/action-setup@v4
+        with: { version: '${{ env.PNPM_VERSION }}' }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - uses: chromaui/action@latest
+        with:
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          exitZeroOnChanges: true
+
+  # 5. Build Verification
+  build:
+    runs-on: ubuntu-latest
+    needs: [test, a11y, visual]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: '${{ env.PNPM_VERSION }}' }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - name: Check bundle size
+        run: |
+          SIZE=$(du -sk dist/ | cut -f1)
+          echo "Bundle size: ${SIZE}KB"
+          if [ $SIZE -gt 500 ]; then
+            echo "Bundle too large: ${SIZE}KB > 500KB"
+            exit 1
+          fi
+```
+
+## 실무 노하우
+
+### NOW 단계: Hostile Styles 환경
+
 ```css
-/* ❌ 잘못된 예 */
+/* hostile-styles.css - 컴포넌트 격리 테스트 */
+* {
+  box-sizing: content-box !important;
+  font-family: 'Comic Sans MS' !important;
+  line-height: 3 !important;
+  color: red !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-size: 48px !important;
+}
+```
+
+이 CSS를 적용한 상태에서 컴포넌트가 정상 동작하면 스타일 격리가 올바른 것입니다.
+
+### NEXT 단계: Design Token 의존성
+
+```css
+/* 잘못된 예 */
 .button { background: #3b82f6; }
-/* ✅ 올바른 예 */
+
+/* 올바른 예 */
 .button { background: var(--color-primary-500); }
 ```
 
-### 2. 출시 전 필수 절차 (NEXT)
-
-#### Automated Visual Regression (AVR)
-- 추천 도구: BackstopJS, Percy, Chromatic
-- 베이스라인 스크린샷 생성 → 코드 변경 후 비교 → 차이점 시각화
-
-#### Accessibility Audit
-**전략 2가지**:
-1. Per-Component: 컴포넌트 완성 시마다 감사 (즉각 피드백)
-2. Periodic: 정기 간격 (비용 효율적)
-
-**체크리스트**:
-- 키보드 네비게이션, 스크린 리더 호환성, ARIA 라벨, 색상 대비율, 포커스 표시
-
-#### Semantic Versioning + Changelog
-```markdown
-# v2.1.0 (2024-01-15)
-
-## 🎉 New Features
-- Button: 새로운 `size="xs"` prop 추가
-
-## 🐛 Bug Fixes
-- Modal: iOS Safari 스크롤 버그 수정
-```
-
-### 3. 고급 스코프 (LATER)
-
-#### Light & Dark Mode
-| 레벨 | 배경 수 | 예시 |
-|------|---------|------|
-| 기본 | 2개 | White, Black |
-| 중급 | 4개 | White, Black, Light Gray, Dark Gray |
-| 고급 | 8개 | + Mid Gray, Off-White, Charcoal, Slate |
-
-#### Internationalization (i18n)
-1. Easy: 긴 독일어 라벨 테스트
-2. Medium: 넓은 문자 (일본 엔화)
-3. Hard: 글로벌 헤더 (다국어 혼합)
-
-## 📋 테스트 계획 체크리스트
+## 테스트 계획 체크리스트
 
 ### 초기 단계 (NOW)
 - [ ] Kitchen Sink 페이지 구축
@@ -108,38 +353,32 @@ tags: [testing, planning, quality, roadmap, visual-regression]
 - [ ] ESLint/Prettier 설정
 
 ### 중기 단계 (NEXT)
-- [ ] Visual Regression (BackstopJS/Percy)
+- [ ] Visual Regression (BackstopJS/Chromatic)
 - [ ] Unit Tests (80% 커버리지)
-- [ ] axe-core 자동 검사
+- [ ] jest-axe 자동 검사
 - [ ] 키보드 네비게이션 테스트
-- [ ] Semantic Versioning 규칙
+- [ ] GitHub Actions CI 파이프라인
 
 ### 성숙 단계 (LATER)
 - [ ] Light/Dark Mode 지원
 - [ ] RTL 레이아웃 지원
-- [ ] Small/Medium/Large variants
-- [ ] 컴포넌트 사용 추적
+- [ ] 컴포넌트 사용 추적 (Analytics)
 - [ ] 퍼포먼스 모니터링
 
-## 💡 핵심 교훈
+## 핵심 교훈
 
 1. **품질 > 수량**: 30개의 평범한 컴포넌트보다 10개의 완벽한 컴포넌트
 2. **점진적 개선**: 완벽한 테스트 스위트로 시작하지 말고 기본부터
-3. **시각화**: 테스팅 계획을 테이블 형태로 시각화 → 팀 정렬
-4. **자동화 투자**: 초기 노력 크지만 장기적 ROI 높음
-5. **Design Tokens 처음부터**: 나중에 리팩토링하면 10배 힘듦
-6. **Hostile Styles**: 진짜 강건함의 척도
-7. **버전 관리 규율**: Semantic Versioning + 명확한 Changelog
-8. **팀 합의**: 테스팅 계획은 팀 전체의 buy-in 필요
-9. **현실적 목표**: 모든 컴포넌트가 모든 기준 만족 불필요
+3. **자동화 투자**: 초기 노력 크지만 장기적 ROI 높음
+4. **Design Tokens 처음부터**: 나중에 리팩토링하면 10배 힘듦
+5. **Hostile Styles**: 진짜 강건함의 척도
 
 ---
 *출처: Nathan Curtis (EightShapes)*
-*분석일: 2026-02-06*
 
 ---
 
-## 📎 Related Articles
+## Related Articles
 
 import CrossRef from '@site/src/components/CrossRef';
 

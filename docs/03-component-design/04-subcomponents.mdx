@@ -2,14 +2,21 @@
 title: "Subcomponents - 조합 가능한 부품 제공"
 sidebar_label: "서브컴포넌트"
 sidebar_position: 4
-tags: [subcomponents, composition, components]
+audience: developer
+tags: [subcomponents, composition, components, react, context-api]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#561
 
-## Subcomponents: 통제를 내려놓고 구현자가 조합하게 하라
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-## 📌 핵심 개념
+<DevQuickStart
+  what="Instead of one mega-component with 50 props, provide small composable subcomponents that users assemble themselves"
+  learn="Inside-out and outside-in decomposition strategies, lockups/extensions/combinations/repeaters patterns, and API distribution"
+  able="Build a React compound component using Context API with composable subcomponents, similar to Radix UI patterns"
+/>
+
+## 핵심 개념
 
 > **Subcomponent**: 특정 부모 컴포넌트나 컨텍스트 내에서만 사용하도록 의도된, 독립적으로 조합 가능한 UI 컴포넌트
 
@@ -137,9 +144,83 @@ CardContainer
 **새로운 사고방식**:
 > "구현자는 자신의 운명을 소유한다. 시스템은 통제하거나 막기보다는 장비를 제공하고 가속화하기 위해 존재한다"
 
----
+## React Compound Component (Context API)
 
-*출처: Nathan Curtis (EightShapes), 2022-07*
+```tsx title="CompoundCard.tsx"
+import React, { createContext, useContext } from 'react';
+
+// Shared context for parent-child communication
+interface CardContextValue {
+  variant: 'default' | 'outlined' | 'elevated';
+  colorMode: 'light' | 'dark';
+}
+
+const CardContext = createContext<CardContextValue>({
+  variant: 'default',
+  colorMode: 'light',
+});
+
+// Parent container
+function CardRoot({
+  variant = 'default',
+  colorMode = 'light',
+  children,
+}: CardContextValue & { children: React.ReactNode }) {
+  return (
+    <CardContext.Provider value={{ variant, colorMode }}>
+      <article className={`card card--${variant} card--${colorMode}`}>
+        {children}
+      </article>
+    </CardContext.Provider>
+  );
+}
+
+// Subcomponents consume parent context
+function CardMedia({ src, alt }: { src: string; alt: string }) {
+  return (
+    <div className="card__media">
+      <img src={src} alt={alt} loading="lazy" />
+    </div>
+  );
+}
+
+function CardText({
+  title,
+  description,
+}: {
+  title: string;
+  description?: string;
+}) {
+  const { colorMode } = useContext(CardContext);
+  return (
+    <div className={`card__text card__text--${colorMode}`}>
+      <h3 className="card__title">{title}</h3>
+      {description && <p className="card__desc">{description}</p>}
+    </div>
+  );
+}
+
+function CardActions({ children }: { children: React.ReactNode }) {
+  return <div className="card__actions">{children}</div>;
+}
+
+// Compound component export (similar to Radix UI pattern)
+export const Card = Object.assign(CardRoot, {
+  Media: CardMedia,
+  Text: CardText,
+  Actions: CardActions,
+});
+
+// Usage:
+// <Card variant="elevated" colorMode="dark">
+//   <Card.Media src="photo.jpg" alt="Description" />
+//   <Card.Text title="Product" description="Details here" />
+//   <Card.Actions>
+//     <Button>Buy</Button>
+//     <Button variant="ghost">Save</Button>
+//   </Card.Actions>
+// </Card>
+```
 
 ---
 

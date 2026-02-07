@@ -2,48 +2,282 @@
 title: "Dealing with Dependencies Inside Design Systems"
 sidebar_label: "의존성 관리"
 sidebar_position: 12
-tags: [dependencies, versioning, architecture, release]
+audience: developer
+tags: [dependencies, versioning, architecture, release, monorepo]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#574
 
-## 디자인 시스템의 의존성 관리
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-## 📌 핵심 개념
+<DevQuickStart
+  what="Component dependency chains determine your build order, release strategy, and the blast radius of every change"
+  learn="How to manage dependencies with peerDependencies, monorepo tooling, and automated dependency graphs"
+  able="Set up a monorepo with proper dependency tracking and automated versioning using Changesets"
+/>
 
-- **Component dependency chain**: icon이 가장 많은 dependents를 가짐 (button, checkbox, select, alert 등에서 재사용)
-- **Compositional hierarchy**: 예: menu = popover + list group, popover는 tooltip을 확장
-- **Build sequence**: Small to large 순서로 구축 (icon → button → card), 하지만 design은 모든 레벨에서 동시 진행
-- **Dependency types**: Component-to-component (명시적) + shared styles/behaviors (암묵적)
-- **Subsystem dependencies**: Design tokens, documentation, page types 등도 dependency chain에 포함
+## 의존성 체인 이해
 
-## 🎯 실무 노하우
+디자인 시스템에서 컴포넌트는 서로 의존합니다. Icon을 변경하면 Button, Checkbox, Select, Alert 등 모든 의존 컴포넌트에 영향을 미칩니다.
 
-- Trace dependencies up the chain: icon 변경 시 모든 dependent components도 업데이트 필요
-- Automate versioning tools: Release wizard로 impacted dependencies 자동 표시 및 version increment 결정
-- Use scripts to highlight dependencies: Repository를 intelligent하게 trace하는 도구 활용
-- Design tokens separation: Single source-of-truth로 분리하여 multiple systems 지원
-- Breaking changes propagation: Icon이 major version increment 해도 모든 dependents가 major일 필요는 없음 (patch로 처리 가능)
+```mermaid
+graph TD
+    Icon["Icon<br/>62 dependents"] --> Button["Button<br/>42 dependents"]
+    Icon --> Checkbox
+    Icon --> Select
+    Icon --> Alert
+    Button --> Card
+    Button --> Modal
+    Button --> Toolbar
+    Tooltip --> Popover
+    Popover --> Menu
+    ListGroup["List Group"] --> Menu
 
-## 📊 주요 구조/다이어그램
-
-**Dependency levels:**
+    style Icon fill:#fee2e2,stroke:#dc2626
+    style Button fill:#fef3c7,stroke:#d97706
+    style Card fill:#d1fae5,stroke:#059669
+    style Modal fill:#d1fae5,stroke:#059669
 ```
-Level 1: icon (62 dependents - Atlassian 기준)
-Level 2: button (42), avatar (19), modal (15)
-Level 3: menu (depends on popover + list-group)
-Level 4: popover (depends on tooltip)
+
+### 의존성 레벨
+
+| Level | 예시 | Dependents | 변경 위험도 |
+|-------|------|------------|------------|
+| **1 (Foundation)** | Icon, Token | 60+ | Very High |
+| **2 (Core)** | Button, Avatar, Input | 20-40 | High |
+| **3 (Composite)** | Menu, Popover, Modal | 5-15 | Medium |
+| **4 (Pattern)** | Card Grid, Toolbar | 0-5 | Low |
+
+## npm peerDependencies 전략
+
+디자인 시스템 패키지에서 peerDependencies를 사용하면 버전 충돌을 방지하고 번들 크기를 줄일 수 있습니다.
+
+### 패키지 구조
+
+```json title="packages/button/package.json"
+{
+  "name": "@myds/button",
+  "version": "2.1.0",
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "@myds/icon": "^3.0.0",
+    "@myds/tokens": "^1.0.0"
+  },
+  "devDependencies": {
+    "@myds/icon": "^3.2.0",
+    "@myds/tokens": "^1.4.0"
+  }
+}
 ```
 
-**Shared style/behavior dependencies (layered components):**
-- Shadow, notch, elevation, border-radius (visual)
-- Opening/closing states, animation, collision detection (behavioral)
+```json title="packages/modal/package.json"
+{
+  "name": "@myds/modal",
+  "version": "1.5.0",
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "@myds/button": "^2.0.0",
+    "@myds/icon": "^3.0.0",
+    "@myds/tokens": "^1.0.0"
+  },
+  "dependencies": {
+    "@myds/focus-trap": "^1.0.0"
+  }
+}
+```
 
-**System output dependencies:**
+### 언제 어떤 dependency 타입을 사용하나?
+
+| 타입 | 사용 시점 | 예시 |
+|------|----------|------|
+| `peerDependencies` | 소비자가 이미 설치한 패키지 | React, 다른 DS 컴포넌트 |
+| `dependencies` | 내부 유틸리티, 소비자에게 노출 안 됨 | focus-trap, class-variance-authority |
+| `devDependencies` | 빌드/테스트 전용 | TypeScript, Jest, Storybook |
+
+## 모노레포 설정
+
+### Turborepo 구성
+
+```json title="turbo.json"
+{
+  "$schema": "https://turbo.build/schema.json",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**"]
+    },
+    "test": {
+      "dependsOn": ["^build"]
+    },
+    "lint": {}
+  }
+}
 ```
-Build Tooling → Design Tokens → UI Components →
-Doc Components → Documentation Site
+
+`"dependsOn": ["^build"]`는 패키지의 의존성이 먼저 빌드되도록 보장합니다. Icon이 먼저 빌드되고, 그 다음 Button, 그 다음 Modal 순서입니다.
+
+### 디렉토리 구조
+
 ```
+design-system/
+├── packages/
+│   ├── tokens/          # Foundation - 가장 먼저 빌드
+│   │   ├── src/
+│   │   └── package.json
+│   ├── icon/            # Level 1
+│   │   ├── src/
+│   │   └── package.json
+│   ├── button/          # Level 2 - depends on icon, tokens
+│   │   ├── src/
+│   │   └── package.json
+│   ├── modal/           # Level 3 - depends on button, icon
+│   │   ├── src/
+│   │   └── package.json
+│   └── react/           # Meta-package (re-exports all)
+│       └── package.json
+├── turbo.json
+├── package.json
+└── pnpm-workspace.yaml
+```
+
+```yaml title="pnpm-workspace.yaml"
+packages:
+  - 'packages/*'
+```
+
+## Changesets를 사용한 자동 버전 관리
+
+[Changesets](https://github.com/changesets/changesets)는 변경 사항을 추적하고 자동으로 버전을 증가시킵니다.
+
+### 설치 및 초기화
+
+```bash
+pnpm add -Dw @changesets/cli
+pnpm changeset init
+```
+
+### 변경 사항 기록
+
+Icon 컴포넌트를 수정했다면:
+
+```bash
+pnpm changeset
+```
+
+```markdown title=".changeset/cool-tigers-fly.md"
+---
+"@myds/icon": minor
+---
+
+Added new `ChevronDown` icon variant for dropdown indicators.
+```
+
+### 의존성 체인 자동 버전 업데이트
+
+Changesets는 의존하는 패키지의 버전도 자동으로 올립니다.
+
+```bash
+pnpm changeset version
+```
+
+결과:
+- `@myds/icon`: 3.2.0 -> 3.3.0 (minor - 새 기능)
+- `@myds/button`: 2.1.0 -> 2.1.1 (patch - dependency update)
+- `@myds/modal`: 1.5.0 -> 1.5.1 (patch - dependency update)
+
+### Breaking Change 전파 규칙
+
+Icon이 breaking change(major)를 발생시켜도, 의존하는 모든 패키지가 major일 필요는 없습니다.
+
+```markdown title="When icon has a breaking change"
+@myds/icon:   3.x.x → 4.0.0  (MAJOR - API changed)
+@myds/button: 2.x.x → 2.2.0  (MINOR - adapts to new icon API internally)
+@myds/modal:  1.x.x → 1.5.1  (PATCH - no API change for modal consumers)
+```
+
+핵심: 소비자의 API가 변경되지 않으면 patch/minor로 충분합니다.
+
+## 의존성 시각화
+
+### 스크립트로 의존성 그래프 생성
+
+```typescript title="scripts/dependency-graph.ts"
+import { readFileSync, readdirSync } from 'fs';
+import { join } from 'path';
+
+interface PackageInfo {
+  name: string;
+  peerDependencies?: Record<string, string>;
+  dependencies?: Record<string, string>;
+}
+
+function buildDependencyGraph(packagesDir: string) {
+  const packages = readdirSync(packagesDir);
+  const graph: Record<string, string[]> = {};
+
+  for (const pkg of packages) {
+    const pkgJsonPath = join(packagesDir, pkg, 'package.json');
+    const pkgJson: PackageInfo = JSON.parse(
+      readFileSync(pkgJsonPath, 'utf-8')
+    );
+
+    const deps = {
+      ...pkgJson.peerDependencies,
+      ...pkgJson.dependencies,
+    };
+
+    const internalDeps = Object.keys(deps || {}).filter((d) =>
+      d.startsWith('@myds/')
+    );
+
+    graph[pkgJson.name] = internalDeps;
+  }
+
+  return graph;
+}
+
+function getDependents(
+  graph: Record<string, string[]>,
+  packageName: string
+): string[] {
+  return Object.entries(graph)
+    .filter(([, deps]) => deps.includes(packageName))
+    .map(([name]) => name);
+}
+
+// Usage: "What breaks if I change @myds/icon?"
+const graph = buildDependencyGraph('./packages');
+const affected = getDependents(graph, '@myds/icon');
+console.log('Affected packages:', affected);
+// → ["@myds/button", "@myds/checkbox", "@myds/select", "@myds/alert", ...]
+```
+
+## 시스템 전체 의존성 흐름
+
+컴포넌트 외에도 빌드 도구, 토큰, 문서 사이트 간의 의존성이 있습니다.
+
+```mermaid
+graph LR
+    A[Build Tooling<br/>webpack, tsconfig] --> B[Design Tokens<br/>JSON → CSS]
+    B --> C[UI Components<br/>React/Vue/Web Components]
+    C --> D[Doc Components<br/>CodeBlock, PropTable]
+    D --> E[Documentation Site<br/>Storybook, Docusaurus]
+
+    style A fill:#f3e8ff,stroke:#7c3aed
+    style B fill:#fef3c7,stroke:#d97706
+    style C fill:#dbeafe,stroke:#2563eb
+    style D fill:#d1fae5,stroke:#059669
+    style E fill:#fee2e2,stroke:#dc2626
+```
+
+## 의존성 관리 체크리스트
+
+- [ ] 모든 내부 패키지 간 의존성을 `peerDependencies`로 선언
+- [ ] Turborepo 또는 Nx로 빌드 순서 자동 관리
+- [ ] Changesets로 버전 관리 자동화
+- [ ] CI에서 `pnpm changeset status`로 changeset 누락 체크
+- [ ] 의존성 그래프 시각화 도구 구축 (영향 범위 파악용)
+- [ ] Breaking change 전파 규칙 문서화
 
 ---
 

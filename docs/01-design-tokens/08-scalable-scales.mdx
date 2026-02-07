@@ -2,19 +2,21 @@
 title: "확장 가능한 스케일 시스템"
 sidebar_label: "스케일 시스템"
 sidebar_position: 8
-tags: [tokens, scales, typography, spacing]
+audience: developer
+tags: [tokens, scales, typography, spacing, react]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#538
 
-## 확장 가능한 스케일 시스템 정리 - Scalable Scales That Scale
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-> **출처**: Into Design Systems 컨퍼런스 - Nate Baldwin (Adobe Spectrum, Leonardo/Proportio 개발자)
-> **핵심 주제**: 디자인 시스템에서 타입, 간격, 컴포넌트 크기를 수학적으로 확장 가능하게 만드는 방법론
+<DevQuickStart
+  what="Proportional (geometric) scales produce visually consistent size hierarchies that linear pixel grids cannot achieve"
+  learn="How to implement modular type and spacing scales with parameterized formulas, and how size vs density dimensions work independently"
+  able="Build a complete scale system with TypeScript types and a React component that uses generated tokens"
+/>
 
----
-
-## 📌 핵심 철학
+## 핵심 철학
 
 ### 문제 인식: "픽셀 그리드는 쓰레기다"
 
@@ -340,49 +342,139 @@ window.addEventListener('resize', generateCSSVariables);
   - [ ] 다양한 뷰포트/텍스트 크기에서 테스트
   - [ ] 접근성 검증 (브라우저 폰트 크기 변경 테스트)
 
----
+## TypeScript 타입 정의
 
-## 🛠️ 추천 도구
+```typescript title="types/scale-system.ts"
+type ScaleSize = 'small' | 'medium' | 'large';
+type ScaleDensity = 'compact' | 'regular' | 'comfortable';
+
+interface ScaleConfig {
+  base: number;
+  ratio: number;
+  stepsDown: number;
+  stepsUp: number;
+}
+
+interface ViewportConfig extends ScaleConfig {
+  maxWidth: number;
+}
+
+interface ComponentStyle {
+  fontSize: string;
+  paddingTop: string;
+  paddingBottom: string;
+  paddingLeft: string;
+  paddingRight: string;
+  gap: string;
+}
+
+function getComponentStyle(
+  size: ScaleSize,
+  density: ScaleDensity,
+  config: ScaleConfig
+): ComponentStyle {
+  const sizeOffset = { small: -1, medium: 0, large: 1 }[size];
+  const densityOffset = { compact: -1, regular: 0, comfortable: 1 }[density];
+  const densityShift = densityOffset * 2;
+
+  const textPx = Math.round(
+    (config.base * Math.pow(config.ratio, sizeOffset)) / 2
+  ) * 2;
+  const paddingV = Math.round(
+    (config.base * Math.pow(config.ratio, -4 + sizeOffset + densityShift)) / 2
+  ) * 2;
+  const paddingH = Math.round(
+    (config.base * Math.pow(config.ratio, -1 + sizeOffset + densityShift)) / 2
+  ) * 2;
+  const gapPx = Math.round(
+    (config.base * Math.pow(config.ratio, -3 + sizeOffset + densityShift)) / 2
+  ) * 2;
+
+  return {
+    fontSize: `${textPx / 16}rem`,
+    paddingTop: `${paddingV}px`,
+    paddingBottom: `${paddingV}px`,
+    paddingLeft: `${paddingH}px`,
+    paddingRight: `${paddingH}px`,
+    gap: `${gapPx}px`,
+  };
+}
+```
+
+## React 컴포넌트 예시
+
+```tsx title="ScaledButton.tsx"
+import React from 'react';
+
+type Size = 'small' | 'medium' | 'large';
+type Density = 'compact' | 'regular' | 'comfortable';
+
+interface ScaledButtonProps {
+  size?: Size;
+  density?: Density;
+  children: React.ReactNode;
+  onClick?: () => void;
+}
+
+const BASE = 16;
+const RATIO = 1.2;
+
+function scale(index: number): number {
+  return Math.round((BASE * Math.pow(RATIO, index)) / 2) * 2;
+}
+
+export function ScaledButton({
+  size = 'medium',
+  density = 'regular',
+  children,
+  onClick,
+}: ScaledButtonProps) {
+  const sizeOffset = { small: -1, medium: 0, large: 1 }[size];
+  const densityOffset = { compact: -2, regular: 0, comfortable: 2 }[density];
+
+  const style: React.CSSProperties = {
+    fontSize: `${scale(sizeOffset) / 16}rem`,
+    paddingBlock: `${scale(-4 + sizeOffset + densityOffset)}px`,
+    paddingInline: `${scale(-1 + sizeOffset + densityOffset)}px`,
+    gap: `${scale(-3 + sizeOffset + densityOffset)}px`,
+    display: 'inline-flex',
+    alignItems: 'center',
+    borderRadius: 'var(--radius-md)',
+    border: 'none',
+    background: 'var(--color-brand-primary)',
+    color: 'var(--color-text-on-primary)',
+    cursor: 'pointer',
+  };
+
+  return (
+    <button style={style} onClick={onClick}>
+      {children}
+    </button>
+  );
+}
+
+// Usage:
+// <ScaledButton size="large" density="compact">Submit</ScaledButton>
+// <ScaledButton size="small" density="comfortable">Cancel</ScaledButton>
+```
+
+## 추천 도구
 
 | 도구 | 용도 | URL |
 |------|------|-----|
-| **Proportio** | Modular Scale 계산기 (Nate Baldwin 개발) | [proportio.app](https://proportio.app) |
+| **Proportio** | Modular Scale 계산기 | [proportio.app](https://proportio.app) |
 | **Utopia** | CSS clamp() 기반 Fluid 타이포그래피 | [utopia.fyi](https://utopia.fyi) |
 | **Token Studio** | Figma 플러그인 (시스템 다이어그램 → 토큰) | [tokens.studio](https://tokens.studio) |
 
-**주의**: CSS `clamp()` 함수는 접근성 이슈 있음 (텍스트 스케일 방해 가능) → 조사 후 사용
-
----
-
-## 📚 핵심 용어 정리
-
-| 용어 | 한글 | 설명 |
-|------|------|------|
-| **Modular Scale** | 모듈 스케일 | 기하급수적 비율로 생성된 크기 체계 |
-| **Parameterization** | 파라미터화 | 최소 변수로 시스템 전체 제어 |
-| **Encapsulation** | 캡슐화 | 복잡한 문제를 독립적 부분으로 분리 |
-| **Abstraction** | 추상화 | 공통 패턴을 재사용 가능한 템플릿으로 변환 |
-| **Archetype** | 원형 | 모든 컴포넌트가 파생되는 기본 템플릿 |
-| **Relative Index** | 상대 인덱스 | 기본 크기 대비 몇 단계 떨어진 값인지 표현 |
-| **Design Tokens** | 디자인 토큰 | 디자인 결정을 코드로 표현한 변수 |
-
----
-
-## 💡 주요 인사이트
+## 주요 인사이트
 
 1. **"픽셀 그리드는 시스템이 아니다"** - 주관적 예외가 필요한 규칙은 확장 불가
 2. **컴포넌트 높이는 출력값이지 입력값이 아니다** - 간격+텍스트 크기가 높이를 결정
-3. **모든 것을 반응형으로 만들 필요는 없다** - 헤딩은 반응형, 본문은 고정이 더 나을 수도
-4. **크기(Size) ≠ 밀도(Density)** - 계층 구조 vs 공간 효율성은 별개 차원
-5. **시스템 다이어그램을 먼저 그려라** - 구현 전에 관계를 시각화하면 문제가 명확해짐
-6. **파라미터 2개로 수백 개의 값을 제어** - baseSize + ratio = 전체 스케일 시스템
-7. **팀별로 다른 문서를 제공하라** - 모바일팀은 모바일 값만, 마케팅팀은 반응형 로직만
+3. **크기(Size) =/= 밀도(Density)** - 계층 구조 vs 공간 효율성은 별개 차원
+4. **파라미터 2개로 수백 개의 값을 제어** - baseSize + ratio = 전체 스케일 시스템
 
 ---
-
-**작성 기준**: 2026-02-05
-**발표자**: Nate Baldwin (Adobe Spectrum, Leonardo/Proportio 개발자)
-**컨퍼런스**: Into Design Systems 2023
+*출처: Nate Baldwin (Adobe Spectrum)*
 
 ---
 

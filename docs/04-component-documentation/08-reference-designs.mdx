@@ -1,37 +1,226 @@
 ---
-title: "Reference Designs - Before & After with System Twist"
+title: "Reference Designs - Before & After with Design System"
 sidebar_label: "레퍼런스 디자인"
 sidebar_position: 8
-tags: [reference-designs, before-after, adoption, workshop]
+audience: developer
+tags: [reference-designs, before-after, adoption, comparison]
 ---
 
-> Original issue: shaun0927/stocktitan-crawler#575
+import DevQuickStart from '@site/src/components/DevQuickStart';
+
+<DevQuickStart
+  what="디자인 시스템 적용 전후의 코드 차이를 비교하고 개발자 역할을 이해합니다."
+  learn="Ad-hoc 코드를 디자인 시스템 기반 코드로 리팩토링하는 구체적 방법"
+  able="기존 페이지를 디자인 시스템 컴포넌트로 마이그레이션할 수 있습니다."
+/>
 
 ## 핵심 개념
-- **Reference Designs = 시스템 세일즈 도구**: 초기 단계에서 "시스템 없는 현재" vs "시스템 적용 후 미래"를 비교하는 고퀄리티 페이지 컨셉
-- **광범위한 페이지 선택**: 플래그십 제품 + 보조 제품, 다양한 레이아웃 모티프, 컴포넌트 다양성을 커버 (5~20개 페이지)
-- **Before & After 발표 전략**: 사이드바이사이드 비교로 청중 설득, 팀 피드백용 벽면 전시 (Post-It 피드백 기법)
-- **시스템 빌드 중 재활용**: 완성된 컴포넌트로 실제 페이지 예제 재구성, 릴리스 전 스트레스 테스트
 
-## 실무 노하우
-- **워크숍으로 집단 소유권 확보**: 제품 디자이너를 참여시켜 블랙박스 회피, 조기 피드백 유도
-- **6~10개 페이지를 고객 여정으로 연결**: 단일 시나리오로 엮어 프레젠테이션 시 "체험" 효과
-- **플래그십 + 이상 케이스 혼합**: 핵심 페이지 + 엣지 케이스로 시스템의 확장성 입증
-- **스프린트 2~3에 집중 작업**: 1주 초안 + 1~3주 반복, 빠른 버스트로 동력 유지
-- **시스템 구축 후 재방문**: 실제 컴포넌트로 페이지 예제 재구축, 문서 사이트에 전시
+- **Reference Design = 시스템 설득 도구**: "시스템 없는 현재" vs "시스템 적용 후 미래"를 비교하는 실증 사례
+- **개발자의 역할**: 디자인 시스템 적용이 코드 품질, 유지보수성, 일관성에 미치는 영향을 코드로 증명
+- **Before/After 비교**: 동일한 페이지를 ad-hoc 코드와 시스템 코드로 구현하여 차이를 시각화
 
-## 주요 구조/다이어그램
-- **페이지 선정 체크리스트**: 제품 다양성, 레이아웃 모티프 믹스, 컴포넌트 다양성, 공유 컴포넌트 기회 발굴, 단순/복잡 균형
-- **Marriott.com 참고 예시**: 검색, 기사, 딜, 호텔 페이지의 Before/After 비교 (반응형 재디자인)
-- **Feedback 워크플로우**: 컨퍼런스룸/복도 벽면 전시 → Pink/Yellow/Green Post-It으로 구조화된 피드백 수집
-- **Page Example Showcase**: NetApp LUCI 사례처럼 완성된 컴포넌트로 풀페이지 빌드, 문서 사이트에 통합
+## Before: 디자인 시스템 없이
+
+시스템 없이 만든 카드 목록 페이지. 하드코딩된 값, 일관성 없는 스타일, 중복 코드가 특징입니다.
+
+```tsx
+// pages/ProductList.tsx - 디자인 시스템 없음
+export default function ProductList() {
+  return (
+    <div style={{ padding: '20px', maxWidth: '1200px', margin: '0 auto' }}>
+      <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#1a1a1a', marginBottom: '24px' }}>
+        상품 목록
+      </h1>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+        {/* 카드 1 - 개발자 A가 작성 */}
+        <div style={{
+          border: '1px solid #e0e0e0',
+          borderRadius: '8px',
+          padding: '16px',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+        }}>
+          <img src="/product1.jpg" style={{ width: '100%', borderRadius: '4px' }} />
+          <h3 style={{ fontSize: '16px', fontWeight: 600, marginTop: '12px' }}>상품명</h3>
+          <p style={{ color: '#666', fontSize: '14px' }}>설명 텍스트</p>
+          <span style={{ color: '#e53e3e', fontWeight: 700, fontSize: '18px' }}>29,900원</span>
+          <button style={{
+            width: '100%',
+            marginTop: '12px',
+            padding: '10px',
+            backgroundColor: '#3182ce',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+          }}>
+            장바구니 담기
+          </button>
+        </div>
+
+        {/* 카드 2 - 개발자 B가 작성 (미묘하게 다른 스타일) */}
+        <div style={{
+          border: '1px solid #ddd',      /* 다른 보더 색상 */
+          borderRadius: '12px',           /* 다른 radius */
+          padding: '20px',               /* 다른 패딩 */
+          boxShadow: '0 1px 3px rgba(0,0,0,0.08)', /* 다른 그림자 */
+        }}>
+          <img src="/product2.jpg" style={{ width: '100%', borderRadius: '8px' }} />
+          <h3 style={{ fontSize: '18px', fontWeight: 500, marginTop: '8px' }}>상품명</h3>
+          <p style={{ color: '#888', fontSize: '13px' }}>설명 텍스트</p>
+          <span style={{ color: '#c53030', fontWeight: 600, fontSize: '20px' }}>39,900원</span>
+          <button style={{
+            width: '100%',
+            marginTop: '16px',
+            padding: '12px',
+            backgroundColor: '#2b6cb0',  /* 미묘하게 다른 파란색 */
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+          }}>
+            구매하기              {/* 다른 라벨 */}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+**문제점:**
+- 8가지 하드코딩된 색상 (`#e0e0e0`, `#666`, `#e53e3e`, `#3182ce`, ...)
+- 카드 간 불일치: radius 8px vs 12px, padding 16px vs 20px
+- 같은 역할의 버튼이 다른 라벨 ("장바구니 담기" vs "구매하기")
+- 접근성 속성 전무 (alt, aria-label 없음)
+- 다크모드 전환 불가능
+
+## After: 디자인 시스템 적용
+
+동일한 페이지를 디자인 시스템 컴포넌트로 구현한 버전.
+
+```tsx
+// pages/ProductList.tsx - 디자인 시스템 적용
+import { PageLayout } from '@ds/layouts';
+import { Heading } from '@ds/typography';
+import { Grid } from '@ds/layout';
+import { ProductCard } from '@ds/cards';
+import { Button } from '@ds/buttons';
+import { formatCurrency } from '@ds/utils';
+
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  image: string;
+}
+
+export default function ProductList({ products }: { products: Product[] }) {
+  return (
+    <PageLayout maxWidth="lg" padding="md">
+      <Heading level={1} size="xl" marginBottom="lg">
+        상품 목록
+      </Heading>
+
+      <Grid columns={{ sm: 1, md: 2, lg: 3 }} gap="md">
+        {products.map((product) => (
+          <ProductCard key={product.id}>
+            <ProductCard.Image
+              src={product.image}
+              alt={`${product.name} 상품 이미지`}
+            />
+            <ProductCard.Body>
+              <ProductCard.Title>{product.name}</ProductCard.Title>
+              <ProductCard.Description>{product.description}</ProductCard.Description>
+              <ProductCard.Price>
+                {formatCurrency(product.price, 'KRW')}
+              </ProductCard.Price>
+            </ProductCard.Body>
+            <ProductCard.Footer>
+              <Button
+                variant="primary"
+                size="md"
+                fullWidth
+                onClick={() => addToCart(product.id)}
+                aria-label={`${product.name} 장바구니에 담기`}
+              >
+                장바구니 담기
+              </Button>
+            </ProductCard.Footer>
+          </ProductCard>
+        ))}
+      </Grid>
+    </PageLayout>
+  );
+}
+```
+
+**개선된 점:**
+- 하드코딩된 색상 0개 (모두 토큰)
+- 모든 카드가 동일한 구조, 스타일, 간격
+- 반응형 Grid (sm: 1열, md: 2열, lg: 3열)
+- 접근성: alt 텍스트, aria-label 포함
+- 다크모드 자동 지원 (토큰 기반)
+
+## 코드 비교 요약
+
+| 항목 | Before | After |
+|------|--------|-------|
+| **하드코딩 색상** | 8개 | 0개 |
+| **일관성** | 카드마다 다름 | 100% 동일 |
+| **반응형** | 없음 (3열 고정) | sm/md/lg breakpoint |
+| **접근성** | aria 속성 없음 | alt, aria-label 완비 |
+| **다크모드** | 불가능 | 토큰 기반 자동 전환 |
+| **코드 라인** | 65줄 (카드 2개) | 42줄 (N개 확장 가능) |
+| **컴포넌트 재사용** | 0% | 100% |
+| **유지보수** | 카드별 수정 | 시스템 수정 1회 |
+
+## 개발자의 Reference Design 기여
+
+개발자는 Reference Design 과정에서 다음과 같이 기여합니다.
+
+```mermaid
+graph TD
+    A["1. 현황 분석"] --> B["2. 토큰 추출"]
+    B --> C["3. 컴포넌트 구현"]
+    C --> D["4. 마이그레이션"]
+    D --> E["5. 문서화"]
+
+    A --> A1["기존 코드에서 하드코딩된 값 수집"]
+    B --> B1["반복되는 값을 토큰으로 정의"]
+    C --> C1["Storybook으로 컴포넌트 빌드"]
+    D --> D1["기존 페이지를 시스템 코드로 전환"]
+    E --> E1["Before/After를 문서 사이트에 전시"]
+```
+
+### 마이그레이션 스크립트 예시
+
+```bash
+# 하드코딩된 색상을 토큰으로 변환하는 codemod
+npx jscodeshift -t transforms/hardcoded-colors.ts src/
+
+# 변환 결과 확인
+# Before: style={{ color: '#3182ce' }}
+# After:  className="text-brand-500"
+```
+
+## 실무 적용 체크리스트
+
+- [ ] 현재 제품에서 5-10개 대표 페이지 선정
+- [ ] 각 페이지의 하드코딩된 값 수집 (색상, 간격, 폰트)
+- [ ] 반복 패턴에서 토큰 후보 추출
+- [ ] Before 코드 스냅샷 저장
+- [ ] 디자인 시스템 컴포넌트로 After 버전 구현
+- [ ] 코드 비교표 작성 (라인 수, 색상 수, 접근성 등)
+- [ ] Storybook/문서 사이트에 Before/After 전시
 
 ---
 > 출처: Nathan Curtis (EightShapes)
 
 ---
 
-## 📎 Related Articles
+## Related Articles
 
 import CrossRef from '@site/src/components/CrossRef';
 

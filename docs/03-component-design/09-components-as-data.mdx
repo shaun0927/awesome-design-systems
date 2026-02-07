@@ -2,14 +2,21 @@
 title: "Components as Data - 플랫폼 독립적 정의"
 sidebar_label: "Components as Data"
 sidebar_position: 9
-tags: [components, data, automation]
+audience: developer
+tags: [components, data, automation, yaml, codegen]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#556
 
-## Components as Data
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-## 📌 핵심 개념
+<DevQuickStart
+  what="Define UI components as structured data (YAML/JSON) instead of platform-specific code - Figma becomes an output, not the source"
+  learn="4 data elements (anatomy, props, styles, variants), reverse generation workflow, and AI/LLM integration for component catalogs"
+  able="Write a YAML component definition and generate a React component scaffold from it"
+/>
+
+## 핵심 개념
 
 > UI 컴포넌트를 디자인 툴이나 플랫폼별 코드에 하드코딩하는 대신, **중립적인 포맷(YAML/JSON)으로 구조화하여 표현**하는 방식
 
@@ -138,9 +145,103 @@ Idea → Plan → Data → [Figma, React, iOS, Android]
 - 1시간 계획 + 1시간 팀 협의로 데이터 정의 완료
 - 수동으로 수십 개 variant 만드는 대신 **자동 생성**
 
----
+## YAML to React Code Generator
 
-*출처: Nathan Curtis, Medium 2025-09*
+```yaml title="alert.component.yaml"
+name: Alert
+description: "Feedback message with severity levels"
+anatomy:
+  root:
+    type: container
+  icon:
+    type: slot
+    nullable: true
+  content:
+    type: container
+  title:
+    type: text
+  description:
+    type: text
+    nullable: true
+  dismiss:
+    type: slot
+    nullable: true
+
+props:
+  severity:
+    type: string
+    default: info
+    enum: [info, success, warning, error]
+  dismissible:
+    type: boolean
+    default: false
+  title:
+    type: string
+    required: true
+  description:
+    type: string
+
+default:
+  elements:
+    root:
+      styles:
+        display: flex
+        alignItems: flex-start
+        gap: foundations/space/s
+        padding: foundations/space/m
+        borderRadius: foundations/radius/md
+        backgroundColor: foundations/color/surface/info
+```
+
+```typescript title="generate-component.ts"
+import { readFileSync } from 'fs';
+import { parse } from 'yaml';
+
+interface ComponentSpec {
+  name: string;
+  anatomy: Record<string, { type: string; nullable?: boolean }>;
+  props: Record<string, {
+    type: string;
+    default?: unknown;
+    enum?: string[];
+    required?: boolean;
+  }>;
+}
+
+function generateReactComponent(yamlPath: string): string {
+  const spec: ComponentSpec = parse(readFileSync(yamlPath, 'utf8'));
+
+  const propsInterface = Object.entries(spec.props)
+    .map(([name, def]) => {
+      const tsType = def.enum
+        ? def.enum.map(v => `'${v}'`).join(' | ')
+        : def.type === 'boolean' ? 'boolean' : 'string';
+      const optional = def.required ? '' : '?';
+      return `  ${name}${optional}: ${tsType};`;
+    })
+    .join('\n');
+
+  const slots = Object.entries(spec.anatomy)
+    .filter(([, v]) => v.type === 'slot')
+    .map(([name]) => `  ${name}?: React.ReactNode;`)
+    .join('\n');
+
+  return `
+interface ${spec.name}Props {
+${propsInterface}
+${slots}
+  children?: React.ReactNode;
+}
+
+export function ${spec.name}({ ${Object.keys(spec.props).join(', ')}, children }: ${spec.name}Props) {
+  return (
+    <div className="${spec.name.toLowerCase()}" role="alert">
+      {children}
+    </div>
+  );
+}`.trim();
+}
+```
 
 ---
 

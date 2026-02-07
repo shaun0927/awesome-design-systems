@@ -2,14 +2,23 @@
 title: "디자인 토큰 10가지 핵심 팁"
 sidebar_label: "토큰 10가지 팁"
 sidebar_position: 1
+audience: developer
 tags: [tokens, architecture, governance]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#549
 
-## 디자인 토큰 10가지 핵심 팁 (Nathan Curtis, 2016)
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-### 📌 핵심 개념
+<DevQuickStart
+  what="Design tokens are the single source of truth for design decisions, stored as platform-agnostic key-value pairs"
+  learn="10 practical tips for structuring, naming, and governing design tokens using JSON/YAML and Style Dictionary"
+  able="Set up a token architecture that separates options from decisions and generates CSS variables automatically"
+/>
+
+## 디자인 토큰 10가지 핵심 팁
+
+### 핵심 개념
 
 **디자인 토큰 = 옵션(Option) + 컨텍스트(Context) → 디자인 결정(Design Decision)**
 
@@ -75,11 +84,15 @@ duration: {quickly, promptly, slowly}
 ### 구현 (Implementation)
 
 #### #7. JSON으로 재사용 가능하게 만들어라
-```
-tokens.json (단일 소스)
-    ├─→ tokens.scss (SASS)
-    ├─→ tokens.xml (Android)
-    └─→ iOS 직접 소비
+
+```mermaid
+graph LR
+    A["tokens.json<br/>(Single Source)"] --> B["tokens.css<br/>(CSS Variables)"]
+    A --> C["tokens.xml<br/>(Android)"]
+    A --> D["tokens.swift<br/>(iOS)"]
+    A --> E["tokens.js<br/>(JavaScript)"]
+
+    style A fill:#f3e8ff,stroke:#7c3aed
 ```
 
 #### #8. YAML로 쉽게 관리/읽기
@@ -109,28 +122,58 @@ background-color:
 | Figma | Plugin API | Design token importer |
 | Sketch | JSON 플러그인 | Color palette sync |
 
-## 💡 실무 적용 단계
+## Style Dictionary 연동 예시
+
+토큰을 JSON으로 정의하고 CSS 변수로 자동 변환하는 워크플로우입니다.
+
+```json title="tokens.json"
+{
+  "color": {
+    "neutral": {
+      "10": { "value": "#F7F9FA" },
+      "20": { "value": "#2B303B" }
+    },
+    "background": {
+      "default": { "value": "{color.neutral.10}" },
+      "dark": { "value": "{color.neutral.20}" }
+    }
+  },
+  "space": {
+    "inset": {
+      "default": { "value": "16px" },
+      "compact": { "value": "8px" }
+    }
+  }
+}
+```
+
+```css title="Generated output: tokens.css"
+:root {
+  --color-neutral-10: #F7F9FA;
+  --color-neutral-20: #2B303B;
+  --color-background-default: var(--color-neutral-10);
+  --color-background-dark: var(--color-neutral-20);
+  --space-inset-default: 16px;
+  --space-inset-compact: 8px;
+}
+```
+
+## 실무 적용 단계
 
 ### Phase 1: 파운데이션 (1-2주)
-```
-✅ 색상 팔레트 정의
-✅ 타이포그래피 스케일
-✅ YAML 파일 구조 결정
-✅ JSON 변환 스크립트 작성
-```
+- [ ] 색상 팔레트 정의
+- [ ] 타이포그래피 스케일
+- [ ] JSON 파일 구조 결정
+- [ ] Style Dictionary 변환 스크립트 작성
 
 ### Phase 2: 시맨틱 레이어 (2-4주)
-```
-✅ background-color 토큰 정의
-✅ text-color 토큰 정의
-✅ space 토큰 정의
-```
+- [ ] background-color 토큰 정의
+- [ ] text-color 토큰 정의
+- [ ] space 토큰 정의
 
 ### Phase 3: 컴포넌트 적용 (4-8주)
-```
-✅ Button에 토큰 적용
-✅ 컴포넌트별 로컬 변수 → 토큰 승급 검토
-```
+- [ ] Button에 토큰 적용
+- [ ] 컴포넌트별 로컬 변수 → 토큰 승급 검토
 
 ## 🚨 흔한 안티패턴
 
@@ -151,6 +194,7 @@ $color-primary: $blue-500;  // 결정!
 
 ---
 *출처: Nathan Curtis (EightShapes, 2016)*
+
 
 ---
 

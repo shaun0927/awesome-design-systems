@@ -1,13 +1,345 @@
 ---
-title: "디자인 & CSS 실전 팁 모음 정리"
+title: "디자인 시스템을 위한 10가지 CSS 실전 팁"
 sidebar_label: "CSS 실전 팁"
 sidebar_position: 5
+audience: developer
 tags: ["CSS", "tips", "gradients", "hover-effects", "animations"]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#517
 
-Design & CSS Tips 영상 분석 요약 (한글) - 10가지 핵심 팁: 색상 변수, 그라디언트, 카드 디자인, Border Radius, 호버 효과, 동적 크기, 스크롤 스냅, 커스텀 불릿, 버튼 디자인, 애니메이션 - AlphaView 프로젝트 적용 가이드 포함
+import DevQuickStart from '@site/src/components/DevQuickStart';
+
+<DevQuickStart
+  what="Ten CSS techniques for design system implementation: color variables, gradient patterns, card depth, border radius tokens, hover states, fluid sizing, scroll snap, custom bullets, button hierarchy, and micro-animations"
+  learn="How to use CSS custom properties for systematic color management, create reusable gradient mixins, and implement fluid responsive sizing with clamp()"
+  able="Build a complete CSS foundation for a design system with tokenized colors, consistent hover patterns, scroll-snap galleries, and performant micro-animations"
+/>
+
+## 1. CSS 변수로 색상 시스템 구축
+
+```css
+:root {
+  /* Primitive tokens */
+  --hue-primary: 250;
+  --color-primary-50: hsl(var(--hue-primary), 80%, 95%);
+  --color-primary-100: hsl(var(--hue-primary), 80%, 90%);
+  --color-primary-500: hsl(var(--hue-primary), 80%, 50%);
+  --color-primary-600: hsl(var(--hue-primary), 80%, 40%);
+  --color-primary-900: hsl(var(--hue-primary), 80%, 10%);
+
+  /* Semantic tokens */
+  --color-action: var(--color-primary-500);
+  --color-action-hover: var(--color-primary-600);
+  --color-surface: var(--color-primary-50);
+}
+```
+
+`--hue-primary` 하나만 변경하면 전체 팔레트가 재생성된다.
+
+---
+
+## 2. 그라데이션 패턴
+
+```css
+/* 브랜드 그라데이션 */
+.gradient-brand {
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-500) 0%,
+    var(--color-primary-600) 100%
+  );
+}
+
+/* 유리 효과 (glassmorphism) */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 메쉬 그라데이션 */
+.mesh-gradient {
+  background:
+    radial-gradient(at 20% 80%, var(--color-primary-100) 0%, transparent 50%),
+    radial-gradient(at 80% 20%, var(--color-accent-100) 0%, transparent 50%),
+    var(--color-surface);
+}
+```
+
+---
+
+## 3. 카드 깊이 시스템 (Elevation)
+
+```css
+:root {
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+}
+
+.card {
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+```
+
+---
+
+## 4. Border Radius 토큰
+
+```css
+:root {
+  --radius-xs: 0.125rem;  /* 2px - 태그, 뱃지 */
+  --radius-sm: 0.25rem;   /* 4px - 입력 필드 */
+  --radius-md: 0.5rem;    /* 8px - 카드, 버튼 */
+  --radius-lg: 0.75rem;   /* 12px - 모달 */
+  --radius-xl: 1rem;      /* 16px - 대형 카드 */
+  --radius-full: 9999px;  /* 아바타, 알약 버튼 */
+}
+
+.avatar { border-radius: var(--radius-full); }
+.card { border-radius: var(--radius-lg); }
+.button { border-radius: var(--radius-md); }
+.input { border-radius: var(--radius-sm); }
+```
+
+---
+
+## 5. 일관된 호버 효과 패턴
+
+```css
+/* 기본 호버 전환 */
+.interactive {
+  transition: color 0.15s ease,
+              background-color 0.15s ease,
+              border-color 0.15s ease,
+              box-shadow 0.15s ease;
+}
+
+/* 링크 호버: 밑줄 슬라이드 */
+.link {
+  position: relative;
+}
+.link::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--color-action);
+  transition: width 0.2s ease;
+}
+.link:hover::after {
+  width: 100%;
+}
+
+/* 터치 디바이스 대응 */
+@media (hover: none) {
+  .link:active { opacity: 0.7; }
+}
+```
+
+---
+
+## 6. 유동적 크기 (Fluid Sizing)
+
+```css
+/* clamp(최소값, 선호값, 최대값) */
+:root {
+  font-size: clamp(14px, 1.5vw, 16px);
+}
+
+h1 { font-size: clamp(1.75rem, 4vw, 3rem); }
+h2 { font-size: clamp(1.5rem, 3vw, 2.25rem); }
+h3 { font-size: clamp(1.25rem, 2.5vw, 1.75rem); }
+
+/* 유동적 간격 */
+.section {
+  padding-block: clamp(2rem, 5vw, 4rem);
+}
+
+.container {
+  max-width: min(1200px, 90vw);
+  margin-inline: auto;
+}
+```
+
+---
+
+## 7. Scroll Snap 갤러리
+
+```css
+.gallery {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding: 1rem;
+  -webkit-overflow-scrolling: touch;
+
+  /* 스크롤바 숨김 */
+  scrollbar-width: none;
+}
+.gallery::-webkit-scrollbar { display: none; }
+
+.gallery-item {
+  flex: 0 0 min(300px, 80vw);
+  scroll-snap-align: start;
+}
+```
+
+---
+
+## 8. 커스텀 불릿 리스트
+
+```css
+/* 체크마크 불릿 */
+.checklist {
+  list-style: none;
+  padding-left: 0;
+}
+.checklist li {
+  padding-left: 1.5em;
+  position: relative;
+}
+.checklist li::before {
+  content: '\2713';  /* checkmark */
+  position: absolute;
+  left: 0;
+  color: var(--color-success, #059669);
+  font-weight: bold;
+}
+
+/* 이모지 불릿 */
+.features li { list-style: '-> '; }
+
+/* 카운터 기반 번호 */
+.numbered {
+  counter-reset: step;
+  list-style: none;
+}
+.numbered li::before {
+  counter-increment: step;
+  content: counter(step) '.';
+  font-weight: 700;
+  color: var(--color-action);
+  margin-right: 0.5em;
+}
+```
+
+---
+
+## 9. 버튼 위계 시스템
+
+```css
+/* 공통 버튼 베이스 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  border-radius: var(--radius-md);
+  transition: all 0.15s ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+  min-height: 44px;  /* 접근성: 터치 타겟 */
+}
+
+/* Primary: 가장 눈에 띄는 행동 */
+.btn-primary {
+  background: var(--color-action);
+  color: white;
+  padding: 0.625rem 1.5rem;
+}
+.btn-primary:hover {
+  background: var(--color-action-hover);
+}
+
+/* Secondary: 보조 행동 */
+.btn-secondary {
+  background: transparent;
+  color: var(--color-action);
+  border-color: var(--color-action);
+  padding: 0.625rem 1.5rem;
+}
+
+/* Ghost: 최소 시각적 무게 */
+.btn-ghost {
+  background: transparent;
+  color: var(--color-action);
+  padding: 0.625rem 1rem;
+}
+.btn-ghost:hover {
+  background: var(--color-primary-50);
+}
+```
+
+---
+
+## 10. 마이크로 애니메이션
+
+```css
+/* 로딩 스피너 */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid var(--color-primary-100);
+  border-top-color: var(--color-action);
+  border-radius: var(--radius-full);
+  animation: spin 0.6s linear infinite;
+}
+
+/* 펄스 알림 뱃지 */
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+.badge-pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* 스켈레톤 로딩 */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-primary-50) 25%,
+    var(--color-primary-100) 50%,
+    var(--color-primary-50) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* 접근성: 모션 감소 */
+@media (prefers-reduced-motion: reduce) {
+  .spinner,
+  .badge-pulse,
+  .skeleton {
+    animation: none;
+  }
+  .skeleton {
+    background: var(--color-primary-100);
+  }
+}
+```
 
 ---
 

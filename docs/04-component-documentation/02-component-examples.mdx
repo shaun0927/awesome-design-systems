@@ -2,10 +2,17 @@
 title: "Component Examples - 15 Tips for Showcasing Component Quality"
 sidebar_label: "컴포넌트 예제 15팁"
 sidebar_position: 2
-tags: [examples, documentation, show-dont-tell]
+audience: developer
+tags: [examples, documentation, show-dont-tell, storybook]
 ---
 
-> Original issue: shaun0927/stocktitan-crawler#587
+import DevQuickStart from '@site/src/components/DevQuickStart';
+
+<DevQuickStart
+  what="컴포넌트 예제 작성의 15가지 핵심 팁과 Storybook args matrix 구성법을 배웁니다."
+  learn="Live Example + Code Pairing 패턴과 Storybook args 자동 생성 기법"
+  able="모든 컴포넌트에 체계적인 예제 페이지를 구축할 수 있습니다."
+/>
 
 ## 핵심 개념
 - **시각적 예제가 핵심**: 효과적인 컴포넌트 문서에서 가장 중요한 요소
@@ -44,12 +51,211 @@ tags: [examples, documentation, show-dont-tell]
 - 라이브러리 전체에 걸쳐 일관된 예제 구성
 
 ## 예제 성숙도 수준
+
+```mermaid
+graph LR
+    A[Level 1: Static Images] --> B[Level 2: Live + Code]
+    B --> C[Level 3: Component Explorer]
+
+    style B fill:#4caf50,color:#fff
+
+    B -.- D["권장 시작점"]
+    C -.- E["v1.0.0 이후"]
 ```
-Level 1: Static Images
-  ↓
-Level 2: Live Example + Code Pairing ← 권장 시작점
-  ↓
-Level 3: Component Explorer (Interactive) ← 1.0.0 이후
+
+## CodeBlock 컴포넌트 구현
+
+문서 사이트에서 Example + Code Pair를 보여주는 핵심 컴포넌트입니다.
+
+```tsx
+// components/CodeBlock.tsx
+import React, { useState } from 'react';
+import { Highlight, themes } from 'prism-react-renderer';
+
+interface CodeBlockProps {
+  /** 렌더링할 React 요소 */
+  preview: React.ReactNode;
+  /** 표시할 소스 코드 문자열 */
+  code: string;
+  /** 코드 언어 (구문 강조용) */
+  language?: string;
+  /** 제목 */
+  title?: string;
+}
+
+export const CodeBlock: React.FC<CodeBlockProps> = ({
+  preview,
+  code,
+  language = 'tsx',
+  title,
+}) => {
+  const [showCode, setShowCode] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="code-block-wrapper">
+      {title && <div className="code-block-title">{title}</div>}
+
+      {/* Live Preview */}
+      <div className="code-block-preview">
+        {preview}
+      </div>
+
+      {/* Toggle + Copy */}
+      <div className="code-block-toolbar">
+        <button onClick={() => setShowCode(!showCode)}>
+          {showCode ? 'Hide Code' : 'Show Code'}
+        </button>
+        <button onClick={handleCopy}>
+          {copied ? 'Copied!' : 'Copy'}
+        </button>
+      </div>
+
+      {/* Code */}
+      {showCode && (
+        <Highlight theme={themes.nightOwl} code={code} language={language}>
+          {({ style, tokens, getLineProps, getTokenProps }) => (
+            <pre style={style}>
+              {tokens.map((line, i) => (
+                <div key={i} {...getLineProps({ line })}>
+                  <span className="line-number">{i + 1}</span>
+                  {line.map((token, key) => (
+                    <span key={key} {...getTokenProps({ token })} />
+                  ))}
+                </div>
+              ))}
+            </pre>
+          )}
+        </Highlight>
+      )}
+    </div>
+  );
+};
+```
+
+### CSS 스타일
+
+```css
+.code-block-wrapper {
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: 8px;
+  overflow: hidden;
+  margin: 1rem 0;
+}
+
+.code-block-title {
+  padding: 8px 16px;
+  background: var(--color-surface, #f8fafc);
+  font-weight: 600;
+  font-size: 14px;
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+}
+
+.code-block-preview {
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 80px;
+}
+
+.code-block-toolbar {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px;
+  border-top: 1px solid var(--color-border, #e2e8f0);
+  background: var(--color-surface, #f8fafc);
+}
+
+.code-block-toolbar button {
+  padding: 4px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  background: white;
+  cursor: pointer;
+  font-size: 13px;
+}
+```
+
+## Storybook Args Matrix 설정
+
+Storybook의 `argTypes`를 활용하면 모든 조합을 자동으로 탐색할 수 있습니다.
+
+```tsx
+// Alert.stories.tsx - Args Matrix 예제
+import type { Meta, StoryObj } from '@storybook/react';
+import { Alert } from './Alert';
+
+const meta: Meta<typeof Alert> = {
+  title: 'Components/Alert',
+  component: Alert,
+  argTypes: {
+    severity: {
+      control: 'select',
+      options: ['info', 'success', 'warning', 'error'],
+      table: {
+        type: { summary: "'info' | 'success' | 'warning' | 'error'" },
+        defaultValue: { summary: 'info' },
+      },
+    },
+    variant: {
+      control: 'radio',
+      options: ['filled', 'outlined', 'standard'],
+    },
+    closable: { control: 'boolean' },
+    icon: { control: 'boolean' },
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof Alert>;
+
+// 각 severity를 한 눈에 비교
+export const AllSeverities: Story = {
+  render: () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <Alert severity="info">정보 메시지입니다.</Alert>
+      <Alert severity="success">성공적으로 완료되었습니다.</Alert>
+      <Alert severity="warning">주의가 필요합니다.</Alert>
+      <Alert severity="error">오류가 발생했습니다.</Alert>
+    </div>
+  ),
+};
+
+// Variant x Severity 매트릭스 (핵심 조합만)
+export const VariantMatrix: Story = {
+  render: () => (
+    <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+      <thead>
+        <tr>
+          <th></th>
+          <th>Filled</th>
+          <th>Outlined</th>
+          <th>Standard</th>
+        </tr>
+      </thead>
+      <tbody>
+        {(['info', 'success', 'warning', 'error'] as const).map((sev) => (
+          <tr key={sev}>
+            <td><strong>{sev}</strong></td>
+            {(['filled', 'outlined', 'standard'] as const).map((v) => (
+              <td key={v} style={{ padding: 8 }}>
+                <Alert severity={sev} variant={v}>Example</Alert>
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  ),
+};
 ```
 
 ## Material Design 사례
@@ -63,6 +269,7 @@ Level 3: Component Explorer (Interactive) ← 1.0.0 이후
 - [ ] 이미지 의존 시: 주석 시각 언어(색상, 타입, 크기) 안정화
 - [ ] 일관된 이미지 생성 템플릿 확립
 - [ ] 예제가 가이드라인을 포함하지 않도록 분리 유지
+- [ ] Args Matrix로 핵심 조합만 보여주기 (모든 조합 X)
 
 ## 피해야 할 것
 - 초기 단계에서 Component Explorer 구축에 몰두
@@ -74,11 +281,10 @@ Level 3: Component Explorer (Interactive) ← 1.0.0 이후
 > 출처: Nathan Curtis (EightShapes), Mar 24, 2018
 > 원문: Component Examples - Showcasing a component's quality, depth and versatility
 > 시리즈: #3 of 7 (Overview | Intros | Examples | Design | Code | Authoring | Myths)
-> "Show don't tell. Seeing is believing."
 
 ---
 
-## 📎 Related Articles
+## Related Articles
 
 import CrossRef from '@site/src/components/CrossRef';
 

@@ -2,14 +2,21 @@
 title: "States Management - 상태 관리의 정석"
 sidebar_label: "상태 관리"
 sidebar_position: 7
-tags: [states, interaction, components]
+audience: developer
+tags: [states, interaction, components, css, typescript]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#557
 
-## 디자인 시스템의 상태(States) 관리
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-## 📌 핵심 개념
+<DevQuickStart
+  what="Separate interactive states (hover/focus), control states (disabled/readonly), and validation states (error/success) instead of one catch-all 'state' property"
+  learn="4 state categories, priority ordering (disabled > readonly > validation > interactive), and combination matrix reduction"
+  able="Implement CSS state priority with pseudo-classes and attribute selectors, plus TypeScript state type definitions"
+/>
+
+## 핵심 개념
 
 **문제의 본질**: 대부분의 디자인 시스템이 Figma 컴포넌트의 `state` 속성을 **만능 속성(catch-all)**으로 사용
 
@@ -172,9 +179,83 @@ disabled=true:
 4. **문서화**: 조합 테이블 작성 → 개발자와 공유
 5. **점진적 개선**: 한 번에 모든 것을 바꾸지 말기
 
----
+## CSS State Priority Implementation
 
-*출처: Nathan Curtis, "The Sorry State of States", 2024-12*
+```css title="input-states.css"
+/* Base styles */
+.input {
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-s) var(--space-m);
+  background: var(--color-surface);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* Interactive states (lowest priority) */
+.input:hover:not(:disabled):not([readonly]) {
+  border-color: var(--color-border-hover);
+}
+.input:focus-visible {
+  border-color: var(--color-focus);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
+  outline: none;
+}
+
+/* Validation states (medium priority - overrides interactive) */
+.input[aria-invalid="true"] {
+  border-color: var(--color-error);
+}
+.input[aria-invalid="true"]:focus-visible {
+  box-shadow: 0 0 0 3px var(--color-error-ring);
+}
+.input[data-validation="success"] {
+  border-color: var(--color-success);
+}
+
+/* Control states (highest priority - overrides everything) */
+.input[readonly] {
+  background: var(--color-surface-muted);
+  cursor: default;
+}
+.input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: var(--color-border);
+  /* Disabled overrides all other visual states */
+}
+```
+
+```typescript title="state-types.ts"
+// Separate concerns in TypeScript
+interface InteractiveState {
+  state: 'rest' | 'hover' | 'active' | 'focus';
+}
+
+interface ControlState {
+  disabled?: boolean;
+  readOnly?: boolean;
+}
+
+interface ValidationState {
+  validation?: 'none' | 'error' | 'success';
+}
+
+// Combined input props with priority rules
+type TextInputProps = InteractiveState & ControlState & ValidationState & {
+  value: string;
+  onChange: (value: string) => void;
+  label: string;
+};
+
+// State resolution function
+function resolveVisualState(props: ControlState & ValidationState & InteractiveState) {
+  if (props.disabled) return 'disabled';      // Priority 1
+  if (props.readOnly) return 'readonly';       // Priority 2
+  if (props.validation === 'error') return 'error';  // Priority 3
+  if (props.validation === 'success') return 'success';
+  return props.state;                          // Priority 4
+}
+```
 
 ---
 

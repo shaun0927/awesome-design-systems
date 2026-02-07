@@ -2,10 +2,17 @@
 title: "Documenting Components - Serving System Audiences"
 sidebar_label: "컴포넌트 문서화"
 sidebar_position: 1
-tags: [documentation, audiences, component-docs]
+audience: developer
+tags: [documentation, audiences, component-docs, storybook, naming]
 ---
 
-> Original issue: shaun0927/stocktitan-crawler#589
+import DevQuickStart from '@site/src/components/DevQuickStart';
+
+<DevQuickStart
+  what="컴포넌트 문서화의 5대 청중별 구조와 Storybook MDX 기반 문서 작성법을 배웁니다."
+  learn="Storybook MDX로 컴포넌트를 문서화하고 Props를 자동 추출하는 기법"
+  able="완성된 Storybook 문서 페이지를 가진 컴포넌트를 제작할 수 있습니다."
+/>
 
 ## 핵심 개념
 
@@ -24,23 +31,265 @@ tags: [documentation, audiences, component-docs]
 
 ## 문서 구조
 
+```mermaid
+graph TD
+    A[Component Documentation] --> B[Overview - 언제/왜 사용]
+    A --> C[Examples - 기본 → 고급]
+    A --> D[Props/API Reference]
+    A --> E[Design Guidelines - Do/Don't]
+    A --> F[Accessibility - WCAG]
+    A --> G[Code Snippets]
+    A --> H[Related Components]
+
+    B --> B1[Use When / Don't Use When]
+    C --> C1[Live Example + Code Pair]
+    D --> D1[자동 추출된 Props Table]
+    E --> E1[Visual Style + Behavior]
 ```
-컴포넌트 문서 구조
-├── Overview (언제/왜 사용)
-├── Examples (기본 → 고급)
-├── Props/API Reference
-├── Design Guidelines (Do/Don't)
-├── Accessibility (WCAG)
-├── Code Snippets
-└── Related Components
+
+## Storybook MDX 문서화 예제
+
+Storybook MDX를 사용하면 문서와 인터랙티브 예제를 한 파일에서 관리할 수 있습니다.
+
+### 1. 기본 Storybook MDX 구조
+
+```mdx
+{/* Button.mdx */}
+import { Meta, Story, Canvas, ArgsTable, Source } from '@storybook/blocks';
+import * as ButtonStories from './Button.stories';
+
+<Meta of={ButtonStories} />
+
+# Button
+
+버튼은 사용자 액션을 트리거하는 인터랙티브 요소입니다.
+폼 제출, 대화상자 열기, 작업 확인 등에 사용하세요.
+
+## Use When
+- 사용자가 **명시적 액션**을 수행해야 할 때
+- 폼 제출, 모달 열기, 데이터 저장 등
+
+## Don't Use When
+- 단순 페이지 이동에는 `<a>` 태그를 사용하세요
+- 토글 상태 전환에는 Switch 컴포넌트를 사용하세요
+
+## Examples
+
+<Canvas of={ButtonStories.Primary} />
+<Canvas of={ButtonStories.Secondary} />
+<Canvas of={ButtonStories.AllSizes} />
+
+## Props
+
+<ArgsTable of={ButtonStories} />
 ```
+
+### 2. React 컴포넌트 + Props 자동 문서화
+
+```tsx
+// Button.tsx
+import React from 'react';
+
+export interface ButtonProps {
+  /** 버튼의 시각적 스타일 */
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  /** 버튼 크기 */
+  size?: 'sm' | 'md' | 'lg';
+  /** 비활성화 여부 */
+  disabled?: boolean;
+  /** 로딩 상태 표시 */
+  loading?: boolean;
+  /** 클릭 이벤트 핸들러 */
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  /** 버튼 내용 */
+  children: React.ReactNode;
+}
+
+export const Button: React.FC<ButtonProps> = ({
+  variant = 'primary',
+  size = 'md',
+  disabled = false,
+  loading = false,
+  onClick,
+  children,
+}) => {
+  return (
+    <button
+      className={`btn btn--${variant} btn--${size}`}
+      disabled={disabled || loading}
+      onClick={onClick}
+      aria-busy={loading}
+    >
+      {loading && <span className="btn__spinner" aria-hidden="true" />}
+      {children}
+    </button>
+  );
+};
+```
+
+### 3. Storybook Stories 파일
+
+```tsx
+// Button.stories.tsx
+import type { Meta, StoryObj } from '@storybook/react';
+import { Button } from './Button';
+
+const meta: Meta<typeof Button> = {
+  title: 'Components/Button',
+  component: Button,
+  tags: ['autodocs'],
+  argTypes: {
+    variant: {
+      control: 'select',
+      options: ['primary', 'secondary', 'ghost', 'danger'],
+      description: '버튼의 시각적 스타일',
+      table: { defaultValue: { summary: 'primary' } },
+    },
+    size: {
+      control: 'select',
+      options: ['sm', 'md', 'lg'],
+      description: '버튼 크기',
+      table: { defaultValue: { summary: 'md' } },
+    },
+  },
+};
+
+export default meta;
+type Story = StoryObj<typeof Button>;
+
+export const Primary: Story = {
+  args: { children: '확인', variant: 'primary' },
+};
+
+export const Secondary: Story = {
+  args: { children: '취소', variant: 'secondary' },
+};
+
+export const AllSizes: Story = {
+  render: () => (
+    <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+      <Button size="sm">Small</Button>
+      <Button size="md">Medium</Button>
+      <Button size="lg">Large</Button>
+    </div>
+  ),
+};
+
+export const Loading: Story = {
+  args: { children: '저장 중...', loading: true },
+};
+```
+
+## 컴포넌트 네이밍 규칙
+
+컴포넌트 이름은 디자인, 코드, 대화 전체에서 일관되게 유지해야 합니다.
+
+### 네이밍 일관성 매핑
+
+| 컨텍스트 | 네이밍 | 예시 |
+|---------|--------|------|
+| Figma 레이어 | PascalCase | `PrimaryButton` |
+| React 컴포넌트 | PascalCase | `<PrimaryButton />` |
+| CSS 클래스 | kebab-case (BEM) | `.primary-button` |
+| 파일 경로 | kebab-case | `primary-button.tsx` |
+| Storybook | Title Case | `Components / Primary Button` |
+| 대화/문서 | 자연어 | "프라이머리 버튼" |
+
+### 설명 작성 원칙
+
+```
+좋은 예: "사용자 액션을 트리거하는 인터랙티브 요소" (구조와 목적)
+나쁜 예: "12px 패딩에 border-radius 4px인 클릭 가능 요소" (구현 세부사항)
+```
+
+- **설명은 144자(Tweet 길이) 이내**로 간결하게 작성
+- **단수형 vs 복수형**: 대부분 복수형 선호 (Buttons, Inputs), 한 번만 나오는 요소는 단수형 (Footer, Grid)
+- **"Also known as" 패턴**: 동의어를 자연스럽게 제시하여 검색성 향상
+
+## Combinatoric 함정 피하기
+
+컴포넌트를 문서화할 때 **모든 조합을 보여주지 마세요.**
+
+```
+5개 속성 x 4개 옵션 = 625가지 조합
+→ 모두 보여주면 독자가 압도당함
+```
+
+### 비용 vs 가치 매트릭스
+
+| | 낮은 비용 | 높은 비용 |
+|---|-----------|-----------|
+| **높은 가치** | Introduction (1-2문장), Example+Code Pair, State 표시, Copy-to-clipboard | Component Explorer, Multi-platform 코드 탭 |
+| **낮은 가치** | 625가지 조합 전부, Lorem ipsum 콘텐츠 | iframe 스케일링, 깊은 가이드라인 |
+
+**권장 전략:**
+1. **대표 예시 우선**: 가장 많이 사용되는 variant 1-2개로 시작
+2. **State는 수직 나열**: 수평 나열은 확장성 없음
+3. **Theming 증명**: Light/Dark 토글로 토큰 시스템 동작 검증
+
+```tsx
+// 대표 예시만 보여주는 효과적인 문서 구조
+export const DocumentationLayout = () => (
+  <div>
+    {/* 1. 가장 일반적인 사용법 */}
+    <h3>기본 사용법</h3>
+    <Button variant="primary">확인</Button>
+
+    {/* 2. States를 수직으로 */}
+    <h3>상태별 표시</h3>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <Button variant="primary">Default</Button>
+      <Button variant="primary" disabled>Disabled</Button>
+      <Button variant="primary" loading>Loading</Button>
+    </div>
+
+    {/* 3. 크기 비교 */}
+    <h3>크기 비교</h3>
+    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+      <Button size="sm">Small</Button>
+      <Button size="md">Medium</Button>
+      <Button size="lg">Large</Button>
+    </div>
+  </div>
+);
+```
+
+## Design/Code 통합 전략
+
+Material Design 규모가 아닌 이상, **Design 문서와 Code 문서를 단일 페이지에 통합**하세요.
+
+```mermaid
+graph LR
+    A[단일 페이지 통합] --> B[Introduction]
+    B --> C[Examples - Live + Code]
+    C --> D[Design Reference]
+    D --> E[Code Reference]
+    E --> F[Accessibility]
+
+    style A fill:#4caf50,color:#fff
+```
+
+**분리의 위험:**
+- 시간이 지나면서 네이밍 불일치 발생 (loader vs spinner)
+- 기능 불일치: 디자인은 깊은 기능 표현, 코드는 미구현
+- 사용자는 단일 정보원을 원함 (back and forth 싫어함)
+
+## 실무 적용 체크리스트
+
+- [ ] 모든 컴포넌트에 JSDoc 주석으로 Props 설명 추가
+- [ ] Storybook `tags: ['autodocs']`로 자동 문서 생성 활성화
+- [ ] Example-Code Pair가 각 컴포넌트에 1개 이상 존재
+- [ ] 네이밍이 Figma/Code/Storybook/대화에서 일관됨
+- [ ] Do/Don't 이미지 또는 코드 비교가 포함됨
+- [ ] 대표 예시 위주로 문서화 (625가지 전부 X)
+- [ ] Accessibility 섹션에 ARIA, 키보드, 스크린리더 가이드 포함
 
 ---
 > 출처: Nathan Curtis (EightShapes)
 
 ---
 
-## 📎 Related Articles
+## Related Articles
 
 import CrossRef from '@site/src/components/CrossRef';
 

@@ -2,27 +2,34 @@
 title: "디자인 토큰 네이밍 시스템"
 sidebar_label: "네이밍 시스템"
 sidebar_position: 2
+audience: developer
 tags: [tokens, naming, architecture]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#547
 
-## 디자인 토큰 네이밍 시스템 (Nathan Curtis, EightShapes)
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-### 📌 핵심 개념
+<DevQuickStart
+  what="Token naming conventions determine how discoverable, predictable, and maintainable your design system variables are"
+  learn="A 4-group, 13-level naming taxonomy (Namespace, Object, Base, Modifier) for structuring token names"
+  able="Define a naming convention that scales from primitive palette tokens to component-specific tokens"
+/>
 
-- **디자인 토큰**: 디자인 시스템의 시각적 스타일을 기술하는 변수 체계
-- **4개 그룹, 13개 레벨**: NAMESPACE → OBJECT → BASE → MODIFIER
-- **중요성**: 디자인, 코드, 문서 간 일관된 시각적 결정의 공유 및 재사용
+## 네이밍 레벨 구조
 
-## 🎯 실무 노하우
+디자인 토큰의 이름은 4개 그룹, 13개 레벨로 구성됩니다.
 
-### 네이밍 레벨 구조
-```
-1. NAMESPACE: System (esds-) / Theme / Domain
-2. OBJECT: Group (forms) / Component / Element
-3. BASE: Category (color, font, space) / Concept / Property
-4. MODIFIER: Variant / State / Scale / Mode
+```mermaid
+graph LR
+    A["NAMESPACE<br/>System / Theme / Domain"] --> B["OBJECT<br/>Group / Component / Element"]
+    B --> C["BASE<br/>Category / Concept / Property"]
+    C --> D["MODIFIER<br/>Variant / State / Scale / Mode"]
+
+    style A fill:#f3e8ff,stroke:#7c3aed
+    style B fill:#dbeafe,stroke:#2563eb
+    style C fill:#d1fae5,stroke:#059669
+    style D fill:#fef3c7,stroke:#d97706
 ```
 
 ### 핵심 원칙
@@ -32,16 +39,17 @@ tags: [tokens, naming, architecture]
 4. **일관된 순서 유지** - `[Namespace] [Object] [Base] [Modifier]`
 
 ### 토큰 네이밍 예시
-```scss
-// BASE 레벨
-$color-neutral-42: #6B6B6B;  // Category + Variant + Scale
 
-// BASE + MODIFIER
-$color-feedback-background-error  // Category + Concept + Property + Variant
+```css
+/* BASE 레벨: Category + Variant + Scale */
+--color-neutral-42: #6B6B6B;
 
-// NAMESPACE + OBJECT + BASE + MODIFIER
-$esds-forms-color-border-hover-on-dark
-// System + Group + Category + Property + State + Mode
+/* BASE + MODIFIER: Category + Concept + Property + Variant */
+--color-feedback-background-error: var(--color-red-500);
+
+/* NAMESPACE + OBJECT + BASE + MODIFIER */
+/* System + Group + Category + Property + State + Mode */
+--esds-forms-color-border-hover-on-dark: var(--color-neutral-70);
 ```
 
 ## 📊 토큰 레벨 매트릭스
@@ -72,22 +80,31 @@ $esds-forms-color-border-hover-on-dark
 - [ ] 레벨 순서가 시스템 규칙과 일치하는가?
 
 ### 토큰 워크플로우
-```
-1단계: 기본 제네릭 토큰 정의
-   $color-neutral-42: #6B6B6B
 
-2단계: 목적성 있는 토큰으로 별칭
-   $color-text-primary: $color-neutral-42
+```css
+/* 1단계: 기본 제네릭 토큰 정의 */
+:root {
+  --color-neutral-42: #6B6B6B;
+}
 
-3단계: 컴포넌트별 필요에 따라 로컬 토큰
-   $input-color-border: $color-neutral-70  (로컬)
+/* 2단계: 목적성 있는 토큰으로 별칭 */
+:root {
+  --color-text-primary: var(--color-neutral-42);
+}
 
-4단계: 재사용 발견 시 글로벌 승격 (3회 규칙)
-   $forms-color-border: $color-neutral-70  (글로벌)
+/* 3단계: 컴포넌트별 필요에 따라 로컬 토큰 */
+.input {
+  --input-color-border: var(--color-neutral-70); /* 로컬 */
+}
+
+/* 4단계: 재사용 발견 시 글로벌 승격 (3회 규칙) */
+:root {
+  --forms-color-border: var(--color-neutral-70); /* 글로벌 */
+}
 ```
 
 ---
-*출처: Nathan Curtis (EightShapes, 2020)*
+*출처: Nathan Curtis (EightShapes)*
 
 ---
 
@@ -99,6 +116,6 @@ import CrossRef from '@site/src/components/CrossRef';
   related={[
     { path: "/docs/design-tokens/naming-automation", label: "디자인 토큰 네이밍 자동화 노하우" },
     { path: "/docs/design-tokens/semantic-naming", label: "Purposeful vs Aesthetic Naming" },
-    { path: "/docs/component-documentation/component-introductions", label: "Component Introductions - 이름과 설명" },
+    { path: "/docs/component-documentation/documenting-components", label: "Component Documentation - 문서화 가이드" },
   ]}
 />

@@ -2,12 +2,22 @@
 title: "Adopting Design System Generations - Managing Major System Changes"
 sidebar_label: "Adopting"
 sidebar_position: 3
+audience: both
 tags: ["adoption", "migration", "incremental-delivery", "communication"]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#585
 
-## 📌 핵심 개념
+import DevQuickStart from '@site/src/components/DevQuickStart';
+
+<DevQuickStart
+  what="Design system generation adoption requires incremental delivery so adopting teams can start before the system is fully complete"
+  learn="How to decompose a generation into independently deliverable subsystems and manage four distinct adopter types"
+  able="Create an adoption timeline with subsystem milestones, codemod-based migration tooling, and adapters for gradual transition"
+/>
+
+## 세대 채택의 핵심 개념
+
 - **Generation = 대규모 변화**: 모든 색상, 타이포그래피, 간격, 컴포넌트 디자인 변경하는 혁명적 업데이트
 - **시스템은 의존성(Dependency)**: 단일 의존성이 아닌 여러 하위 시스템과 컴포넌트 부품들의 집합
 - **채택자 유형 4가지**:
@@ -17,7 +27,8 @@ tags: ["adoption", "migration", "incremental-delivery", "communication"]
   - Individualist: "시스템 안 쓰고 우리가 직접 하면 안 되나요?"
 - **점진적 전달(Incremental Delivery)**: 시스템이 완료되기 전에 채택 팀이 시작할 수 있도록 분해
 
-## 🎯 실무 노하우
+## 점진적 전달 전략
+
 - **DON'T: 단일 의존성으로 포지셔닝**: "시스템 완료될 때까지 기다려야 함"이라는 인식 방지
 - **DO: 점진적 전달 강조**:
   - 채택 팀이 시스템 완료 전에 시작하도록 권장
@@ -27,32 +38,227 @@ tags: ["adoption", "migration", "incremental-delivery", "communication"]
 - **의존성 분해**: 색상, 타이포그래피, 간격, 개별 컴포넌트별로 전달 일정 제시
 - **기대치 조율**: 각 채택자 유형에 맞는 설명과 지원 전략 수립
 
-## 📊 주요 구조
-```
-System Generation (3-12+ months)
-  ├─ Colors (Month 1-2)
-  ├─ Typography (Month 2-3)
-  ├─ Spacing (Month 2-3)
-  ├─ Component A (Month 3-4)
-  ├─ Component B (Month 4-5)
-  └─ Component C (Month 5-6)
-       ↓
-Adopters can start before system finishes
-Adopters can finish before system finishes
+## 점진적 전달 타임라인
+
+```mermaid
+gantt
+    title System Generation vs Adopter Timeline
+    dateFormat  YYYY-MM
+    axisFormat  %b %Y
+
+    section System Delivery
+    Colors & Tokens       :s1, 2025-01, 2M
+    Typography            :s2, 2025-02, 2M
+    Spacing               :s3, 2025-02, 2M
+    Component A (Button)  :s4, 2025-03, 2M
+    Component B (Card)    :s5, 2025-04, 2M
+    Component C (Table)   :s6, 2025-05, 2M
+
+    section Adopter Team (Eager)
+    Start with Colors     :a1, 2025-02, 1M
+    Integrate Components  :a2, 2025-03, 3M
+    Complete Migration    :a3, 2025-06, 1M
+
+    section Adopter Team (Pragmatic)
+    Wait for Beta         :b1, 2025-04, 1M
+    Batch Migration       :b2, 2025-05, 3M
 ```
 
-## 💡 Challenge 1 해결책
+## 채택자 유형별 대응 전략
+
+| 유형 | 특성 | 대응 전략 | 제공 자료 |
+|------|------|-----------|-----------|
+| **Eager** | 즉시 시작 원함 | Alpha 접근 권한, Early Adopter 프로그램 | API Preview, Migration Guide |
+| **Pragmatic** | 안정성 확인 후 시작 | Beta 릴리스 알림, 완성도 매트릭스 | Changelog, Breaking Changes 목록 |
+| **Reluctant** | 불가피할 때만 이동 | Deprecation 일정 명시, 지원 기간 공지 | Codemod 도구, 1:1 지원 |
+| **Individualist** | 자체 솔루션 선호 | 가치 제안 강화, 유지보수 비용 비교 | TCO 분석, 일관성 보고서 |
+
+## Challenge: "How long?" 해결책
+
 **문제**: "How long?" → "We'll let you know" (불충분한 답변)
-**해결**: 
+
+**해결**:
 1. 명확한 전체 일정 수립 (3/6/12개월)
 2. 하위 시스템별 전달 일정 공개
 3. 점진적 통합 옵션 제공
 4. 채택 팀 우선순위 반영 메커니즘
 
+## 마이그레이션 도구: Codemod
+
+세대 전환 시 자동화된 코드 변환 도구가 핵심입니다.
+
+```typescript title="codemods/migrate-tokens.ts"
+// Token import 경로 자동 변환 codemod
+import { API, FileInfo } from 'jscodeshift';
+
+export default function transformer(file: FileInfo, api: API) {
+  const j = api.jscodeshift;
+  const root = j(file.source);
+
+  // v1 → v2 token import 변환
+  root
+    .find(j.ImportDeclaration, {
+      source: { value: '@design-system/tokens' }
+    })
+    .forEach(path => {
+      path.node.source.value = '@design-system/tokens-v2';
+    });
+
+  // 구 token 이름 → 신 token 이름 매핑
+  const TOKEN_MAP: Record<string, string> = {
+    'colorPrimary': 'colorBrandPrimary',
+    'colorDanger': 'colorAlertError',
+    'spacingSm': 'spaceCompact',
+    'spacingMd': 'spaceDefault',
+    'spacingLg': 'spaceRelaxed',
+  };
+
+  // 식별자 이름 치환
+  Object.entries(TOKEN_MAP).forEach(([oldName, newName]) => {
+    root
+      .find(j.Identifier, { name: oldName })
+      .forEach(path => {
+        path.node.name = newName;
+      });
+  });
+
+  return root.toSource();
+}
+```
+
+## Adapter 패턴: 점진적 전환
+
+한 번에 모든 컴포넌트를 교체하기 어려울 때, Adapter 패턴을 사용합니다.
+
+```tsx title="adapters/ButtonAdapter.tsx"
+import { Button as ButtonV1 } from '@design-system/components-v1';
+import { Button as ButtonV2 } from '@design-system/components-v2';
+import { useGenerationContext } from './GenerationContext';
+
+interface AdaptedButtonProps {
+  label: string;
+  variant?: 'primary' | 'secondary' | 'danger';
+  onClick?: () => void;
+  disabled?: boolean;
+}
+
+/**
+ * v1/v2를 자동 전환하는 Adapter.
+ * GenerationContext로 전환 시점을 제어합니다.
+ */
+export function Button({ label, variant = 'primary', onClick, disabled }: AdaptedButtonProps) {
+  const { activeGeneration } = useGenerationContext();
+
+  if (activeGeneration === 'v2') {
+    return (
+      <ButtonV2
+        variant={variant}
+        onPress={onClick}
+        isDisabled={disabled}
+      >
+        {label}
+      </ButtonV2>
+    );
+  }
+
+  return (
+    <ButtonV1
+      type={variant}
+      onClick={onClick}
+      disabled={disabled}
+    >
+      {label}
+    </ButtonV1>
+  );
+}
+```
+
+```tsx title="adapters/GenerationContext.tsx"
+import { createContext, useContext, ReactNode } from 'react';
+
+type Generation = 'v1' | 'v2';
+
+const GenerationContext = createContext<{ activeGeneration: Generation }>({
+  activeGeneration: 'v1',
+});
+
+export function GenerationProvider({
+  generation,
+  children,
+}: {
+  generation: Generation;
+  children: ReactNode;
+}) {
+  return (
+    <GenerationContext.Provider value={{ activeGeneration: generation }}>
+      {children}
+    </GenerationContext.Provider>
+  );
+}
+
+export const useGenerationContext = () => useContext(GenerationContext);
+```
+
+## 마이그레이션 CLI
+
+```json title="package.json"
+{
+  "scripts": {
+    "migrate:check": "npx @design-system/cli check --from v1 --to v2",
+    "migrate:run": "npx @design-system/cli migrate --from v1 --to v2 --dry-run",
+    "migrate:apply": "npx @design-system/cli migrate --from v1 --to v2",
+    "migrate:report": "npx @design-system/cli report --format markdown > migration-status.md"
+  }
+}
+```
+
+```typescript title="scripts/migration-report.ts"
+// 마이그레이션 진행률 리포트 생성
+interface MigrationStatus {
+  component: string;
+  v1Usage: number;
+  v2Usage: number;
+  percentMigrated: number;
+}
+
+function generateReport(components: MigrationStatus[]): string {
+  const total = components.length;
+  const complete = components.filter(c => c.percentMigrated === 100).length;
+
+  let report = `# Migration Report\n\n`;
+  report += `**Progress**: ${complete}/${total} components (${Math.round(complete / total * 100)}%)\n\n`;
+  report += `| Component | v1 Imports | v2 Imports | Migrated |\n`;
+  report += `|-----------|-----------|-----------|----------|\n`;
+
+  for (const c of components) {
+    const status = c.percentMigrated === 100 ? 'Done' :
+                   c.percentMigrated > 0 ? 'In Progress' : 'Not Started';
+    report += `| ${c.component} | ${c.v1Usage} | ${c.v2Usage} | ${status} (${c.percentMigrated}%) |\n`;
+  }
+
+  return report;
+}
+```
+
+## 성공 체크리스트
+
+**계획 단계**:
+- [ ] 하위 시스템별 전달 일정 수립
+- [ ] 채택자 유형별 커뮤니케이션 전략 수립
+- [ ] Codemod 도구 준비
+
+**실행 단계**:
+- [ ] Early Adopter 프로그램 운영
+- [ ] 점진적 전달 시작 (Colors → Typography → Components)
+- [ ] Adapter 패턴으로 병행 운영
+
+**완료 단계**:
+- [ ] 마이그레이션 진행률 대시보드 운영
+- [ ] v1 Deprecation 공지 및 일정 확정
+- [ ] 지원 기간(Warranty Period) 명시
+
 ---
-> 출처: Nathan Curtis (EightShapes), Mar 12, 2024
-> 원문: Adopting Design System Generations
-> 시리즈: #3 of 5 (Defining | Planning | Adopting | Naming | Retiring)
+> 출처: Nathan Curtis (EightShapes) - Adopting Design System Generations
 
 ---
 

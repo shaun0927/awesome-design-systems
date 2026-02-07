@@ -2,14 +2,21 @@
 title: "Right-Sizing: 컴포넌트 계층 구조 설계"
 sidebar_label: "Right-Sizing 컴포넌트 설계"
 sidebar_position: 2
-tags: [components, hierarchy, architecture]
+audience: developer
+tags: [components, hierarchy, architecture, npm]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#571
 
-## Right-Sizing the Rectangles: 컴포넌트 계층 구조 (Nathan Curtis, 2016)
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-## 📌 핵심 메시지
+<DevQuickStart
+  what="Component libraries need rich hierarchy from atomic elements to pre-assembled shells - not just a flat list of parts"
+  learn="5 principles for sizing components: hierarchical nesting, encapsulation, big components, grid-as-component, and shell patterns"
+  able="Structure a component library with proper hierarchy using npm package organization and React component trees"
+/>
+
+## 핵심 메시지
 
 > **"컴포넌트 라이브러리는 단순한 부품 목록이 아니라, 작은 것부터 큰 것까지 계층적으로 짜여진 태피스트리다."**
 
@@ -19,12 +26,20 @@ tags: [components, hierarchy, architecture]
 
 ### #1. 컴포넌트는 계층적이며 다른 컴포넌트를 포함한다
 
-```
-Card Grid (큰 컴포넌트)
-  └─ Card (중간 컴포넌트)
-      └─ Primary Button (작은 컴포넌트)
-      └─ Icon Button (작은 컴포넌트)
-      └─ Tag (작은 컴포넌트)
+```mermaid
+graph TD
+    A["Card Grid (Template)"] --> B["Card (Organism)"]
+    B --> C["Primary Button (Atom)"]
+    B --> D["Icon Button (Atom)"]
+    B --> E["Tag (Atom)"]
+    B --> F["CardImage (Molecule)"]
+
+    style A fill:#fef3c7,stroke:#d97706
+    style B fill:#dbeafe,stroke:#2563eb
+    style C fill:#d1fae5,stroke:#059669
+    style D fill:#d1fae5,stroke:#059669
+    style E fill:#d1fae5,stroke:#059669
+    style F fill:#e0e7ff,stroke:#4f46e5
 ```
 
 **효과**:
@@ -37,15 +52,13 @@ Card Grid (큰 컴포넌트)
 - Button, Textbox, Tag, Checkbox, Breadcrumb, Modal, Forms, Card 등
 
 **캡슐화 도구**:
-```scss
-// CSS 프리프로세서 Mixin
-@mixin button-primary {
-  background-color: $color-primary;
-  padding: $spacing-sm $spacing-md;
+```css
+/* CSS Custom Properties for encapsulation */
+.btn-primary {
+  background-color: var(--color-primary);
+  padding: var(--space-s) var(--space-m);
+  border-radius: var(--radius-md);
 }
-
-// Template Partial
-{{> button variant="primary" text="Learn More"}}
 ```
 
 > "캡슐화는 라이브러리 확장에 필수적이지만, 복잡성을 증가시킨다. 효과적인 캡슐화는 결코 공짜가 아니다."
@@ -170,8 +183,49 @@ Card Grid (큰 컴포넌트)
 - [ ] 사전 조립된 Shell(Header + Footer 포함)을 제공하는가?
 - [ ] Shell을 통해 글로벌 컴포넌트 재구축을 방지하는가?
 
----
-*출처: Nathan Curtis (EightShapes, 2016)*
+## npm Package Structure
+
+```
+@myds/
+├── core/                 # Atomic elements
+│   ├── button/
+│   ├── input/
+│   ├── icon/
+│   └── tag/
+├── patterns/             # Molecular/Organism
+│   ├── card/
+│   ├── toolbar/
+│   └── search-field/
+├── layouts/              # Templates
+│   ├── grid/
+│   ├── page-layout/
+│   └── sidebar-layout/
+└── shells/               # Pre-assembled shells
+    ├── app-shell/        # Header + Nav + Footer + Slot
+    └── admin-shell/
+```
+
+```tsx title="AppShell.tsx"
+interface AppShellProps {
+  header?: React.ReactNode;
+  sidebar?: React.ReactNode;
+  footer?: React.ReactNode;
+  children: React.ReactNode;
+}
+
+export function AppShell({ header, sidebar, footer, children }: AppShellProps) {
+  return (
+    <div className="app-shell">
+      {header && <header className="app-shell__header">{header}</header>}
+      <div className="app-shell__body">
+        {sidebar && <aside className="app-shell__sidebar">{sidebar}</aside>}
+        <main className="app-shell__main">{children}</main>
+      </div>
+      {footer && <footer className="app-shell__footer">{footer}</footer>}
+    </div>
+  );
+}
+```
 
 ---
 

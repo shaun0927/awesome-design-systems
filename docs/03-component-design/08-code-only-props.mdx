@@ -2,14 +2,21 @@
 title: "Code Only Props - 비시각적 속성 관리"
 sidebar_label: "Code Only Props"
 sidebar_position: 8
-tags: [props, figma, accessibility]
+audience: both
+tags: [props, figma, accessibility, typescript]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#544
 
-## Code Only Props in Figma
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-## 📌 핵심 개념
+<DevQuickStart
+  what="Code Only Props are non-visual properties (accessibility, semantic HTML tags, behavior constraints) that exist in Figma but only render in code"
+  learn="How to create hidden Figma layers for code-only props, visibility strategies, and type inference rules from Figma to TypeScript"
+  able="Map Figma code-only prop definitions to TypeScript interfaces with proper type inference"
+/>
+
+## 핵심 개념
 
 **문제**: Figma는 시각적 결과물 중심으로 설계되어 접근성, 동작, 비시각적 로직 표현 수단이 제한적
 
@@ -82,9 +89,59 @@ props:
     codeOnly: true
 ```
 
----
+## Figma to TypeScript Mapping
 
-*출처: Nathan Curtis, Medium 2026-01*
+```typescript title="figma-props-mapping.ts"
+// Figma "Code Only Props" layer → TypeScript interface
+
+// Heading component
+// Figma: as = "h1|h2|h3|h4|h5|h6", level = "1|2|3|4|5|6"
+interface HeadingProps {
+  /** Code-only: semantic HTML tag (not visual in Figma) */
+  as: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6';
+  /** Code-only: heading level for styling */
+  level: 1 | 2 | 3 | 4 | 5 | 6;
+  /** Visual prop: visible in Figma */
+  children: React.ReactNode;
+}
+
+// Type inference rules from Figma layer values
+type InferFigmaPropType<T extends string> =
+  T extends `${number}` ? number :           // "0" → number
+  T extends `${string}|${string}` ? string : // "h1|h2|h3" → string enum
+  string;                                     // "Label" → string
+
+// Checkbox Group with slot constraints (from Figma code-only props)
+interface CheckboxGroupCodeProps {
+  /** Code-only: slot type constraint */
+  'items anyOf': 'checkbox';
+  /** Code-only: minimum items required */
+  'items minItems': number;
+}
+
+// Merged props for development
+interface CheckboxGroupProps extends Omit<CheckboxGroupCodeProps, 'items anyOf' | 'items minItems'> {
+  /** Derived from code-only 'items anyOf: checkbox' */
+  children: React.ReactElement<CheckboxProps>[];
+  label: string;
+  error?: string;
+  /** Derived from code-only 'items minItems: 1' */
+  required?: boolean;
+}
+
+// Generation helper: Figma spec → React component scaffold
+function generatePropsFromSpec(spec: Record<string, { type: string; value: string; codeOnly?: boolean }>) {
+  const visualProps: string[] = [];
+  const codeOnlyProps: string[] = [];
+
+  for (const [name, def] of Object.entries(spec)) {
+    const target = def.codeOnly ? codeOnlyProps : visualProps;
+    target.push(`  ${name}: ${def.type}; // ${def.value}`);
+  }
+
+  return { visualProps, codeOnlyProps };
+}
+```
 
 ---
 

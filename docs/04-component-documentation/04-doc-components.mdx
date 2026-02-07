@@ -2,10 +2,17 @@
 title: "Doc Components - Top 8 Reusable Components for Documentation"
 sidebar_label: "문서화용 컴포넌트 Top 8"
 sidebar_position: 4
-tags: [doc-components, documentation, tooling, reusable]
+audience: developer
+tags: [doc-components, documentation, tooling, reusable, react]
 ---
 
-> Original issue: shaun0927/stocktitan-crawler#579
+import DevQuickStart from '@site/src/components/DevQuickStart';
+
+<DevQuickStart
+  what="문서 사이트를 위한 Top 8 재사용 컴포넌트와 그 React 구현을 배웁니다."
+  learn="Example-Code Pair, Do/Don't, Spec Table 컴포넌트의 실제 React 코드"
+  able="문서 사이트 전용 컴포넌트 라이브러리를 직접 구축할 수 있습니다."
+/>
 
 ## 핵심 개념
 - **Documentation as product**: Doc site도 library toolkit을 사용하여 구축하는 또 다른 제품
@@ -14,35 +21,305 @@ tags: [doc-components, documentation, tooling, reusable]
 - **Build your own**: Documentation 전용 components를 library와 분리하여 구축
 - **Meta benefit**: Doc site 구축 과정이 team을 library 사용자 입장에 sensitize함
 
-## 실무 노하우
-- **#1 Example-Code Pair**: Click-to-copy 기능, responsive tabs, state stacking (hover/active/disabled 동시 표시)
-- **#2 Markdown + Templating**: Nunjucks 같은 templating에 Markdown 통합, Google Docs에서 migration 용이하게
-- **#3 Sticky local TOC**: Wide displays에서 sticky, subsections 자동 표시 (scroll position 기반)
-- **#4 Do & Don't**: Green/red border로 구분, "DO" & "DON'T" prefix 자동 추가, image는 conflict 피하게 compose
-- **#5 Tint Stack**: Accessibility scores 표시 (AA/AAA), click-to-copy variable names ($color-neutral-95)
-- **#6 Page Gallery**: iFrame 사용, transform: scale() 조정 기능, viewport width toggle
-- **#7 Release Details**: Change type 표시 (markup/style/script/spec), grouping (enhancements/fixes/new)
-- **#8 Spec Tables**: Recursive hierarchy display ($space-s → $space-inset-s → $space-inset-squish-s)
+## 우선순위 매트릭스
 
-## 주요 구조/다이어그램
-**Doc component priority ranking:**
-```
-#1 ★★★ Example-Code Pair (필수 - 모든 doc의 핵심)
-#2 ★★★ Markdown Chunks (long-form content 기본)
-#3 ★★☆ Page-level TOC (navigation 개선)
-#4 ★★☆ Do & Don't (guidelines 시각화)
-#5 ★☆☆ Tint Stack (color system 전용)
-#6 ★☆☆ Framed Page Gallery (showcase용)
-#7 ★☆☆ Release Details (version management)
-#8 ★☆☆ Spec/Token Tables (technical reference)
+```mermaid
+quadrantChart
+    title Doc Component Priority
+    x-axis Low Cost --> High Cost
+    y-axis Low Value --> High Value
+    quadrant-1 Build First
+    quadrant-2 Plan Carefully
+    quadrant-3 Defer
+    quadrant-4 Skip
+    Example-Code Pair: [0.3, 0.95]
+    Markdown Chunks: [0.2, 0.8]
+    Do and Don't: [0.35, 0.75]
+    Page TOC: [0.4, 0.7]
+    Spec Tables: [0.5, 0.6]
+    Tint Stack: [0.6, 0.45]
+    Release Details: [0.55, 0.5]
+    Page Gallery: [0.75, 0.4]
 ```
 
-**Example-Code Pair features:**
-- Visual example (rendered)
-- Code tabs (HTML, @extends, macro)
-- Responsive toggles (small/medium/large)
-- Click-to-copy button
-- State stacking display
+## Top 3 컴포넌트 React 구현
+
+### #1 Example-Code Pair
+
+문서의 핵심 컴포넌트. 실시간 렌더링 + 코드를 나란히 보여줍니다.
+
+```tsx
+// components/doc/ExampleCodePair.tsx
+import React, { useState } from 'react';
+
+interface ExampleCodePairProps {
+  /** 렌더링할 실시간 예제 */
+  children: React.ReactNode;
+  /** 표시할 코드 (문자열) */
+  code: string;
+  /** 코드 언어 */
+  language?: 'tsx' | 'html' | 'css';
+  /** 제목 */
+  title?: string;
+  /** 반응형 토글 활성화 */
+  responsive?: boolean;
+}
+
+type Viewport = 'sm' | 'md' | 'lg';
+
+export const ExampleCodePair: React.FC<ExampleCodePairProps> = ({
+  children,
+  code,
+  language = 'tsx',
+  title,
+  responsive = false,
+}) => {
+  const [viewport, setViewport] = useState<Viewport>('lg');
+  const [copied, setCopied] = useState(false);
+
+  const viewportWidths: Record<Viewport, string> = {
+    sm: '320px',
+    md: '768px',
+    lg: '100%',
+  };
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <figure className="example-code-pair" role="figure" aria-label={title}>
+      {title && <figcaption className="ecp-title">{title}</figcaption>}
+
+      {/* Responsive toggles */}
+      {responsive && (
+        <div className="ecp-viewport-bar" role="radiogroup" aria-label="Viewport size">
+          {(['sm', 'md', 'lg'] as const).map((vp) => (
+            <button
+              key={vp}
+              role="radio"
+              aria-checked={viewport === vp}
+              onClick={() => setViewport(vp)}
+              className={viewport === vp ? 'active' : ''}
+            >
+              {vp.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Live preview */}
+      <div
+        className="ecp-preview"
+        style={{ maxWidth: responsive ? viewportWidths[viewport] : '100%' }}
+      >
+        {children}
+      </div>
+
+      {/* Code block */}
+      <div className="ecp-code">
+        <div className="ecp-code-header">
+          <span className="ecp-language">{language}</span>
+          <button onClick={handleCopy} className="ecp-copy">
+            {copied ? 'Copied!' : 'Copy'}
+          </button>
+        </div>
+        <pre><code className={`language-${language}`}>{code}</code></pre>
+      </div>
+    </figure>
+  );
+};
+```
+
+### #2 Do/Don't
+
+가이드라인 시각화의 핵심 도구. 초록/빨강 테두리로 올바른/잘못된 사용법을 구분합니다.
+
+```tsx
+// components/doc/DoDont.tsx
+import React from 'react';
+
+interface DoDontItem {
+  /** 시각적 예제 (이미지 또는 컴포넌트) */
+  children: React.ReactNode;
+  /** 설명 텍스트 */
+  description: string;
+}
+
+interface DoDontProps {
+  doExample: DoDontItem;
+  dontExample: DoDontItem;
+}
+
+export const DoDont: React.FC<DoDontProps> = ({ doExample, dontExample }) => (
+  <div className="do-dont-grid" role="group" aria-label="Do and Don't comparison">
+    {/* DO */}
+    <div className="do-dont-card do-dont-card--do">
+      <div className="do-dont-badge" aria-hidden="true">DO</div>
+      <div className="do-dont-preview">{doExample.children}</div>
+      <p className="do-dont-desc">{doExample.description}</p>
+    </div>
+
+    {/* DON'T */}
+    <div className="do-dont-card do-dont-card--dont">
+      <div className="do-dont-badge" aria-hidden="true">DON'T</div>
+      <div className="do-dont-preview">{dontExample.children}</div>
+      <p className="do-dont-desc">{dontExample.description}</p>
+    </div>
+  </div>
+);
+
+// 사용 예시:
+// <DoDont
+//   doExample={{
+//     children: <Button variant="primary">저장하기</Button>,
+//     description: "동사로 시작하는 구체적 라벨 사용"
+//   }}
+//   dontExample={{
+//     children: <Button variant="primary">OK</Button>,
+//     description: "모호한 라벨은 사용자를 혼란시킴"
+//   }}
+// />
+```
+
+```css
+.do-dont-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 1rem 0;
+}
+
+.do-dont-card {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.do-dont-card--do {
+  border: 2px solid #22c55e;
+}
+
+.do-dont-card--dont {
+  border: 2px solid #ef4444;
+}
+
+.do-dont-badge {
+  padding: 4px 12px;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.do-dont-card--do .do-dont-badge {
+  background: #22c55e;
+  color: white;
+}
+
+.do-dont-card--dont .do-dont-badge {
+  background: #ef4444;
+  color: white;
+}
+
+.do-dont-preview {
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.do-dont-desc {
+  padding: 12px 16px;
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-text-secondary, #64748b);
+  border-top: 1px solid var(--color-border, #e2e8f0);
+}
+```
+
+### #3 Spec/Token Table
+
+디자인 토큰의 계층 구조와 실제 값을 보여주는 테이블입니다.
+
+```tsx
+// components/doc/SpecTable.tsx
+import React from 'react';
+
+interface TokenSpec {
+  /** 토큰 이름 (예: --space-inset-s) */
+  token: string;
+  /** 상위 토큰 (계층 표시) */
+  parent?: string;
+  /** CSS 값 */
+  value: string;
+  /** 시각적 미리보기 (색상 swatch 등) */
+  preview?: React.ReactNode;
+}
+
+interface SpecTableProps {
+  title: string;
+  tokens: TokenSpec[];
+}
+
+export const SpecTable: React.FC<SpecTableProps> = ({ title, tokens }) => (
+  <div className="spec-table-wrapper">
+    <h4 className="spec-table-title">{title}</h4>
+    <table className="spec-table">
+      <thead>
+        <tr>
+          <th>Token</th>
+          <th>Alias / Parent</th>
+          <th>Value</th>
+          <th>Preview</th>
+        </tr>
+      </thead>
+      <tbody>
+        {tokens.map((t) => (
+          <tr key={t.token}>
+            <td>
+              <code className="spec-token-name">{t.token}</code>
+            </td>
+            <td>{t.parent || '-'}</td>
+            <td><code>{t.value}</code></td>
+            <td>{t.preview || null}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
+
+// 사용 예시:
+// <SpecTable
+//   title="Spacing Tokens"
+//   tokens={[
+//     { token: '--space-s', value: '8px', parent: '--space-base' },
+//     { token: '--space-inset-s', value: '8px', parent: '--space-s' },
+//     { token: '--space-inset-squish-s', value: '4px 8px', parent: '--space-s' },
+//   ]}
+// />
+```
+
+## 실제 오픈소스 구현 참고
+
+| 디자인 시스템 | Example-Code | Do/Don't | Spec Table | URL |
+|--------------|-------------|----------|------------|-----|
+| **Chakra UI** | Editable JSX | Aspect cards | Props table | chakra-ui.com/docs |
+| **Radix UI** | Live sandbox | Usage notes | API reference | radix-ui.com |
+| **shadcn/ui** | Copy-paste blocks | - | CLI install | ui.shadcn.com |
+| **Storybook** | Canvas + Controls | - | ArgsTable | storybook.js.org |
+
+## 나머지 5개 컴포넌트 요약
+
+| # | 컴포넌트 | 핵심 기능 | 구현 우선순위 |
+|---|---------|-----------|-------------|
+| #2 | Markdown Chunks | Nunjucks 통합, Google Docs migration | 높음 |
+| #3 | Page TOC | Sticky, scroll-based subsection 표시 | 높음 |
+| #5 | Tint Stack | AA/AAA score 표시, click-to-copy 변수명 | 중간 |
+| #6 | Framed Page Gallery | iframe + transform:scale(), viewport toggle | 낮음 |
+| #7 | Release Details | Change type (markup/style/script), grouping | 중간 |
 
 ---
 > 출처: Nathan Curtis (EightShapes)
@@ -50,7 +327,7 @@ tags: [doc-components, documentation, tooling, reusable]
 
 ---
 
-## 📎 Related Articles
+## Related Articles
 
 import CrossRef from '@site/src/components/CrossRef';
 

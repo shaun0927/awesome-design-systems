@@ -2,14 +2,21 @@
 title: "지루한 UI 개선 노하우 정리"
 sidebar_label: "지루한 UI 개선 노하우"
 sidebar_position: 8
-tags: [ui-design, depth, shadows]
+audience: developer
+tags: [ui-design, depth, shadows, css, color-scheme]
 ---
 
 > Original issue: shaun0927/stocktitan-crawler#512
 
-## 지루한 UI 개선 노하우 정리 - The Easy Way to Fix Boring UIs
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-## 📌 핵심 철학
+<DevQuickStart
+  what="Two techniques - color layering (3-4 shades) and shadow levels (small/medium/big) - transform flat UIs into visually rich interfaces"
+  learn="How to create depth with HSL lightness stepping, 3-tier shadow system, inset shadows, and gradient highlights for dark/light themes"
+  able="Implement a complete depth system with CSS custom properties for backgrounds, shadows, and automatic theme switching"
+/>
+
+## 핵심 철학
 
 **"평범한 디자인을 좋은 디자인으로 만드는 것은, 좋은 디자인을 최고의 디자인으로 만드는 것보다 훨씬 적은 노력으로 가능하다"**
 
@@ -334,6 +341,26 @@ High → Ultra: 작은 시각적 개선, 많은 노력 ❌ (과최적화)
   --shadow-inset:
     inset 0 2px 4px rgba(0, 0, 0, 0.3),
     inset 0 -1px 0 rgba(255, 255, 255, 0.05);
+}
+```
+
+### Using color-scheme for Native Elements
+
+```css
+/* Tell the browser which color schemes the page supports */
+:root {
+  color-scheme: dark light;
+}
+
+/* Dark-only sections */
+.dark-panel {
+  color-scheme: dark;
+  /* Native form controls, scrollbars, etc. auto-adapt */
+}
+
+/* Light-only sections */
+.light-panel {
+  color-scheme: light;
 }
 ```
 

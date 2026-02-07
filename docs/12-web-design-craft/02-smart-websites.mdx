@@ -2,78 +2,371 @@
 title: "스마트한 웹사이트 구축 방법론 정리 - The Smart Way to Build Websites"
 sidebar_label: "스마트 구축법"
 sidebar_position: 2
+audience: developer
 tags: ["components", "reusability", "design-first", "workflow"]
 ---
 
-> Original issue: shaun0927/stocktitan-crawler#521
-
-## 스마트한 웹사이트 구축 방법론 - Design System & Efficiency 관점
-
-> **출처**: "The Smart Way to Build Websites" 영상 트랜스크립트 분석  
-> **관점**: 디자인 시스템 효율성 및 실전 노하우
-
----
-
-## 📌 핵심 철학
-
-### 1. 컴포넌트 기반 사고방식
-
-**"레고 블록처럼 생각하라"**
-
-- 매번 나무를 깎아서 새 블록을 만드는 대신, 미리 만들어진 레고 블록으로 조립
-- 디자인 시스템 = 재사용 가능한 UI 컴포넌트 + 글로벌 CSS 스타일 + 유틸리티 클래스의 집합
-- 처음부터 스타일을 다시 작성하지 않고, 사전 정의된 컴포넌트로 개발 속도 향상
-
-### 2. "Design First, Then Build"
-
-**Step 0: 반드시 디자인부터**
-
-1. **디자인 능력이 없다면**: 영상/튜토리얼로 기본기 습득
-2. **영감 수집**:
-   - Mobin (강력 추천): 필터링이 쉽고, 실제로 검증된 수백 개의 디자인 탐색 가능
-   - 경쟁사 분석
-   - Figma 커뮤니티
-3. **패턴 분석**: 실제 웹사이트들을 분석하면 대부분 **2~3개의 반복 컴포넌트**로 구성됨을 발견
-
----
-
-## 🔍 실전 사례 분석: 컴포넌트 재사용 패턴
-
-### 분석 대상 웹사이트의 구조
-
-```
-페이지 구조:
-├── Header (글로벌 컴포넌트)
-├── Hero Section (글로벌 컴포넌트)
-├── Testimonial Cards (동일 컴포넌트 반복)
-├── Bento Grid (동일 컴포넌트, flexbox로 동적 레이아웃)
-├── 2-Column Section (이미지 + 텍스트)
-│   ├── 왼쪽: 이미지
-│   └── 오른쪽: Subheading + Heading + Details
-├── 2-Column Section (Reversed)
-│   └── flex-direction만 reverse (동일 컴포넌트!)
-├── CTA Section (글로벌 컴포넌트)
-└── Footer (글로벌 컴포넌트)
-```
-
-### 핵심 발견
-
-| 관찰 | 인사이트 |
-|------|----------|
-| **전체 페이지가 2개의 메인 컴포넌트로 구성** | 섹션들은 props만 다르고 구조는 동일 |
-| **4개 섹션 = 동일 컴포넌트** | Icon + Heading + Details (3개 props) |
-| **2-Column 레이아웃 = 1개 컴포넌트** | flex-direction: reverse로 좌우 전환 |
-| **모든 페이지가 같은 패턴** | Header, Hero, 반복 섹션, CTA, Footer |
-| **YouTube 카드 예시** | 모든 비디오 카드가 동일 스타일 + props, 내용만 변경 |
-
-**결론**: "Repeat Your Design" - 일관된 구조로 동적 데이터를 렌더링하기 위해 필수
-
-
----
-
-## Related Articles
-
+import DevQuickStart from '@site/src/components/DevQuickStart';
 import CrossRef from '@site/src/components/CrossRef';
+
+<DevQuickStart
+  what="스마트 웹사이트는 CSS Grid와 Container Queries로 구현됩니다"
+  learn="CSS Grid, Container Queries, 적응형 컴포넌트"
+  able="CSS Grid와 Container Queries로 적응형 레이아웃을 구축할 수 있습니다"
+/>
+
+## 핵심 철학
+
+### 컴포넌트 기반 사고방식
+
+웹사이트는 반복 가능한 컴포넌트의 조합입니다. 매번 새로 만들지 말고, 재사용 가능한 블록으로 구성합니다.
+
+```tsx
+// Bad: 섹션마다 새로운 컴포넌트
+<FeatureSection1 />
+<FeatureSection2 />
+<FeatureSection3 />
+
+// Good: 하나의 컴포넌트 + props
+<FeatureSection icon="🚀" title="Fast" details="Lightning speed" />
+<FeatureSection icon="🔒" title="Secure" details="Bank-level encryption" />
+<FeatureSection icon="📱" title="Mobile" details="Works everywhere" />
+```
+
+### Design First, Then Build
+
+코드 작성 전 반드시 디자인 단계를 거칩니다.
+
+**프로세스:**
+1. 영감 수집 (Mobbin, 경쟁사 분석)
+2. 패턴 분석 (반복되는 컴포넌트 식별)
+3. 컴포넌트 설계 (props 정의)
+4. 구현
+
+---
+
+## CSS Grid로 적응형 레이아웃 구현
+
+### 기본 Grid 시스템
+
+```css
+.layout {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+  gap: 2rem;
+}
+```
+
+**작동 원리:**
+- `auto-fit`: 가능한 많은 열을 생성하고 빈 열 제거
+- `minmax(min(300px, 100%), 1fr)`: 최소 300px, 모바일에서 오버플로 방지
+- `gap: 2rem`: 자식 간 간격
+
+### 복잡한 레이아웃 템플릿
+
+```css
+.dashboard {
+  display: grid;
+  grid-template-areas:
+    "header header header"
+    "sidebar main main"
+    "footer footer footer";
+  grid-template-columns: 250px 1fr 1fr;
+  gap: 1rem;
+}
+
+.header { grid-area: header; }
+.sidebar { grid-area: sidebar; }
+.main { grid-area: main; }
+.footer { grid-area: footer; }
+
+@media (max-width: 768px) {
+  .dashboard {
+    grid-template-areas:
+      "header"
+      "main"
+      "sidebar"
+      "footer";
+    grid-template-columns: 1fr;
+  }
+}
+```
+
+---
+
+## Container Queries로 컴포넌트 적응
+
+Container Queries는 부모 컨테이너 크기에 따라 스타일을 변경합니다.
+
+### 기본 사용법
+
+```css
+.card-container {
+  container-type: inline-size;
+  container-name: card;
+}
+
+.card-title {
+  font-size: 1rem;
+}
+
+@container card (min-width: 400px) {
+  .card-title {
+    font-size: 1.5rem;
+  }
+
+  .card-layout {
+    display: flex;
+    gap: 1rem;
+  }
+}
+```
+
+### React 적응형 카드 컴포넌트
+
+```tsx
+interface CardProps {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+export function AdaptiveCard({ icon, title, description }: CardProps) {
+  return (
+    <div className="card-container">
+      <div className="card-layout">
+        <span className="card-icon">{icon}</span>
+        <div>
+          <h3 className="card-title">{title}</h3>
+          <p className="card-description">{description}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+```
+
+```css
+.card-container {
+  container-type: inline-size;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+/* 좁은 컨테이너: 세로 레이아웃 */
+.card-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.card-icon {
+  font-size: 2rem;
+}
+
+/* 넓은 컨테이너 (400px+): 가로 레이아웃 */
+@container (min-width: 400px) {
+  .card-layout {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .card-icon {
+    font-size: 3rem;
+  }
+
+  .card-title {
+    font-size: 1.5rem;
+  }
+}
+```
+
+---
+
+## 재사용 가능한 섹션 컴포넌트
+
+### 2-Column 레이아웃 컴포넌트
+
+```tsx
+interface TwoColumnProps {
+  imageSrc: string;
+  imageAlt: string;
+  subheading: string;
+  heading: string;
+  details: string;
+  reverse?: boolean;
+}
+
+export function TwoColumnSection({
+  imageSrc,
+  imageAlt,
+  subheading,
+  heading,
+  details,
+  reverse = false,
+}: TwoColumnProps) {
+  return (
+    <section className={`two-column ${reverse ? 'reverse' : ''}`}>
+      <div className="image-container">
+        <img src={imageSrc} alt={imageAlt} />
+      </div>
+      <div className="content">
+        <p className="subheading">{subheading}</p>
+        <h2>{heading}</h2>
+        <p className="details">{details}</p>
+      </div>
+    </section>
+  );
+}
+```
+
+```css
+.two-column {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(400px, 100%), 1fr));
+  gap: 2rem;
+  align-items: center;
+}
+
+.two-column.reverse {
+  direction: rtl;
+}
+
+.two-column.reverse > * {
+  direction: ltr;
+}
+
+.image-container img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+```
+
+### Bento Grid 레이아웃
+
+```tsx
+interface BentoItemProps {
+  title: string;
+  description: string;
+  size?: 'small' | 'medium' | 'large';
+}
+
+export function BentoGrid({ items }: { items: BentoItemProps[] }) {
+  return (
+    <div className="bento-grid">
+      {items.map((item, idx) => (
+        <div key={idx} className={`bento-item ${item.size || 'medium'}`}>
+          <h3>{item.title}</h3>
+          <p>{item.description}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+```
+
+```css
+.bento-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-auto-rows: 200px;
+  gap: 1rem;
+}
+
+.bento-item {
+  background: #f5f5f5;
+  padding: 1.5rem;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.bento-item.small {
+  grid-column: span 1;
+  grid-row: span 1;
+}
+
+.bento-item.medium {
+  grid-column: span 2;
+  grid-row: span 1;
+}
+
+.bento-item.large {
+  grid-column: span 2;
+  grid-row: span 2;
+}
+
+@media (max-width: 768px) {
+  .bento-item.medium,
+  .bento-item.large {
+    grid-column: span 1;
+    grid-row: span 1;
+  }
+}
+```
+
+---
+
+## 실전 예시: 페이지 구조
+
+```tsx
+export function HomePage() {
+  return (
+    <>
+      <Header />
+      <HeroSection />
+
+      {/* 반복 컴포넌트 */}
+      <BentoGrid items={features} />
+
+      {/* 2-Column 섹션 */}
+      <TwoColumnSection
+        imageSrc="/feature1.jpg"
+        imageAlt="Feature 1"
+        subheading="Innovation"
+        heading="Built for the future"
+        details="Advanced technology that scales with your needs"
+      />
+
+      <TwoColumnSection
+        imageSrc="/feature2.jpg"
+        imageAlt="Feature 2"
+        subheading="Security"
+        heading="Enterprise-grade protection"
+        details="Bank-level encryption keeps your data safe"
+        reverse
+      />
+
+      <CTASection />
+      <Footer />
+    </>
+  );
+}
+```
+
+---
+
+## 체크리스트
+
+### 설계 단계
+- [ ] 페이지를 반복 컴포넌트로 분해
+- [ ] 각 컴포넌트의 props 정의
+- [ ] 모바일/데스크톱 레이아웃 스케치
+
+### 구현 단계
+- [ ] CSS Grid로 기본 레이아웃 구성
+- [ ] Container Queries로 컴포넌트 적응형 동작 추가
+- [ ] 재사용 가능한 React 컴포넌트 작성
+
+### 검증 단계
+- [ ] 다양한 컨테이너 크기에서 테스트
+- [ ] 반응형 동작 확인 (모바일/태블릿/데스크톱)
+- [ ] 컴포넌트 재사용성 확인
+
+---
 
 <CrossRef
   related={[

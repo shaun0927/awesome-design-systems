@@ -2,120 +2,114 @@
 title: "Figma 컴포넌트 테스팅 워크플로우"
 sidebar_label: "Figma 테스팅"
 sidebar_position: 3
+audience: designer
 tags: [figma, testing, workflow, component, quality]
 ---
 
-## Figma 컴포넌트 테스팅 워크플로우
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-> Original issue: shaun0927/stocktitan-crawler#551
+<DevQuickStart
+  what="Figma 컴포넌트 테스팅의 6단계 워크플로우와 개발자의 역할을 이해합니다."
+  learn="Figma 컴포넌트 품질 기준과 코드 구현과의 정합성 검증 방법"
+  able="Figma 테스트 결과를 코드 구현에 반영하고 API 일관성을 검증할 수 있습니다."
+/>
 
-## 📌 핵심 개념
+## 핵심 개념
 
-### 1. 왜 Figma 컴포넌트 테스팅이 필요한가?
+### 왜 Figma 컴포넌트 테스팅이 필요한가?
 - **문제 인식**: Figma 컴포넌트는 복잡하며, 기대대로 작동해야 하고 유효하지 않은 표시를 방지해야 함
 - **흔히 발생하는 결함**: 레이블과 함께 커지지 않는 버튼, 누락된 배경색, 하드코딩된 스타일, 잘못된 이름
 
-### 2. 테스팅의 범위 정의
-**✅ 테스팅이 검증하는 것**:
+### 테스팅의 범위 정의
+
+**테스팅이 검증하는 것:**
 - 레이어와 속성이 올바르게 명명되었는가?
 - 각 구성이 예상된 시각적 결과를 생성하는가?
 - 색상이 제대로 적용되었는가?
 - 컴포넌트 크기 조정 시 요소가 텍스트를 올바르게 흐르게 하는가?
 
-**❌ 테스팅이 검증하지 않는 것**:
+**테스팅이 검증하지 않는 것:**
 - UI 컴포넌트 디자인의 사용성 (최종 사용자 관점)
 - Figma 컴포넌트 자체의 사용성 (디자이너 관점)
 
-### 3. 품질의 균형 찾기
-**핵심 질문**:
-- "컴포넌트를 배포하기 전에 얼마나 많은 품질이 필수적인가?"
-- "그 이상으로 품질을 개선하는 데 얼마나 비용이 들고, 대신 무엇을 할 수 있으며, 무엇이 가장 중요한가?"
+## 테스팅 워크플로우
 
-**기회 비용 고려**:
-- 코드 품질이 훨씬 더 중요함
-- 해야 할 다른 일이 너무 많음
-- 92% vs 98% 품질의 딜레마: 균형을 잃지 말 것
+```mermaid
+graph TD
+    A["Phase 1: 준비"] --> B["Phase 2: 테스트 케이스 생성"]
+    B --> C["Phase 3: 비평 (선택)"]
+    C --> D["Phase 4: 공식 검토"]
+    D --> E["Phase 5: 수정 및 재검토"]
+    E --> F["Phase 6: 승인 및 머지"]
 
-## 🎯 실무 노하우
+    B --> B1["빌더가 시각적 테스트 케이스 설계"]
+    D --> D1["테스터가 체크리스트 기반 검토"]
+    E --> E1["결함 수정 후 재검증"]
+```
 
-### 1. 테스트 준비 단계의 전제 조건
-**테스트 전 완료 사항**:
-1. 개발로의 디자인 핸드오프 (코딩 시작됨)
-2. API 안정화를 위한 디자이너-개발자 협업
-3. Figma 컴포넌트 기능의 대부분 또는 전부 구축
+## 개발자의 역할
 
-### 2. 필수 테스팅 활동
-**활동 1: 시각적 테스트 케이스 생성** (빌더, 필수)
-- 타이밍: Figma 컴포넌트 빌드가 거의 완료될 때
-- 넓은 기준을 포괄적으로 커버
+디자이너가 Figma 테스팅을 수행하는 동안, 개발자는 다음 영역에서 협업합니다.
 
-**활동 2: 컴포넌트 검토** (테스터, 필수)
-- 체크리스트를 사용하여 철저히 검사
-- 결함을 코멘트하고 추적
+### Figma-Code 정합성 검증 테이블
 
-**활동 3: 비평** (권장, 선택 사항)
-- 타이밍: 공식 검토 전
-- 개발자를 포함시키는 것이 권장됨
+| Figma 속성 | 코드 대응 | 검증 방법 |
+|-----------|----------|----------|
+| Layer name: `icon-leading` | `className="icon-leading"` | Storybook에서 시각적 비교 |
+| Property: `size = sm / md / lg` | `type Size = 'sm' \| 'md' \| 'lg'` | TypeScript 타입 일치 확인 |
+| Auto Layout: horizontal, gap 8 | `display: flex; gap: 8px` | DevTools 검사 |
+| Color style: `brand/500` | `var(--color-brand-500)` | 계산된 값 비교 |
+| Text style: `heading/sm` | `var(--font-heading-sm)` | 폰트 속성 비교 |
+| Variant: `state = hover` | `.btn:hover` | 상태별 스크린샷 비교 |
 
-### 3. 품질 기준의 현실적 설정
-**권장 접근법**: "충분히 좋은" 품질 + 다른 기회
-- 필수 품질 기준으로 축소하는 것은 어렵지만 중요
-- 디자인 자산은 끊임없이 변화하는 코드로 구축된 프로덕션 경험으로 가는 길의 로드킬
-- 품질은 매우 중요하지만 균형을 잃지 마라
+### API 네이밍 정렬 체크
 
-### 4. 개발자와의 협업 강조
-**개발자 참여의 중요성**:
-- API 일관성 검증 (요소 이름, 속성 이름)
-- 코드 구현과의 정합성 확인
-- 실제 사용 케이스에 대한 피드백
+```tsx
+// Figma에서 Button의 Properties:
+// - variant: primary | secondary | ghost
+// - size: sm | md | lg
+// - state: default | hover | active | disabled
+// - hasIcon: true | false
 
-## 📊 테스팅 역할 모델
+// 코드에서의 대응 (정렬 필수):
+interface ButtonProps {
+  variant: 'primary' | 'secondary' | 'ghost';  // Figma와 동일
+  size: 'sm' | 'md' | 'lg';                    // Figma와 동일
+  disabled?: boolean;         // Figma 'state=disabled' 대응
+  // hasIcon은 children으로 자연스럽게 처리
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+}
+
+// 불일치 예시 (피해야 할 것):
+// Figma: "size = small"  vs  Code: size = 'sm'  → 약어 규칙 합의 필요
+// Figma: "type = primary" vs  Code: variant = 'primary' → 속성명 합의 필요
+```
+
+## 테스팅 역할 모델
 
 ### Model 1: "빌드하면, 테스트도 해라"
 - 적용 상황: 혼자 작업하는 디자이너, 소규모 팀
 
-### Model 2: "빌더가 빌드 → 테스터가 테스트"
-- 적용 상황: 전담 역할, 승인 역할, 견습, 역량 부족, 기술 특화
+### Model 2: "빌더가 빌드하고 테스터가 테스트"
+- 적용 상황: 전담 역할, 승인 필요, 견습, 역량 부족
 
 ### Model 3: "내가 당신 것을 테스트, 당신이 내 것을 테스트"
 - 적용 상황: 더 큰 디자인 시스템 팀, 많은 컴포넌트가 병렬로 작업될 때
 
-## 📋 구체적 워크플로우
+## 품질 기준의 현실적 설정
 
-### Phase 1: 준비 단계
-1. 전제 조건 확인
-2. 역할 할당
-
-### Phase 2: 테스트 케이스 생성 (빌더)
-1. 시각적 테스트 케이스 설계
-2. 자체 검증
-
-### Phase 3: 비평 (선택 사항, 권장)
-1. 비평 세션 준비
-2. 비평 세션 진행
-
-### Phase 4: 공식 검토 (테스터)
-1. 검토 할당
-2. 체크리스트 기반 검토
-3. 결함 문서화
-4. 검토 피드백
-
-### Phase 5: 수정 및 재검토
-1. 빌더가 결함 수정
-2. 수정 검증
-
-### Phase 6: 승인 및 머지
-1. 최종 승인
-2. 브랜치 머지
-3. 릴리스
+**"충분히 좋은" 품질 + 다른 기회:**
+- 코드 품질이 Figma 품질보다 더 중요함
+- 92% vs 98% 품질의 딜레마: 균형을 잃지 말 것
+- 디자인 자산은 끊임없이 변하는 코드로 구축된 프로덕션 경험으로 가는 길의 한 단계
 
 ---
 *출처: Nathan Curtis (EightShapes)*
-*분석일: 2026-02-06*
 
 ---
 
-## 📎 Related Articles
+## Related Articles
 
 import CrossRef from '@site/src/components/CrossRef';
 

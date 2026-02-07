@@ -341,6 +341,37 @@ h3 { font-size: clamp(1.25rem, 2.5vw, 1.75rem); }
 
 ---
 
+## 핵심 팁 요약
+
+| 팁 번호 | 기술 | 사용 케이스 |
+|---------|------|------------|
+| 1 | CSS 변수 색상 시스템 | 테마 일관성, 다크 모드 |
+| 2 | 그라데이션 패턴 | 브랜드 시각 효과, 깊이감 |
+| 3 | 카드 깊이 시스템 | 시각적 계층, 상태 피드백 |
+| 4 | Border Radius 토큰 | UI 일관성 |
+| 5 | 일관된 호버 효과 | 인터랙션 피드백 |
+| 6 | Fluid Sizing | 반응형 타이포그래피 |
+| 7 | Scroll Snap | 갤러리, 캐러셀 |
+| 8 | 커스텀 불릿 | 리스트 시각적 개선 |
+| 9 | 버튼 위계 | CTA 우선순위 표현 |
+| 10 | 마이크로 애니메이션 | 로딩, 상태 전환 |
+
+## 참고 자료
+
+### 핵심 문헌
+- [Modern CSS Solutions](https://moderncss.dev/) — 모던 CSS 기법 모음
+- [CSS Tricks - A Complete Guide to CSS Variables](https://css-tricks.com/a-complete-guide-to-custom-properties/) — CSS Custom Properties 완벽 가이드
+- [Utopia Fluid Responsive Design](https://utopia.fyi/) — clamp() 기반 유동적 디자인 계산기
+
+### 실제 사례
+- [Tailwind CSS](https://tailwindcss.com/) — 토큰 기반 유틸리티 CSS 프레임워크
+- [Open Props](https://open-props.style/) — CSS 변수 기반 디자인 토큰 라이브러리
+- [Radix Colors](https://www.radix-ui.com/colors) — 체계적인 색상 팔레트 시스템
+
+> **실제 사례**: Vercel은 CSS Custom Properties로 구축한 디자인 시스템 덕분에 다크 모드 전환 시 단 1줄의 CSS 변경으로 전체 UI 테마를 전환할 수 있습니다. `--color-primary` 값만 변경하면 모든 컴포넌트가 자동으로 업데이트됩니다.
+
+---
+
 ## Related Articles
 
 import CrossRef from '@site/src/components/CrossRef';

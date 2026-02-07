@@ -10,7 +10,10 @@
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "clear": "docusaurus clear",
-    "serve": "docusaurus serve"
+    "serve": "docusaurus serve",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +28,11 @@
   "devDependencies": {
     "@docusaurus/module-type-aliases": "^3.9.2",
     "@docusaurus/tsconfig": "^3.9.2",
-    "typescript": "^5.9.3"
+    "@vitest/ui": "^4.0.18",
+    "fast-glob": "^3.3.3",
+    "glob": "^13.0.1",
+    "gray-matter": "^4.0.3",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   }
 }

@@ -372,6 +372,19 @@ export function HeroCards() {
 - [ ] `backface-visibility: hidden` 설정
 - [ ] `will-change: transform` 성능 힌트
 
+## 참고 자료
+
+### 핵심 문헌
+- [MDN Web Docs - CSS Transforms](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transforms) — CSS 3D Transform 공식 문서
+- [David DeSandro - Intro to CSS 3D transforms](https://3dtransforms.desandro.com/) — 3D Transform 인터랙티브 가이드
+- [W3C - Understanding SC 2.3.3: Animation from Interactions](https://www.w3.org/WAI/WCAG21/Understanding/animation-from-interactions.html) — 애니메이션 접근성 기준
+
+### 실제 사례
+- [Apple AirPods Pro Page](https://www.apple.com/airpods-pro/) — 스크롤 기반 3D 애니메이션 사례
+- [CodePen - CSS 3D Slider Collection](https://codepen.io/tag/css-3d) — 다양한 3D 슬라이더 구현 예시
+
+> **실제 사례**: Apple은 제품 페이지에서 3D Transform을 적극 활용하지만, `prefers-reduced-motion` 설정 시 모든 회전 애니메이션을 페이드 효과로 대체합니다. 이를 통해 전정 장애가 있는 사용자의 접근성을 보장하면서도 시각적 매력을 유지합니다.
+
 ---
 
 <CrossRef

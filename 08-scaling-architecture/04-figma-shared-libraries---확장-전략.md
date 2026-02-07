@@ -1,156 +1,254 @@
+---
+audience: both
+---
+
 # Figma Shared Libraries - 확장 전략
 
-> Original issue: shaun0927/stocktitan-crawler#565
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-# Figma Shared Libraries - 디자인 시스템 확장 전략
+<DevQuickStart
+  what="Figma 라이브러리는 Core → Shared → Local 계층으로 확장되며, 개발자에게는 npm 패키지 구조와 매핑됩니다"
+  learn="Figma 라이브러리 생명주기, Figma Variables → CSS 변환, Style Dictionary 설정, 패키지 구조 매핑"
+  able="Figma Variables를 CSS custom properties로 자동 변환하는 파이프라인을 구축할 수 있습니다"
+/>
 
-## 📌 핵심 개념
+## 라이브러리 계층 구조
 
-디자인 시스템은 단일 중앙집중식 라이브러리에서 **계층적 생태계**로 진화
+```mermaid
+graph TD
+    C["Core Library\n@company/tokens\n@company/core-ui"] --> S["Shared Library\n@company/editor-kit\n@company/nav-kit"]
+    S --> L["Local Library\n프로젝트 전용 컴포넌트\n(npm 미발행)"]
+    L --> P["Project Files\n실제 제품 코드"]
 
-```
-Core Library (코어 라이브러리)
-    ↓ 의존
-Shared Library (공유 라이브러리)
-    ↓ 의존
-Local Library (로컬 라이브러리)
-    ↓ 사용
-Project Files (프로젝트 파일)
-```
-
-### Shared Library (공유 라이브러리) ⭐
-
-- **정의**: 많은 팀이 필요로 하는 기능으로, 코어 라이브러리를 확장
-- **관리**: 디자인 시스템 코어 팀이 아닌 **기여자**가 제작 및 유지관리
-- **판단기준**: **3개 이상의 팀**에서 **12개월 이상** 사용
-
-## 🎯 실무 노하우
-
-### 라이브러리 생명주기 (6단계)
-
-#### 1. Setup (설정) 🔴🔶
-- 누가 라이브러리 생성을 결정하는가?
-- Figma 팀, 프로젝트, 파일 소유권은?
-- Main Branch의 편집자는?
-
-#### 2. Plan (계획) ⚠️
-- 라이브러리에 들어갈 기능 우선순위 결정
-- **우선순위 결정 요소**:
-  1. Urgency (긴급성)
-  2. Near term shared need (단기 공유 필요)
-  3. Long term shared need (장기 공유 필요)
-  4. Maker availability (제작자 가용성)
-  5. Maintainer availability (유지관리자 가용성)
-
-#### 3. Produce (제작) ✅🔶
-- 기능 명명 및 범위 결정
-- 기존 패턴 감사 (Audit)
-- Figma 컴포넌트 빌드
-- **네임스페이스 사용**:
-```
-ESDS Editor / Button        (공유 라이브러리)
-ESDS / Button                (코어 라이브러리)
-MyTeam / Button              (로컬 라이브러리)
+    style C fill:#51cf66,color:#fff
+    style S fill:#339af0,color:#fff
+    style L fill:#ffd43b,color:#000
 ```
 
-#### 4. Review (검토) ⚠️
-- **Branching 워크플로우 권장**:
-  - Main Branch: Maintainer만 작업
-  - Feature Branches: 기여자가 작업
-- **품질 기준 설정**: "How good must it be?" 워크샵
+### Figma ↔ npm 패키지 매핑
 
-#### 5. Publish (발행) ⚠️🔴
-- 라이브러리 스타일 및 UI 컴포넌트 발행
-- 사용자에게 변경사항 커뮤니케이션
-- 공유 라이브러리에서 코어 라이브러리로 승격 (필요시)
+| Figma 라이브러리 | npm 패키지 | 설명 |
+|-----------------|-----------|------|
+| ESDS Core | `@company/core-ui` | 핵심 컴포넌트 |
+| ESDS Tokens | `@company/tokens` | 디자인 토큰 |
+| ESDS Editor | `@company/editor-kit` | 에디터 컴포넌트 |
+| ESDS Navigation | `@company/nav-kit` | 내비게이션 |
+| MyTeam Local | (미발행) | 팀 내부 전용 |
 
-#### 6. Monitor & Maintain (모니터링 및 유지) ⚠️✅
-- Figma 분석을 통한 사용량 모니터링
-- 개선 및 수정 요청 대응
-- **중요**: "발행 후 선반에 올려두지 마라"
+## Developer Bridge: Figma → Code 파이프라인
+
+### Figma Variables → CSS Custom Properties
+
+Figma의 Variables 기능은 디자인 토큰과 직접 매핑됩니다:
+
+```json
+// figma-variables-export.json (Figma Variables API에서 추출)
+{
+  "colors": {
+    "primary": { "light": "#6B47DC", "dark": "#9B7DEF" },
+    "secondary": { "light": "#339AF0", "dark": "#74C0FC" },
+    "background": { "light": "#FFFFFF", "dark": "#1A1A2E" },
+    "text": { "light": "#1A1A2E", "dark": "#F8F9FA" }
+  },
+  "spacing": {
+    "xs": "4px",
+    "sm": "8px",
+    "md": "16px",
+    "lg": "24px",
+    "xl": "32px"
+  },
+  "radius": {
+    "sm": "4px",
+    "md": "8px",
+    "lg": "16px",
+    "full": "9999px"
+  }
+}
+```
+
+### Style Dictionary 설정 (Figma Token Sync)
+
+```javascript
+// style-dictionary.config.js
+const StyleDictionary = require('style-dictionary');
+
+module.exports = {
+  source: ['tokens/**/*.json'],
+  platforms: {
+    // CSS Custom Properties
+    css: {
+      transformGroup: 'css',
+      buildPath: 'dist/css/',
+      files: [
+        {
+          destination: 'variables.css',
+          format: 'css/variables',
+          options: { outputReferences: true },
+        },
+        {
+          destination: 'variables-dark.css',
+          format: 'css/variables',
+          filter: (token) => token.filePath.includes('dark'),
+          options: {
+            selector: '[data-theme="dark"]',
+          },
+        },
+      ],
+    },
+    // JavaScript/TypeScript
+    js: {
+      transformGroup: 'js',
+      buildPath: 'dist/js/',
+      files: [
+        {
+          destination: 'tokens.ts',
+          format: 'javascript/es6',
+        },
+      ],
+    },
+    // iOS (Swift)
+    ios: {
+      transformGroup: 'ios-swift',
+      buildPath: 'dist/ios/',
+      files: [
+        {
+          destination: 'Tokens.swift',
+          format: 'ios-swift/class.swift',
+          className: 'DesignTokens',
+        },
+      ],
+    },
+  },
+};
+```
+
+### 생성된 CSS 출력
+
+```css
+/* dist/css/variables.css - 자동 생성 */
+:root {
+  /* Colors */
+  --color-primary: #6B47DC;
+  --color-secondary: #339AF0;
+  --color-background: #FFFFFF;
+  --color-text: #1A1A2E;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+
+  /* Radius */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+}
+
+/* dist/css/variables-dark.css */
+[data-theme="dark"] {
+  --color-primary: #9B7DEF;
+  --color-secondary: #74C0FC;
+  --color-background: #1A1A2E;
+  --color-text: #F8F9FA;
+}
+```
+
+### 자동화 파이프라인
+
+```yaml
+# .github/workflows/sync-tokens.yml
+name: Sync Figma Tokens
+
+on:
+  # Figma webhook 또는 수동 실행
+  workflow_dispatch:
+  schedule:
+    - cron: '0 9 * * 1' # 매주 월요일
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract Figma Variables
+        run: |
+          npx figma-variables-export \
+            --file-key ${{ secrets.FIGMA_FILE_KEY }} \
+            --token ${{ secrets.FIGMA_TOKEN }} \
+            --output tokens/
+
+      - name: Build tokens
+        run: npx style-dictionary build
+
+      - name: Create PR if changed
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: 'chore(tokens): sync from Figma Variables'
+          body: 'Automated token sync from Figma Variables API'
+          branch: chore/sync-figma-tokens
+```
+
+## 라이브러리 생명주기
+
+```mermaid
+flowchart LR
+    A["Setup\n소유권 결정"] --> B["Plan\n우선순위 결정"]
+    B --> C["Produce\n빌드"]
+    C --> D["Review\n품질 검증"]
+    D --> E["Publish\n발행"]
+    E --> F["Monitor\n사용량 추적"]
+    F -->|"개선 필요"| B
+
+    style A fill:#ff6b6b,color:#fff
+    style C fill:#339af0,color:#fff
+    style E fill:#51cf66,color:#fff
+```
 
 ### 역할 및 책임
 
-| 아이콘 | 역할 | 수행 가능 작업 |
-|--------|------|---------------|
-| ✅ | **Any Contributor** | 디자인, 빌드, 스펙, 문서화 |
-| ⚠️ | **Library Maintainer** | 승인, 발행, 우선순위 결정 |
-| 🔶 | **Coordinated with Core Team** | 명명, 범위 결정, 코어 승격 |
-| 🔴 | **Core Team Steward** | 소유권, 권한 관리 |
+| 역할 | 수행 가능 작업 |
+|------|---------------|
+| **Any Contributor** | 디자인, 빌드, 스펙, 문서화 |
+| **Library Maintainer** | 승인, 발행, 우선순위 결정 |
+| **Core Team** | 명명, 범위 결정, 코어 승격 |
 
-**Library Maintainer의 핵심 역할**:
-> "Maintainer는 단순히 만드는 사람이 아니라, **유지관리하고 운영**하는 사람이다."
-
-### 배치 전략: 코로케이션 (Co-location)
-
-**시각적 배치**:
-```
-Figma 라이브러리 다이얼로그
-
-┌─────────────────────┐
-│ ESDS CORE           │ ← 코어 (동일 브랜딩)
-│ Tokens              │
-└─────────────────────┘
-
-┌─────────────────────┐
-│ ESDS SHARED LIBRARY │ ← 공유 (동일 브랜딩 + "SHARED" 표시)
-│ Editor              │
-└─────────────────────┘
-
-┌─────────────────────┐
-│ ESDS SHARED LIBRARY │ ← 공유
-│ Help                │
-└─────────────────────┘
-```
-
-**기대 효과**:
-- 기여자와 사용자 모두 공유 라이브러리를 "신뢰할 수 있는 확장"으로 인식
-- 합리적인 엄격함과 지원으로 제작되었다는 기대
-
-### 공유 라이브러리 유형
-
-#### A. 복잡한 기능
-- **Editor 키트**: 리치텍스트 편집기
-- **Card & Media Object 키트**
-- **Global Navigation** (가장 흔함)
-
-#### B. 플랫폼별
-- **iOS Navigation**
-- **Android Components**
-- **CMS 컴포넌트** (AEM, Drupal용)
-
-#### C. 프레임워크별
-- **React 전용**
-- **Vue 전용**
-- **Web Components 전용**
-
-## 📊 라이브러리 파일 템플릿 구조
+### 네임스페이스 규칙
 
 ```
-Pages
-├─ Cover (표준 커버 페이지)
-├─ About the library (라이브러리 소개)
-├─ Component status (컴포넌트 상태)
-├─ Version history (버전 히스토리)
-├─ Foundation Extensions
-│  └─ {Foundation extension name}
-├─ Components
-│  └─ {UI component name}
-└─ Patterns
-   └─ {Pattern name}
+@company/core-ui / Button       → Core 라이브러리
+@company/editor-kit / Button    → Shared 라이브러리 (Editor)
+@company/sales-ui / Button      → Local 라이브러리 (Sales)
 ```
 
-## 성공의 핵심
+## 공유 라이브러리 유형
 
-> "코어 팀이 모든 것을 만드는 것이 아니라, 다른 사람들이 잘 만들 수 있도록 활성화하는 것"
+| 유형 | 예시 | npm 패키지 |
+|------|------|-----------|
+| **복잡한 기능** | Editor, Navigation | `@company/editor-kit` |
+| **플랫폼별** | iOS Nav, Android Components | `@company/ios-nav` |
+| **프레임워크별** | React, Vue, Web Components | `@company/react-ui` |
 
-**최종 조언**:
-- 템플릿을 개선하라
-- 사람들을 참여시켜라
-- 모든 것을 혼자 하지 마라
-- 명확한 기대치를 설정하라
-- "만들어주기"가 아닌 "활성화"에 집중하라
+## 실무 체크리스트
+
+- [ ] Figma Variables → JSON 추출 도구 설정
+- [ ] Style Dictionary 설정 (CSS + JS + iOS/Android)
+- [ ] CI에서 토큰 sync 자동화 (weekly 또는 webhook)
+- [ ] Figma 라이브러리와 npm 패키지 1:1 매핑 문서화
+- [ ] 네임스페이스 규칙 수립 및 중앙 관리
+- [ ] 라이브러리 Maintainer 지정
 
 ---
+
+import CrossRef from '@site/src/components/CrossRef';
+
+<CrossRef related={[
+  { path: "/08-scaling-architecture/01-design-system-tiers---maturity-levels-for-scalable-systems", label: "08-01. Tier 아키텍처" },
+  { path: "/08-scaling-architecture/03-managing-multiple-core-libraries", label: "08-03. 다중 코어 라이브러리" },
+  { path: "/01-design-tokens/01-디자인-토큰-10가지-핵심-팁", label: "01-01. 디자인 토큰 핵심 팁" },
+]} />
 
 *출처: Nathan Curtis (EightShapes), 2022-05*

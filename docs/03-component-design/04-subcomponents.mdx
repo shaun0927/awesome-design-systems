@@ -220,6 +220,19 @@ export const Card = Object.assign(CardRoot, {
 // </Card>
 ```
 
+## 참고 자료
+
+- Nathan Curtis, "Subcomponents in Design Systems" (EightShapes, 2018)
+- [Radix UI Primitives - Composition](https://www.radix-ui.com/primitives/docs/overview/composition) — Compound Component 패턴
+- Kent C. Dodds, "Compound Components in React" (2018) — Context API 활용
+- [Headless UI](https://headlessui.com/) — Unstyled 서브컴포넌트 사례
+- Michael Chan, "Advanced React Patterns" (2017) — Render Props vs Compound Components
+- Brad Frost, "Atomic Design" (2016) — 컴포넌트 조합 이론
+
+> **실제 사례**: Radix UI의 Accordion 컴포넌트는 `<Accordion.Root>` → `<Accordion.Item>` → `<Accordion.Trigger>` + `<Accordion.Content>` 서브컴포넌트 구조를 사용합니다. 각 서브컴포넌트는 독립적으로 스타일링 가능하지만, Context API를 통해 부모의 `expanded` 상태를 공유하여, prop drilling 없이도 동기화된 동작을 보장합니다.
+
+> **심화 이론**: Subcomponent 패턴은 React의 **Compound Component** 패턴과 **IoC(Inversion of Control)** 원칙을 결합한 것입니다. 부모 컴포넌트가 "무엇을 렌더링할지" 제어하는 대신, 자식 컴포넌트들이 자신의 렌더링을 결정하게 하여 제어권을 역전시킵니다. 이는 유연성을 극대화하며, Kent C. Dodds가 "렌더링에 대한 민주화"라고 표현한 접근법입니다.
+
 ---
 
 ## 📎 Related Articles

@@ -609,6 +609,19 @@ graph LR
 
 Use the `InferFigmaPropType` and `SpecToProps` utilities shown above to automatically generate TypeScript interfaces from Figma component properties. This ensures type safety and eliminates manual synchronization errors.
 
+## 참고 자료
+
+- Nathan Curtis, "Design System Documentation" (EightShapes, 2019)
+- [Storybook Args](https://storybook.js.org/docs/react/writing-stories/args) — 컴포넌트 API 문서화
+- [Docusaurus](https://docusaurus.io/) — 기술 문서 플랫폼
+- [React TypeScript Cheatsheet](https://react-typescript-cheatsheet.netlify.app/) — TypeScript Props 베스트 프랙티스
+- Dan Abramov, "Smart and Dumb Components" (2015)
+- Kent C. Dodds, "Prop Drilling" (2018) — Props 전달 패턴
+
+> **실제 사례**: Chakra UI는 100개 이상의 컴포넌트를 제공하지만, Figma에는 30개 시각적 컴포넌트만 존재합니다. 나머지 70개는 Code-Only Props(as, sx, layerStyle 등)로 구현되어, 디자이너는 핵심 컴포넌트만 이해하면 되고, 개발자는 필요 시 TypeScript API로 세밀한 제어를 합니다.
+
+> **심화 이론**: Code-Only Props는 **Separation of Concerns**(관심사 분리)를 디자인-개발 경계에 적용한 것입니다. 디자이너는 시각적 설계에 집중하고, 개발자는 기술적 최적화(key, ref, onClick)에 집중하여, 각자의 전문성을 극대화합니다. 이는 Conway's Law(조직 구조가 시스템 구조를 결정)의 긍정적 활용 사례입니다.
+
 ---
 
 ## 📎 Related Articles

@@ -223,6 +223,11 @@
 
 ## 참고 자료
 
+- [Figma Make Documentation](https://help.figma.com/hc/en-us/articles/16686208127127) — 공식 사용 가이드
+- [Microsoft Copilot](https://www.microsoft.com/en-us/microsoft-365/copilot) — 프롬프트 최적화 도구
+- [UX Research Methods](https://www.nngroup.com/articles/which-ux-research-methods/) — Nielsen Norman Group, 리서치 방법론
+- [RITE (Rapid Iterative Testing)](https://www.usability.gov/how-to-and-tools/methods/rapid-iterative-testing.html) — 신속 반복 테스트 기법
+- [Co-creation in UX Research](https://www.nngroup.com/articles/co-creation/) — 참여형 디자인 리서치
 - **출처**: Figma Deep Dive - How a UX researcher uses Figma Make at GM
 - **발표자**: Laura (GM UX Researcher)
 - **주요 도구**: Figma Make, Microsoft Copilot, Slack

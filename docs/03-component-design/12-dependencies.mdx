@@ -277,6 +277,19 @@ graph LR
 - [ ] 의존성 그래프 시각화 도구 구축 (영향 범위 파악용)
 - [ ] Breaking change 전파 규칙 문서화
 
+## 참고 자료
+
+- Nathan Curtis, "Component Dependencies" (EightShapes, 2018)
+- [Storybook Composition](https://storybook.js.org/docs/react/sharing/storybook-composition) — 컴포넌트 의존성 시각화
+- [Nx Dependency Graph](https://nx.dev/core-features/explore-graph) — Monorepo 의존성 그래프
+- [Madge](https://github.com/pahen/madge) — JavaScript 의존성 분석 도구
+- Robert C. Martin, "Clean Architecture" (2017) — 의존성 관리 원칙
+- [Atomic Design by Brad Frost](https://atomicdesign.bradfrost.com/) — 컴포넌트 계층 이론
+
+> **실제 사례**: Shopify Polaris는 npm 패키지를 `@shopify/polaris-tokens` → `@shopify/polaris-icons` → `@shopify/polaris` 3계층으로 분리하여, 토큰만 필요한 팀은 전체 컴포넌트 라이브러리를 설치하지 않아도 됩니다. 이는 번들 크기를 90% 감소시켰고, 빌드 속도를 5배 향상시켰습니다.
+
+> **심화 이론**: 컴포넌트 의존성 관리는 **Acyclic Dependencies Principle**(비순환 의존성 원칙)을 따라야 합니다. Button → Icon → Button 같은 순환 참조는 빌드 실패, 무한 루프, Tree-shaking 불가를 초래합니다. 의존성 방향은 항상 단방향(Atoms → Molecules → Organisms)이어야 하며, 이는 Robert C. Martin의 "안정된 의존성 원칙"을 UI에 적용한 것입니다.
+
 ---
 
 *출처: Nathan Curtis (EightShapes)*

@@ -38,11 +38,20 @@ Adopters can finish before system finishes
 
 ## 💡 Challenge 1 해결책
 **문제**: "How long?" → "We'll let you know" (불충분한 답변)
-**해결**: 
+**해결**:
 1. 명확한 전체 일정 수립 (3/6/12개월)
 2. 하위 시스템별 전달 일정 공개
 3. 점진적 통합 옵션 제공
 4. 채택 팀 우선순위 반영 메커니즘
+
+---
+
+## 참고 자료
+
+- [Nathan Curtis, "Adopting Design Systems"](https://medium.com/eightshapes-llc/adopting-design-systems-71e599ff660a) — EightShapes, 채택 전략 시리즈
+- [Incremental Delivery Patterns](https://martinfowler.com/articles/continuousIntegration.html) — Martin Fowler, 지속적 통합과 점진적 전달
+- [Dependency Management in Design Systems](https://bradfrost.com/blog/post/managing-technology-agnostic-design-systems/) — Brad Frost, 기술 중립적 디자인 시스템 관리
+- Rogers, E. M. (2003). *Diffusion of Innovations* — 얼리어답터/레이트어답터 유형 분류 이론
 
 ---
 > 출처: Nathan Curtis (EightShapes), Mar 12, 2024

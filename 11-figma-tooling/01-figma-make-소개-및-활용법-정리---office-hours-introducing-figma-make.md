@@ -294,11 +294,14 @@ Figma Make는 디자인을 코드 기반 인터랙티브 프로토타입으로 �
 
 ---
 
-## 📚 추가 리소스
+## 📚 참고 자료
 
-- **공식 가이드**: "Essential Tips for Using Figma Make"
-- **프롬프트 도우미**: Figma Make GPT
-- **다음 Office Hours**: Sites (코드 레이어)
+- [Figma Make Documentation](https://help.figma.com/hc/en-us/articles/16686208127127) — 공식 가이드 및 튜토리얼
+- [Figma Plugin API](https://www.figma.com/plugin-docs/) — Variable Importer/Exporter 등 플러그인 개발
+- [Anthropic Claude Sonnet 4](https://www.anthropic.com/claude) — Figma Make의 기반 AI 모델
+- [Radix UI](https://www.radix-ui.com/) — Figma Make가 생성하는 기본 컴포넌트 라이브러리
+- [Tailwind CSS](https://tailwindcss.com/) — Figma Make의 기본 스타일링 프레임워크
+- [Supabase](https://supabase.com/) — 2024년 7월 통합 예정 데이터베이스/API 서비스
 
 ---
 

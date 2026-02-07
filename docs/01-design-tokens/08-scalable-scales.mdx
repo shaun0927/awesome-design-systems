@@ -471,6 +471,21 @@ export function ScaledButton({
 3. **크기(Size) =/= 밀도(Density)** - 계층 구조 vs 공간 효율성은 별개 차원
 4. **파라미터 2개로 수백 개의 값을 제어** - baseSize + ratio = 전체 스케일 시스템
 
+## 참고 자료
+
+- Nate Baldwin, "Spectrum's Component Architecture" (Adobe, 2020)
+- Tim Brown, "More Meaningful Typography" (A Book Apart, 2011) — Modular Scale 이론
+- [Modular Scale Calculator](https://www.modularscale.com/) — 온라인 스케일 생성 도구
+- Robert Bringhurst, "The Elements of Typographic Style" (1992) — 타이포그래피 비율 이론
+- [Utopia - Fluid Responsive Design](https://utopia.fyi/) — CSS clamp() 기반 유동 스케일
+- [Proportio](https://proportio.app/) — 비례 스케일 계산기
+
+> **실제 사례**: Adobe Spectrum은 Modular Scale(ratio 1.25)로 타입/스페이싱 스케일을 생성하며, Size(small/medium/large)와 Density(compact/regular/spacious)를 독립적으로 제어합니다. 이를 통해 50개 이상의 컴포넌트가 일관된 비율을 유지하면서도 사용 맥락(데이터 집약적 대시보드 vs 마케팅 페이지)에 맞게 조정 가능합니다.
+
+> **심화 이론**: Modular Scale의 수학적 기반은 **황금비(Golden Ratio, φ ≈ 1.618)**와 **음악의 배음(Harmonic Series)**에서 유래합니다. 고대 그리스 건축부터 르네상스 회화까지, 인간이 아름답다고 느끼는 비율은 대부분 기하급수적 관계를 따릅니다. 이는 뇌의 **패턴 인식 메커니즘**이 규칙성을 선호하기 때문입니다.
+
+> **심화 이론**: Size와 Density를 별도 차원으로 분리한 것은 **Orthogonal Design** 원칙(직교성)을 따릅니다. 두 변수가 독립적이면 조합 시 예측 가능성이 높아지고, 엣지 케이스가 줄어듭니다. 이는 소프트웨어 설계의 **Single Responsibility Principle**을 UI에 적용한 사례입니다.
+
 ---
 *출처: Nate Baldwin (Adobe Spectrum)*
 

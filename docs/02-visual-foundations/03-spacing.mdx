@@ -242,6 +242,21 @@ Card Component 구조:
 4. **Line Height 충돌을 시스템적으로 해결**
 5. **Density를 Space 개념으로 조절**
 
+## 참고 자료
+
+- Nathan Curtis, "Space in Design Systems" (EightShapes, 2016)
+- [Gestalt Principles of Proximity](https://www.interaction-design.org/literature/topics/gestalt-principles) — 근접성의 법칙
+- [Every Layout](https://every-layout.dev/) — 현대 CSS 레이아웃 패턴
+- [Spacing Systems by Dan Eden](https://daneden.me/blog/2018/spacing-systems) — Dropbox 간격 시스템 사례
+- [Primer Design System - Spacing](https://primer.style/foundations/spacing) — GitHub의 간격 시스템
+- Brad Frost, "Atomic Design" (2016) — 컴포넌트 간격 구조화
+
+> **실제 사례**: Shopify Polaris는 Inset/Stack/Inline 개념을 컴포넌트 API로 구현하여, `<Stack gap="tight">` 또는 `<Inline gap="loose">`처럼 선언적으로 간격을 제어합니다. 이를 통해 디자이너가 픽셀값을 지정하지 않고도 일관된 간격을 적용할 수 있습니다.
+
+> **심화 이론**: Squish/Stretch Inset은 **광학적 보정(Optical Correction)** 원리에 기반합니다. 인간의 시각은 수평 방향보다 수직 방향의 간격을 더 좁게 인식하므로, 같은 padding을 적용하면 수직이 답답해 보입니다. Button의 padding을 `8px 16px`(1:2 비율)로 설정하는 것은 시각적 균형을 맞추는 광학적 보정입니다.
+
+> **심화 이론**: CSS `gap` 속성은 **Flexbox/Grid의 패러다임 전환**을 상징합니다. 과거에는 `margin-bottom`으로 간격을 만들었지만, 마지막 요소의 불필요한 마진을 제거하는 `:last-child` 선택자가 필요했습니다. `gap`은 이 문제를 근본적으로 해결하며, 더 선언적이고 유지보수가 쉬운 코드를 가능하게 합니다.
+
 ---
 *출처: Nathan Curtis (EightShapes, 2016)*
 

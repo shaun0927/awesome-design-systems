@@ -354,3 +354,14 @@ Investment Prioritization Matrix 적용:
 - 시간: 2시간
 - 참석자: 백엔드/프론트엔드/PM/데이터 분석
 - 목표: Q2 우선순위 TOP 3 이니셔티브 선정 + Beads Issue 생성
+
+---
+
+## 참고 자료
+
+- Gar Wong, *The Art of Design Strategy* — TRACES 프레임워크 창시자, 전략적 디자인 방법론
+- [Figma Config 2024/2025 Recordings](https://config.figma.com/) — Figma의 디자인 협업 철학 발표
+- [Figma for Everyone: Design Goes Beyond Designers](https://www.figma.com/blog/design-for-everyone/) — 비디자이너의 디자인 참여 통계
+- Porter, M. E. (1980). *Competitive Strategy* — PESTEL 프레임워크 (전통적 전략 분석)
+- [Design System ROI Calculator](https://www.knapsack.cloud/design-system-roi-calculator) — 디자인 시스템 투자 가치 측정
+- [Workshop Facilitation Guide](https://www.nngroup.com/articles/ux-workshop-preparation/) — Nielsen Norman Group, 효과적인 워크샵 설계

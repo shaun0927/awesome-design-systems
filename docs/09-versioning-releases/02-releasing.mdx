@@ -536,6 +536,47 @@ flowchart LR
 | Q3 (9월) | 4.0.0 | Breaking: React 19 전용 |
 ```
 
+## 참고 자료
+
+### 핵심 문헌
+- [Nathan Curtis - "Releasing Design Systems"](https://medium.com/eightshapes-llc/releasing-design-systems-57fca91a23f0) — Outputs, Cadence, Versions 전략
+- [npm Publishing Guide](https://docs.npmjs.com/packages-and-modules) — 공식 npm 퍼블리시 문서
+- [GitHub Actions Documentation](https://docs.github.com/en/actions) — CI/CD 자동화 가이드
+
+### CI/CD 아키텍처
+- [The Twelve-Factor App](https://12factor.net/) — 배포 파이프라인 설계 원칙
+- Martin Fowler, ["Continuous Integration"](https://martinfowler.com/articles/continuousIntegration.html) — CI 모범 사례
+- [GitLab CI/CD Best Practices](https://docs.gitlab.com/ee/ci/pipelines/pipeline_efficiency.html) — 파이프라인 최적화
+
+### npm 생태계
+- [npm dist-tag](https://docs.npmjs.com/cli/v10/commands/npm-dist-tag) — 릴리스 채널 관리 (latest, next, canary)
+- [npm Provenance](https://docs.npmjs.com/generating-provenance-statements) — 빌드 출처 증명 (Supply Chain Security)
+- [Verdaccio](https://verdaccio.org/) — 사설 npm 레지스트리 (온프레미스)
+- [GitHub Packages](https://github.com/features/packages) — GitHub 통합 npm 레지스트리
+
+### 모노레포 도구
+- [Turborepo](https://turbo.build/repo) — Vercel의 고속 빌드 시스템
+- [Nx](https://nx.dev/) — Nrwl의 엔터프라이즈 모노레포 도구
+- [Changesets](https://github.com/changesets/changesets) — 버전 관리 및 CHANGELOG 자동화
+- [Rush](https://rushjs.io/) — Microsoft의 대규모 모노레포 관리
+
+### CDN & 배포
+- [unpkg](https://unpkg.com/) — npm 기반 CDN (자동 동기화)
+- [jsDelivr](https://www.jsdelivr.com/) — 오픈소스 CDN (GitHub/npm 지원)
+- [Vercel](https://vercel.com/) — Frontend 배포 플랫폼 (문서 사이트)
+- [Netlify](https://www.netlify.com/) — JAMstack 배포 (Storybook 호스팅)
+
+### Visual Regression Testing
+- [Chromatic](https://www.chromatic.com/) — Storybook 기반 시각적 테스트 (Storybook 공식)
+- [Percy](https://percy.io/) — BrowserStack의 시각적 테스트 플랫폼
+- [Playwright Visual Comparisons](https://playwright.dev/docs/test-snapshots) — 스크린샷 비교 테스트
+- [BackstopJS](https://github.com/garris/BackstopJS) — 오픈소스 시각적 회귀 테스트
+
+### 실제 사례
+- [React Release Process](https://legacy.reactjs.org/docs/implementation-notes.html) — Canary → Next → RC → Stable 채널
+- [Material-UI Release Strategy](https://github.com/mui/material-ui/blob/master/CONTRIBUTING.md#release) — Changesets 기반 자동 릴리스
+- [Ant Design Release Notes](https://github.com/ant-design/ant-design/releases) — 상세한 릴리스 노트 예시
+
 ## 실무 체크리스트
 
 - [ ] CI/CD 파이프라인 구축 (lint, test, build, publish)

@@ -438,6 +438,18 @@ graph TD
 - 명확한 4-group 구조
 - 확장 가능한 패턴 (새 state/variant 추가 용이)
 
+## 참고 자료
+
+- Nathan Curtis, "Naming Tokens in Design Systems" (EightShapes, 2017)
+- [BEM (Block Element Modifier) Methodology](http://getbem.com/) — 네이밍 구조의 원형
+- [Design Tokens W3C Spec - Naming Conventions](https://tr.designtokens.org/format/#name-and-value) — 공식 네이밍 가이드라인
+- Brad Frost, "Atomic Design Methodology" — 컴포넌트 네이밍의 이론적 기반
+- [IBM Carbon Design System - Token Architecture](https://carbondesignsystem.com/guidelines/color/usage/) — 4계층 토큰 네이밍 사례
+
+> **실제 사례**: Adobe Spectrum Design System은 Namespace(`spectrum`), Object(`button`), Base(`color`), Modifier(`hover`) 4-group 구조를 엄격히 준수하여 1,500개 이상의 토큰을 관리합니다. 이를 통해 멀티 플랫폼(Web/iOS/Android/React Native) 간 네이밍 충돌을 완전히 방지합니다.
+
+> **심화 이론**: 토큰 네이밍의 13-level 분류 체계는 정보 아키텍처의 **Controlled Vocabulary** 원칙에 기반합니다. 동음이의어 회피 규칙(예: `type` 대신 `font` 사용)은 언어학의 **Disambiguation** 기법을 차용한 것으로, 대규모 팀에서 오해를 최소화합니다.
+
 ---
 
 *출처: Nathan Curtis (EightShapes)*

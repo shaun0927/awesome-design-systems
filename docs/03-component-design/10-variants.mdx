@@ -200,6 +200,19 @@ export const ${storyName}: Story = {
 }
 ```
 
+## 참고 자료
+
+- Nathan Curtis, "Component Variants" (EightShapes, 2018)
+- [Figma Variants](https://help.figma.com/hc/en-us/articles/360056440594) — Figma variant 공식 문서
+- [CVA (Class Variance Authority)](https://cva.style/docs) — TypeScript variant 유틸리티
+- [Stitches Variants](https://stitches.dev/docs/variants) — CSS-in-JS variant API
+- Brad Frost, "Atomic Design" (2016) — 컴포넌트 변형 이론
+- [Tailwind Variants](https://www.tailwind-variants.org/) — Tailwind variant 패턴
+
+> **실제 사례**: GitHub Primer는 Button variant를 Purposeful 네이밍(primary/secondary/danger)으로 설계하여, 시각적 스타일이 바뀌어도 variant 이름이 유효하도록 합니다. 반면 "filled/outlined/ghost"처럼 스타일 기반 네이밍을 사용하면, 디자인 트렌드 변경 시 모든 코드베이스의 variant 이름을 바꿔야 합니다.
+
+> **심화 이론**: Variant 설계는 **Open-Closed Principle**(개방-폐쇄 원칙)의 실전 적용입니다. 새 variant 추가는 열려있되(확장 가능), 기존 variant 수정은 닫혀있어야(Breaking Change 방지) 합니다. Boolean Props로 variant를 조합하면 2^n 복잡도 폭발이 발생하므로, 상호 배타적 variant(size, color)는 Enum으로, 독립적 속성(loading, disabled)은 Boolean으로 분리하는 것이 핵심입니다.
+
 ---
 
 ## 📎 Related Articles

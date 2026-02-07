@@ -330,6 +330,35 @@ Figma 라이브러리 다이얼로그
 - 명확한 기대치를 설정하라
 - "만들어주기"가 아닌 "활성화"에 집중하라
 
+## 참고 자료
+
+### 핵심 문헌
+- Nathan Curtis (EightShapes, 2022-05) — "Figma Shared Libraries" 세미나 자료
+- [Figma Variables REST API](https://www.figma.com/developers/api#variables) — 공식 Variables API 문서
+- [Figma Best Practices](https://www.figma.com/best-practices/) — 라이브러리 구조화 가이드
+
+### Figma → Code 브릿지
+- [Style Dictionary](https://amzn.github.io/style-dictionary/) — Amazon의 토큰 파이프라인 (Figma Tokens 플러그인 연동)
+- [Figma Tokens Plugin](https://www.figmatokens.com/) — Figma Variables를 JSON으로 동기화
+- [Specify](https://specifyapp.com/) — Figma/Sketch → 코드 자동 변환 서비스
+- [Supernova](https://www.supernova.io/) — Figma → 멀티 플랫폼 코드 생성
+
+### 라이브러리 생명주기 관리
+- Nathan Curtis, ["Releasing Design Systems"](https://medium.com/eightshapes-llc/releasing-design-systems-57fca91a23f0) — 디자인 에셋 릴리스 전략
+- [Figma Branching](https://help.figma.com/hc/en-us/articles/360063144053-Branch-files-and-merge-changes) — Branching & Review 워크플로우
+- [Semantic Versioning for Design](https://www.abstract.com/blog/semantic-versioning-design/) — 디자인 에셋 버전 관리
+
+### 실제 사례
+- [Shopify Polaris Figma Kit](https://www.figma.com/@shopify) — 3-tier 라이브러리 구조 (Foundations + Components + Patterns)
+- [Material Design 3 Figma Kit](https://www.figma.com/community/file/1035203688168086460) — Variables 기반 테마 시스템
+- [IBM Carbon Figma Libraries](https://www.figma.com/@ibm) — 플랫폼별 라이브러리 (Web, Mobile, Product)
+- [Atlassian Design Figma](https://www.figma.com/@atlassian) — Core + Product-specific libraries
+
+### 도구 & 자동화
+- [GitHub Actions for Figma](https://github.com/marketplace?type=actions&query=figma) — Figma API 연동 워크플로우
+- [figma-api](https://github.com/figma/figma-api-demo) — 공식 Node.js API 예제
+- [Anima](https://www.animaapp.com/) — Figma → React/Vue/HTML 코드 생성
+
 ## 실무 체크리스트
 
 - [ ] Figma Variables → JSON 추출 도구 설정

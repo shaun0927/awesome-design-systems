@@ -1171,6 +1171,25 @@ npm run storybook:coverage
 
 ---
 
+## 참고 자료
+
+- [Figma Component Review Checklist (EightShapes)](https://medium.com/eightshapes-llc/component-qa-in-design-systems-b18cb4decb9c) — 9개 검증 카테고리 원문
+- [Figma Variables](https://help.figma.com/hc/en-us/articles/15339657135383-Guide-to-variables-in-Figma) — 디자인 토큰을 Figma Variables로 관리하는 방법
+- [Auto Layout Best Practices](https://www.figma.com/best-practices/everything-you-need-to-know-about-layout-grids/) — Figma 공식 레이아웃 가이드
+- [Design Tokens W3C Spec](https://tr.designtokens.org/format/) — 토큰 네이밍 표준
+- [ripgrep (rg)](https://github.com/BurntSushi/ripgrep) — 하드코딩된 색상 검색 도구
+
+### 이론적 배경
+- **9-Category Review Framework**: Metadata → Anatomy → Color/Text styles → Properties → Content → Spacing → Layout → Composition (Nathan Curtis)
+- **Naming Conventions Matter**: 일관된 네이밍은 디자인-코드 동기화의 핵심 (Brad Frost, Atomic Design)
+
+### 실제 사례
+- **GitHub Primer**: Figma lint 규칙을 CI에 통합하여 PR 단계에서 네이밍 규칙 자동 검증
+- **Atlassian Design System**: 하드코딩된 색상 0개 정책을 Figma Plugin으로 강제
+- **Salesforce Lightning**: Properties 네이밍을 camelCase로 통일하여 React Props와 1:1 매핑
+
+---
+
 ## Related Articles
 
 import CrossRef from '@site/src/components/CrossRef';

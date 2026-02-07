@@ -275,6 +275,19 @@ neutral-plane (평면형 배경)
 3. **빠른 가치 증명** - 15개 컴포넌트를 토큰화하여 리브랜딩 시연 후 투자 확보
 4. **소규모 팀도 가능** - 디자이너 1명 + 엔지니어 1명으로 체계적 토큰 시스템 구축 가능
 
+## 참고 자료
+
+- [90-Day Design System Canvas](https://www.designsystemcanvas.com/) — 생태계 이해를 위한 프레임워크
+- Marta Fioni, "Token Naming Workshop" (Design Systems London, 2023)
+- Nathan Curtis, "Design System Governance" (EightShapes, 2020)
+- [Mantine UI Documentation](https://mantine.dev/) — 제약 조건이 있는 UI 라이브러리 사례
+- Brad Frost, "Atomic Design" (2016) — 컴포넌트 구조 분석 기반 이론
+- [Figma Community - Token Glossary Template](https://www.figma.com/community/file/token-glossary) — 실무 템플릿
+
+> **실제 사례**: Shopify Polaris는 기존 Ember.js 기반 컴포넌트에 토큰을 도입하면서, 라이브러리 제약(변경 불가 네이밍)을 우회하기 위해 추가 Semantic 레이어를 만들었습니다. Ember 컴포넌트는 `--ember-primary`를 유지하고, Polaris 토큰은 `--polaris-action-primary: var(--ember-primary)`로 매핑하여 하위 호환성을 보장했습니다.
+
+> **심화 이론**: 동의어 시스템(Synonyms)은 언어학의 **Controlled Vocabulary** 개념을 차용합니다. `warning = alert = caution = attention`처럼 같은 개념에 여러 용어가 있을 때, 팀 전체가 하나로 합의해야 **Cognitive Load**를 줄일 수 있습니다. 이는 대규모 조직에서 커뮤니케이션 오류를 최소화하는 핵심 전략입니다.
+
 ---
 
 ## 📎 Related Articles

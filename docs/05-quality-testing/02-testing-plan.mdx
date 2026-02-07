@@ -378,6 +378,26 @@ h1, h2, h3, h4, h5, h6 {
 
 ---
 
+## 참고 자료
+
+- [BackstopJS Documentation](https://github.com/garris/BackstopJS) — 시각적 회귀 테스트 도구
+- [Percy Visual Testing](https://www.browserstack.com/percy) — 클라우드 기반 픽셀 단위 비교
+- [pa11y-ci](https://github.com/pa11y/pa11y-ci) — 접근성 CI 통합 도구
+- [Lighthouse CI](https://github.com/GoogleChrome/lighthouse-ci) — 성능/접근성 자동 감사
+- [GitHub Actions for Design Systems](https://github.com/storybookjs/design-system) — Storybook의 오픈소스 CI 설정
+
+### 이론적 배경
+- **NOW/NEXT/LATER 로드맵**: 점진적 품질 개선 프레임워크 (Nathan Curtis)
+- **Quality vs Quantity Paradigm**: 30개 평범한 컴포넌트보다 10개 완벽한 컴포넌트 (Brad Frost)
+- **Hostile Styles Test**: CSS 격리 검증의 강건함 측정 기법 (Harry Roberts)
+
+### 실제 사례
+- **Airbnb DLS**: 모든 컴포넌트를 Hostile Environment에서 테스트하여 격리 보장
+- **Carbon Design System (IBM)**: GitHub Actions로 시각적 회귀 + 접근성 + 번들 크기를 동시 검증
+- **GOV.UK Design System**: 80% 커버리지 강제로 공공 서비스 품질 확보
+
+---
+
 ## Related Articles
 
 import CrossRef from '@site/src/components/CrossRef';

@@ -277,6 +277,25 @@ npx jscodeshift -t transforms/hardcoded-colors.ts src/
 
 ---
 
+## 참고 자료
+
+- [Brad Frost's Pattern Lab](https://patternlab.io/) — 컴포넌트 기반 디자인 시스템 구축 방법론
+- [Atomic Design by Brad Frost](https://atomicdesign.bradfrost.com/) — 컴포넌트 시스템의 이론적 기반
+- [CSS Variables (MDN)](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties) — 디자인 토큰 구현 기술
+- [Design System ROI Calculator (Knapsack)](https://www.knapsack.cloud/roi-calculator) — 디자인 시스템의 비용 절감 효과 계산
+- [jscodeshift](https://github.com/facebook/jscodeshift) — 코드 마이그레이션 자동화 도구
+
+### 이론적 배경
+- **Before/After 비교의 심리학**: 변화의 시각화는 채택 동기를 3배 증가 (Dan Ariely, Behavioral Economics)
+- **Compound Component Pattern**: 유연한 조합을 위한 React 디자인 패턴 (Kent C. Dodds)
+
+### 실제 사례
+- **Airbnb DLS**: 레거시 코드베이스를 디자인 시스템으로 마이그레이션한 사례 공개 (74% 코드 감소)
+- **GitHub Primer**: 하드코딩된 색상 2,400개를 토큰 시스템으로 전환한 마이그레이션 가이드 제공
+- **Salesforce Lightning**: Before/After 비교를 Storybook에 전시하여 팀 설득
+
+---
+
 ## Related Articles
 
 import CrossRef from '@site/src/components/CrossRef';

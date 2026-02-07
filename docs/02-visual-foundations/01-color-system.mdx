@@ -207,6 +207,19 @@ console.log(`Contrast ratio: ${ratio.toFixed(2)}:1`);
 }
 ```
 
+## 참고 자료
+
+- Nathan Curtis, "Color in Design Systems" (EightShapes, 2016)
+- [WCAG 2.1 Contrast Guidelines](https://www.w3.org/WAI/WCAG21/Understanding/contrast-minimum.html) — 접근성 대비 표준
+- Lea Verou, "CSS Color Module Level 4" (W3C) — OKLCH 색공간 스펙
+- [Tanaguru Contrast Finder](https://contrast-finder.tanaguru.com/) — 자동 대비 체크 도구
+- [Material Design Color System](https://m3.material.io/styles/color/overview) — 10단계 팔레트 사례
+- [Refactoring UI - Colors](https://www.refactoringui.com/) — 실전 색상 선택 노하우
+
+> **실제 사례**: Airbnb Design System은 피드백 컬러(success/warning/error/info) 4종을 모두 WCAG AA 대비 기준을 충족하도록 설계하며, 각 색상마다 배경용(bg)과 텍스트용(text) 2개 버전을 제공하여 접근성을 자동으로 보장합니다.
+
+> **심화 이론**: OKLCH 색공간은 CIE Lab의 개선판으로, **지각적 균일성(Perceptual Uniformity)**을 제공합니다. HSL에서 Lightness 50%의 파란색과 노란색은 사람 눈에 다른 밝기로 보이지만, OKLCH에서는 동일한 Lightness 값이 실제로 같은 밝기로 지각됩니다. 이는 일관된 색상 스케일 생성에 필수적입니다.
+
 ---
 *출처: Nathan Curtis (EightShapes)*
 

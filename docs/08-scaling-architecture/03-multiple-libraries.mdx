@@ -207,6 +207,34 @@ node scripts/generate-release-notes.js
 - 각 라이브러리 독립 릴리스 허용
 - Storybook으로 프레임워크 간 API 비교 가능
 
+## 참고 자료
+
+### 핵심 문헌
+- [Nathan Curtis - "Managing Design Systems with Multiple Core Libraries"](https://medium.com/eightshapes-llc/managing-design-systems-with-multiple-core-libraries-2b0e24f9409e) — 멀티 라이브러리 관리 전략
+- [Specification by Example](https://gojko.net/books/specification-by-example/) by Gojko Adzic — 크로스 플랫폼 API 정렬 원칙
+
+### 크로스 플랫폼 아키텍처
+- Martin Fowler, ["GUI Architectures"](https://martinfowler.com/eaaDev/uiArchs.html) — MVC, MVP, MVVM 패턴의 플랫폼별 적용
+- [React Native's "Learn Once, Write Anywhere"](https://reactnative.dev/) — 플랫폼별 차이를 허용하는 철학
+- [Flutter's Platform Channels](https://docs.flutter.dev/platform-integration/platform-channels) — 네이티브 브릿지 설계 패턴
+
+### 실제 사례
+- [IBM Carbon](https://carbondesignsystem.com/) — React (Reference) + Vue + Angular + Svelte + Web Components + Vanilla
+- [Material Design](https://m3.material.io/) — Android (Compose) + iOS (SwiftUI) + Flutter + Web
+- [Microsoft Fluent UI](https://developer.microsoft.com/en-us/fluentui) — React + iOS + Android + macOS + Windows
+- [Ant Design](https://ant.design/) — React + Vue + Angular + React Native
+
+### 모노레포 & 릴리스 관리
+- [Turborepo](https://turbo.build/repo) — 고속 모노레포 빌드 시스템
+- [Nx](https://nx.dev/) — 엔터프라이즈 모노레포 도구
+- [Lerna](https://lerna.js.org/) — 레거시 모노레포 도구 (이제 Nx 통합)
+- [Rush](https://rushjs.io/) — Microsoft의 대규모 모노레포 관리
+
+### 디자인 토큰 동기화
+- [Style Dictionary](https://amzn.github.io/style-dictionary/) — 플랫폼별 토큰 변환
+- [Theo](https://github.com/salesforce-ux/theo) — Salesforce의 토큰 파이프라인
+- [Design Tokens W3C Community Group](https://www.w3.org/community/design-tokens/) — 토큰 표준화 작업
+
 ## 실무 체크리스트
 
 - [ ] 크로스 플랫폼 API 네이밍 규칙 합의

@@ -310,6 +310,19 @@ grep -rn '#[0-9A-Fa-f]\{3,8\}' src/styles/ --include='*.css' --include='*.scss' 
 | **Shadow** | `shadow-2` | `shadow-elevated` | `card-shadow` |
 | **Duration** | `duration-200` | `duration-transition` | `button-transition` |
 
+## 참고 자료
+
+- Nathan Curtis, "Tokens in Design Systems" (EightShapes, 2016)
+- [Style Dictionary - Token Structure](https://amzn.github.io/style-dictionary/#/tokens) — 3-tier 토큰 아키텍처 구현
+- [Design Tokens W3C Community Group](https://www.w3.org/community/design-tokens/) — 토큰 표준화 커뮤니티
+- [Salesforce Lightning Design Tokens](https://www.lightningdesignsystem.com/design-tokens/) — Generic/Semantic/Component 계층 실전 사례
+- Jina Anne, "The Salesforce Team Model for Scaling a Design System" (Clarity, 2017)
+- [Theo Documentation](https://github.com/salesforce-ux/theo) — Salesforce의 토큰 변환 도구
+
+> **실제 사례**: Atlassian Design System은 3-Tier 구조로 7개 제품(Jira, Confluence, Trello 등)의 토큰을 통합 관리합니다. Generic 계층 변경 한 번으로 모든 제품의 다크 모드가 동시에 업데이트됩니다.
+
+> **심화 이론**: 3-Tier 토큰 구조는 소프트웨어 공학의 **Separation of Concerns** 원칙을 디자인에 적용한 것입니다. Generic(What exists) → Semantic(What it means) → Component(Where it's used) 계층 분리는 변경의 영향 범위를 명확히 제한하여 리팩토링 리스크를 최소화합니다.
+
 ---
 > 출처: Nathan Curtis (EightShapes)
 

@@ -393,11 +393,15 @@ AlphaView는 금융 뉴스 큐레이션 플랫폼입니다. "생각하게 만들
 
 ---
 
-## 🔗 참고 자료
+## 📚 참고 자료
 
-- **Don't Make Me Think** (Steve Krug) - UX 디자인의 바이블
-- **Laws of UX** (Jon Yablonski) - 인지 심리학 기반 UX 법칙
-- Nielsen Norman Group - 사용성 연구의 권위 기관
+- Steve Krug, *Don't Make Me Think* (2000) — 웹 사용성의 고전, "생각하게 만들지 마라" 원칙
+- [Nielsen Norman Group](https://www.nngroup.com/) — 사용성 연구의 권위 기관, 수천 개의 UX 아티클
+- [Laws of UX](https://lawsofux.com/) — Jon Yablonski, 인지 심리학 기반 UX 법칙 모음
+- [Gestalt Principles](https://www.interaction-design.org/literature/topics/gestalt-principles) — 시각 인지 이론 (유사성, 근접성 법칙)
+- [Hick's Law](https://lawsofux.com/hicks-law/) — 선택지가 많을수록 의사결정 시간 증가
+- [Miller's Law](https://lawsofux.com/millers-law/) — 단기 기억은 7±2개 항목만 보유
+- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/) — 웹 접근성 표준 (명확성 원칙 포함)
 
 ---
 

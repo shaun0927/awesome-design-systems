@@ -372,6 +372,21 @@ After: 12 → 13 → 16 → 20 → 26 → 35 → 96 (자연스러움)
 ### 5. "Context is King"
 > 수백 개 토큰을 수동 관리하지 말고, 시스템에 올바른 컨텍스트를 주면 올바른 값을 반환하게 하라.
 
+## 참고 자료
+
+- [Tokens Studio Graph Engine](https://graph.tokens.studio/) — 알고리즘 토큰 생성 도구 (무료)
+- Lea Verou, "CSS Color Module Level 4" (W3C) — LCH, OKLab 색공간 스펙
+- Tim Brown, "More Meaningful Typography" (A Book Apart, 2011) — Modular Scale 이론
+- [HSLuv Color Space](https://www.hsluv.org/) — 지각적으로 균일한 색공간
+- Nate Baldwin, "The Physics of Color" (Adobe, 2021) — 색상 지각 이론
+- Louis Chenais, "Context-Driven Tokens" (Tokens Studio, 2024)
+
+> **실제 사례**: Material Design 3는 알고리즘 기반 색상 시스템(Material Color Utilities)을 사용하여, 단일 Brand Color 입력으로 Light/Dark 모드별 40개 톤을 자동 생성합니다. HCT(Hue-Chroma-Tone) 색공간을 사용해 모든 색조에서 WCAG 대비 기준을 자동으로 충족합니다.
+
+> **심화 이론**: 색상의 Lightness 곡선이 선형이 아닌 이유는 **Weber-Fechner Law**(베버-페히너 법칙) 때문입니다. 인간의 감각은 자극의 절대값이 아니라 **비율**에 반응하므로, 명도 스케일도 기하급수적 분포(geometric progression)를 따라야 시각적으로 균등하게 느껴집니다.
+
+> **심화 이론**: Context-Driven Token System은 함수형 프로그래밍의 **Higher-Order Functions** 개념을 디자인에 적용한 것입니다. `data-surface`와 `data-appearance` 조합이 입력 컨텍스트가 되고, 시스템이 그에 맞는 토큰 값을 반환합니다. 이는 수백 개의 정적 토큰 대신 **상황별 계산**으로 대체하는 전략입니다.
+
 ---
 *출처: Token Studio, EightShapes*
 

@@ -243,6 +243,21 @@ type ButtonVariant = 'filled' | 'outlined' | 'blue' | 'transparent';
 | **팀 합의** | 같은 개념에 같은 용어 사용 (warning vs caution 통일) |
 | **일관성 > 완벽** | 하나의 패턴을 일관되게 적용하는 것이 혼합보다 나음 |
 
+## 참고 자료
+
+- Nathan Curtis, "Naming Tokens in Design Systems" (EightShapes, 2017)
+- [Refactoring UI](https://www.refactoringui.com/) — Purposeful 네이밍의 실전 예시
+- Brad Frost, "Atomic Design" (2016) — 컴포넌트 추상화 이론
+- [Material Design - Color System](https://m3.material.io/styles/color/overview) — Purposeful 색상 네이밍 사례
+- [IBM Carbon - Token Migration Guide](https://carbondesignsystem.com/migrating/guide/overview) — 대규모 토큰 마이그레이션 전략
+- Jina Anne, "Design Tokens for Dummies" (Salesforce, 2018)
+
+> **실제 사례**: Salesforce Lightning Design System은 리브랜딩 시 Aesthetic 네이밍(`--color-blue-500`)에서 Purposeful 네이밍(`--color-brand-primary`)으로 전환하면서, 6개월간 Alias 병행 기간을 두었습니다. 이 기간 동안 2,000개 이상의 컴포넌트를 점진적으로 마이그레이션하며, 한 번에 전환했을 때 발생할 수 있는 Breaking Change 리스크를 제로화했습니다.
+
+> **심화 이론**: Purposeful vs Aesthetic 네이밍은 철학에서 **본질주의(Essentialism) vs 현상주의(Phenomenalism)** 논쟁과 유사합니다. Purposeful은 "이것의 본질적 목적은 무엇인가?"를, Aesthetic은 "이것이 현재 어떻게 나타나는가?"를 묻습니다. 디자인 시스템에서는 본질(Purpose)이 외형(Appearance)보다 변하지 않으므로, Purposeful 네이밍이 시간의 시험을 견딥니다.
+
+> **심화 이론**: 3-Tier 하이브리드 전략은 **Abstraction Layers**(추상화 계층)의 고전적 패턴입니다. 컴퓨터 과학의 OSI 7계층 모델처럼, 각 계층이 명확한 책임을 가지면 변경의 파급 효과를 제한할 수 있습니다. Tier 1(구체적) → Tier 2(추상적) → Tier 3(구체적)의 샌드위치 구조는 **변경 격리(Change Isolation)**를 극대화합니다.
+
 ---
 > 출처: Nathan Curtis (EightShapes)
 

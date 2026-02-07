@@ -101,5 +101,16 @@
 **이유**: 롤아웃 특성은 같지만 규모가 훨씬 작음. "다음 세대"의 팡파르는 부족.
 
 ---
+
+## 참고 자료
+
+- [Nathan Curtis, "Adopting Design Systems"](https://medium.com/eightshapes-llc/adopting-design-systems-71e599ff660a) — EightShapes, 디자인 시스템 세대 전환 전략
+- [Feature Toggles (aka Feature Flags)](https://martinfowler.com/articles/feature-toggles.html) — Martin Fowler, 점진적 배포 기법
+- [npm dist-tags documentation](https://docs.npmjs.com/cli/v9/commands/npm-dist-tag) — 버전 태그를 통한 알파/베타 배포 관리
+- [Design Tokens W3C Community Group](https://www.w3.org/community/design-tokens/) — 디자인 토큰 표준화 논의
+- Rogers, E. M. (2003). *Diffusion of Innovations* (5th ed.) — 기술 채택 생애주기 이론
+- [jscodeshift](https://github.com/facebook/jscodeshift) — Facebook의 코드 자동 마이그레이션 도구
+
+---
 *출처: Nathan Curtis (EightShapes) - Design Systems Generations: Defining*
 *"디자인 시스템의 세대 전환은 수년간 지속될 결과물이므로, 모든 이해관계자가 무엇을, 왜, 어떤 규모로 하는지 이해해야 합니다."*

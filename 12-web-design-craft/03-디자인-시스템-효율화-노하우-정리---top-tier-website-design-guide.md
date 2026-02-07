@@ -268,4 +268,16 @@
 
 ---
 
+## 참고 자료
+
+- [Gestalt Principles in UI Design](https://www.interaction-design.org/literature/topics/gestalt-principles) — 유사성, 근접성 법칙의 심리학적 배경
+- [Type Scale Generator](https://typescale.com/) — 타이포그래피 스케일 자동 생성 도구
+- [Modular Scale](https://www.modularscale.com/) — 수학적 비율 기반 타입 시스템
+- [Refactoring UI](https://www.refactoringui.com/) — Adam Wathan & Steve Schoger, 실용적 UI 디자인 원칙
+- [Cubic-bezier.com](https://cubic-bezier.com/) — CSS 타이밍 함수 시각화 도구
+- [Mobbin](https://mobbin.com/) — 모바일/웹 디자인 레퍼런스 라이브러리
+- [Spacing System Guide](https://www.designsystems.com/space-grids-and-layouts/) — 8px 그리드 시스템 설명
+
+---
+
 *이 문서는 디자인 시스템 구축과 효율적인 웹 디자인 프로세스를 위한 참고 자료입니다.*

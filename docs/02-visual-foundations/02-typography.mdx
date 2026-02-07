@@ -234,6 +234,19 @@ xs → small → medium → large → xl
 4. **통제 가능한 범위만** - Page-level reset 지양, Component-level reset 적용
 5. **사용자 지원 우선** - 강력한 도구(mixin) 제공으로 일관성 유지
 
+## 참고 자료
+
+- Nathan Curtis, "Typography in Design Systems" (EightShapes, 2017)
+- Tim Brown, "More Meaningful Typography" (A Book Apart, 2011) — Modular Scale 이론
+- Robert Bringhurst, "The Elements of Typographic Style" (1992) — 타이포그래피 고전
+- [Utopia - Fluid Responsive Design](https://utopia.fyi/) — clamp() 기반 유동 타이포그래피
+- [Web Typography by Richard Rutter](https://book.webtypography.net/) — 웹 타이포그래피 실무
+- [CSS text-box-trim](https://developer.chrome.com/blog/css-text-box-trim) — 최신 CSS 라인박스 제어
+
+> **실제 사례**: BBC GEL (Global Experience Language)은 Heading Level과 HTML Tag를 완전히 분리하여, 같은 `<h2>` 태그가 페이지 컨텍스트에 따라 `heading-level-2`, `heading-level-3`, `heading-level-4` 스타일을 선택적으로 적용합니다. 이를 통해 SEO(시맨틱 구조)와 시각적 디자인을 독립적으로 관리합니다.
+
+> **심화 이론**: Line-height의 **Vertical Rhythm** 개념은 음악의 리듬처럼 텍스트 요소들이 일정한 수직 간격을 유지하는 원칙입니다. Baseline Grid 시스템에서는 모든 텍스트의 baseline이 4px 또는 8px 배수 위치에 정렬되도록 line-height를 계산합니다. 이는 시각적 조화를 극대화하지만, 현대 UI에서는 유연성을 위해 덜 엄격하게 적용됩니다.
+
 ---
 *출처: Nathan Curtis (EightShapes)*
 

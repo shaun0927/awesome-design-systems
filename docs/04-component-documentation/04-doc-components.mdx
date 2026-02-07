@@ -327,6 +327,25 @@ export const SpecTable: React.FC<SpecTableProps> = ({ title, tokens }) => (
 
 ---
 
+## 참고 자료
+
+- [MDX Components](https://mdxjs.com/docs/using-mdx/#components) — 문서 전용 컴포넌트 패턴
+- [Docusaurus Swizzling](https://docusaurus.io/docs/swizzling) — 문서 사이트 컴포넌트 커스터마이징
+- [react-live](https://github.com/FormidableLabs/react-live) — 실시간 편집 가능한 코드 블록
+- [Design Tokens Community Group](https://www.w3.org/community/design-tokens/) — 토큰 테이블 표준화 작업
+- [Color Contrast Analyzer](https://www.tpgi.com/color-contrast-checker/) — Tint Stack의 AA/AAA 점수 계산
+
+### 이론적 배경
+- **Documentation as Product**: 문서 사이트도 사용자 경험 디자인 대상 (Kaplan-Moss, Write the Docs)
+- **Component-Driven Documentation**: 문서 자체가 디자인 시스템 컴포넌트를 재사용 (Brad Frost, Atomic Design)
+
+### 실제 사례
+- **Chakra UI**: 모든 Props를 인터랙티브 테이블로 제공, 실시간 필터링 지원
+- **Radix UI**: Keyboard Interactions 섹션을 키보드 아이콘과 함께 시각화
+- **shadcn/ui**: CLI 설치 명령어를 Copy 버튼과 함께 제공
+
+---
+
 ## Related Articles
 
 import CrossRef from '@site/src/components/CrossRef';

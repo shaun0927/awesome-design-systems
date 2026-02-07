@@ -157,6 +157,25 @@ label:
 
 ---
 
+## 참고 자료
+
+- [EightShapes Specs Plugin](https://www.figma.com/community/plugin/731452122971387000/EightShapes-Specs) — Figma Community에서 무료로 사용 가능
+- [Figma Plugin API](https://www.figma.com/plugin-docs/) — 커스텀 Specs 플러그인 제작 가이드
+- [ESDS Design Tokens](https://eightshapes.com/components/) — EightShapes의 토큰 네이밍 체계 참고
+- [Chrome DevTools Inspect Mode](https://developer.chrome.com/docs/devtools/css/) — Redline과 유사한 웹 개발 도구
+- [Figma Dev Mode Handoff](https://help.figma.com/hc/en-us/articles/15023124644247) — 공식 개발자 핸드오프 기능
+
+### 이론적 배경
+- **Anatomy Traversal**: Figma 레이어 트리를 재귀적으로 순회하여 요소 구조 자동 감지
+- **Automated Redlining**: 수동 주석 작업을 자동화하여 디자이너 생산성 10배 향상 (Nathan Curtis)
+
+### 실제 사례
+- **Uber**: EightShapes Specs를 기반으로 내부 커스텀 플러그인 제작 (회사 토큰 체계 반영)
+- **IBM Carbon**: Specs 출력을 JSON으로 추출하여 자동 코드 생성 파이프라인 구축
+- **Shopify Polaris**: Anatomy 번호를 CSS 클래스명에 매핑하여 디자이너-개발자 소통 간소화
+
+---
+
 ## Related Articles
 
 import CrossRef from '@site/src/components/CrossRef';

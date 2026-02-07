@@ -225,6 +225,19 @@ export function AppShell({ header, sidebar, footer, children }: AppShellProps) {
 }
 ```
 
+## 참고 자료
+
+- Nathan Curtis, "Component Library Hierarchy" (EightShapes, 2017)
+- Brad Frost, "Atomic Design Methodology" (2016) — 컴포넌트 계층 이론
+- [Storybook Composition](https://storybook.js.org/docs/react/sharing/storybook-composition) — 계층적 컴포넌트 문서화
+- [Radix UI Primitives](https://www.radix-ui.com/primitives) — Atomic/Compositional 아키텍처 사례
+- [Shopify Polaris Component Library](https://polaris.shopify.com/) — Shell 제공 전략
+- Dan Abramov, "Presentational and Container Components" (2015)
+
+> **실제 사례**: Shopify Polaris는 Atomic(Button, TextField) → Patterns(SearchField, EmptyState) → Shells(AppProvider + Frame + TopBar) 3계층 구조로 설계됩니다. Shell 컴포넌트는 이미 전역 네비게이션과 인증 상태를 포함하여, 개발자가 빈 페이지에서 시작하지 않고 "90% 완성된 앱"에서 시작하게 합니다.
+
+> **심화 이론**: 계층적 컴포넌트 구조는 **Encapsulation**(캡슐화)과 **Composition**(조합)의 균형입니다. 너무 많은 캡슐화는 유연성을 제한하고(mega-component with 50 props), 너무 적은 캡슐화는 일관성을 해칩니다. 적절한 계층 분리는 각 레벨이 명확한 책임을 가지도록 하여, Gang of Four의 **Single Responsibility Principle**을 컴포넌트 아키텍처에 적용한 것입니다.
+
 ---
 
 ## 📎 Related Articles

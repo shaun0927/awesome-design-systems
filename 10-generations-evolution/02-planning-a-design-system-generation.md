@@ -105,5 +105,15 @@ Icon (의존성 없음) → 최우선
 - [ ] 보증 기간(4-8주) 지원 체계 강화
 
 ---
+
+## 참고 자료
+
+- [Nathan Curtis, "Planning a Design System Generation"](https://medium.com/eightshapes-llc/planning-a-design-system-generation-da078215f844) — EightShapes, 세대 계획 수립 방법론
+- [Semantic Versioning (SemVer)](https://semver.org/) — 버전 관리 표준 (MAJOR.MINOR.PATCH)
+- [Design System Release Cycles](https://bradfrost.com/blog/post/maintaining-design-systems/) — Brad Frost, 디자인 시스템 유지보수 전략
+- [Dependency Management Best Practices](https://engineering.atspotify.com/2020/04/spotifys-new-design-tools/) — Spotify Engineering, 컴포넌트 의존성 관리
+- [Alpha/Beta Testing Frameworks](https://www.nngroup.com/articles/alpha-beta-testing/) — Nielsen Norman Group, 알파/베타 테스트 방법론
+
+---
 *출처: Nathan Curtis (EightShapes) - Planning a Design System Generation*
 *"세대 교체는 디자인 시스템 생애에서 가장 중요한 순간. 단계별 계획, 점진적 전달, 명확한 커뮤니케이션으로 파트너들이 함께 계획할 수 있게 하세요."*

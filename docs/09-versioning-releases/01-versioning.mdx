@@ -366,6 +366,36 @@ https://design.company.com/v3.2.0/components/button
 https://design.company.com/v2.8.0/components/button  # 아직 v2 쓰는 팀용
 ```
 
+## 참고 자료
+
+### 핵심 표준
+- [Semantic Versioning 2.0.0](https://semver.org/) — Tom Preston-Werner (GitHub 공동창업자)의 버전 관리 표준
+- [Keep a Changelog](https://keepachangelog.com/) — Olivier Lacan의 CHANGELOG 작성 가이드
+- [Conventional Commits](https://www.conventionalcommits.org/) — 커밋 메시지 규약 (SemVer 자동화)
+
+### 버전 관리 이론
+- Martin Fowler, ["Breaking Change"](https://martinfowler.com/bliki/BreakingChange.html) — Breaking Change 정의 및 완화 전략
+- **Hyrum's Law** (Google) — "충분한 사용자가 있으면 API의 모든 관찰 가능한 동작은 누군가에게 의존된다"
+- [Deprecation Policy Best Practices](https://opensource.google/documentation/reference/thirdparty/deprecation) — Google의 deprecation 가이드
+
+### 실제 사례
+- [React Versioning Policy](https://legacy.reactjs.org/docs/faq-versioning.html) — Major는 breaking만, Minor는 새 기능, Patch는 버그 수정
+- [Node.js Release Process](https://github.com/nodejs/release) — LTS (Long Term Support) 정책
+- [Rust's Stability Promise](https://blog.rust-lang.org/2014/10/30/Stability.html) — 6주 릴리스 주기 + 3년 edition
+- [Python 2 → 3 Migration](https://docs.python.org/3/howto/pyporting.html) — 장기 마이그레이션 사례 (10년+)
+
+### 도구
+- [Changesets](https://github.com/changesets/changesets) — Atlassian의 모노레포 버전 관리 도구
+- [semantic-release](https://github.com/semantic-release/semantic-release) — 커밋 메시지 기반 자동 릴리스
+- [standard-version](https://github.com/conventional-changelog/standard-version) — Conventional Commits → CHANGELOG 자동 생성
+- [npm version](https://docs.npmjs.com/cli/v10/commands/npm-version) — npm 내장 버전 관리 명령어
+- [npm deprecate](https://docs.npmjs.com/cli/v10/commands/npm-deprecate) — 특정 버전 deprecate 표시
+
+### Deprecation 전략
+- [Stripe API Versioning](https://stripe.com/docs/api/versioning) — 날짜 기반 API 버전 (e.g., `2023-10-16`)
+- [Atlassian Deprecation Practices](https://developer.atlassian.com/platform/marketplace/deprecation-guidelines/) — 최소 6개월 공지 기간
+- [Twilio Upgrade Guidance](https://www.twilio.com/docs/usage/api/upgrades) — 버전별 마이그레이션 가이드
+
 ## 실무 체크리스트
 
 - [ ] SemVer 규칙을 팀 전체가 이해하고 합의

@@ -268,6 +268,19 @@ npx style-dictionary build
 6. **계층별 차별화**: primitive/semantic/component 각각 다른 템플릿으로 가독성 확보
 7. **Future Friendly**: 스타일 변경 시에도 이름이 유효하도록 추상적 네이밍
 
+## 참고 자료
+
+- [W3C DTCG Spec](https://tr.designtokens.org/format/) — 공식 디자인 토큰 포맷 표준
+- [Style Dictionary Documentation](https://amzn.github.io/style-dictionary/) — 토큰 자동화 파이프라인 구축
+- [Tokens Studio for Figma](https://tokens.studio/) — Figma Variables와 토큰 동기화
+- Nathan Curtis, "Tokenizing Design Systems" (EightShapes, 2019)
+- [Figma Variables Documentation](https://help.figma.com/hc/en-us/articles/15339657135383-Guide-to-variables-in-Figma) — Figma 네이티브 토큰 시스템
+- Danny Banks, "Design Tokens: A Love Story" (Clarity, 2020) — Style Dictionary 창시자 강연
+
+> **실제 사례**: GitHub Primer Design System은 Style Dictionary로 JSON 토큰을 CSS/SCSS/JavaScript/iOS/Android 5개 플랫폼으로 자동 변환합니다. CI/CD 파이프라인에서 토큰 변경 시 자동 빌드 및 npm 배포가 이루어져, 수동 작업 없이 전 플랫폼에 30분 내 반영됩니다.
+
+> **심화 이론**: Composite Tokens(복합 토큰)은 CSS의 **Shorthand Properties** 개념을 토큰 레벨로 확장한 것입니다. Typography composite가 `fontFamily + fontSize + fontWeight + lineHeight`를 묶는 것은, 이 4가지 속성이 함께 변경될 때 일관성을 보장하는 **Cohesion** 원칙을 따릅니다.
+
 ---
 
 ---

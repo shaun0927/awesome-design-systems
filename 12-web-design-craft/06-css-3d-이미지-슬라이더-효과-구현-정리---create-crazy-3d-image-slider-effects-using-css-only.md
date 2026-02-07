@@ -549,13 +549,16 @@ transform: rotateY(36deg) translateZ(550px); /* ❌ 의도와 다른 배치 */
 
 ---
 
-## 📌 참고 링크
+## 📚 참고 자료
 
-- **원본 영상**: Create Crazy 3D Image Slider Effects Using CSS Only
-- **관련 CSS 속성 문서**:
-  - [MDN: transform-style](https://developer.mozilla.org/en-US/docs/Web/CSS/transform-style)
-  - [MDN: perspective](https://developer.mozilla.org/en-US/docs/Web/CSS/perspective)
-  - [MDN: CSS 3D Transforms](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transforms/Using_CSS_transforms#3d_specific_css_properties)
+- [MDN: CSS transform-style](https://developer.mozilla.org/en-US/docs/Web/CSS/transform-style) — 3D 공간 활성화 속성
+- [MDN: CSS perspective](https://developer.mozilla.org/en-US/docs/Web/CSS/perspective) — 원근감 설정
+- [MDN: CSS 3D Transforms](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transforms/Using_CSS_transforms#3d_specific_css_properties) — 3D 변환 전체 가이드
+- [MDN: CSS calc()](https://developer.mozilla.org/en-US/docs/Web/CSS/calc) — 수학 계산 함수
+- [CSS Custom Properties (Variables)](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties) — CSS 변수 활용법
+- [MDN: attr()](https://developer.mozilla.org/en-US/docs/Web/CSS/attr) — HTML 속성값을 CSS에서 사용
+- [Can I Use: CSS 3D Transforms](https://caniuse.com/transforms3d) — 브라우저 지원 현황
+- [CSS Tricks: 3D Transform Functions](https://css-tricks.com/almanac/properties/t/transform/) — 3D 변환 실전 예제
 
 ---
 

@@ -241,6 +241,19 @@ export function ${spec.name}({ ${Object.keys(spec.props).join(', ')}, children }
 }
 ```
 
+## 참고 자료
+
+- [Tokens Studio for Figma](https://tokens.studio/) — 데이터 기반 디자인 토큰
+- Nathan Curtis, "Design Tokens as Data" (EightShapes, 2020)
+- [Design Tokens W3C DTCG Format](https://tr.designtokens.org/format/) — 표준 토큰 포맷
+- [Supernova.io](https://www.supernova.io/) — 디자인-코드 자동화 플랫폼
+- [Specify](https://specifyapp.com/) — 디자인 데이터 파이프라인
+- Chris Coyier, "Design Systems as Code" (2019)
+
+> **실제 사례**: Salesforce Lightning Design System은 모든 컴포넌트 variant를 JSON으로 정의하여, 단일 데이터 소스에서 Figma + React + iOS + Android 4개 플랫폼의 컴포넌트를 자동 생성합니다. variant 추가 시 JSON 파일 한 줄만 수정하면, CI/CD 파이프라인이 모든 플랫폼에 배포합니다.
+
+> **심화 이론**: Components as Data는 **Declarative Programming**(선언적 프로그래밍)의 극치입니다. "어떻게(How)" 만들지 코드로 작성하는 대신, "무엇(What)"을 원하는지 데이터로 선언하면, 시스템이 자동으로 생성합니다. 이는 SQL이 데이터베이스를 다루는 방식과 유사하며, Infrastructure as Code(Terraform)의 UI 버전입니다.
+
 ---
 
 ## 📎 Related Articles

@@ -246,6 +246,19 @@ export function CardActions({ children }: { children: React.ReactNode }) {
 .card__link { text-decoration: none; color: inherit; display: contents; }
 ```
 
+## 참고 자료
+
+- Nathan Curtis, "Cards in Design Systems" (EightShapes, 2017)
+- [Material Design - Cards](https://m3.material.io/components/cards/overview) — 카드 구조 가이드라인
+- [Brad Frost - Cards](https://bradfrost.com/blog/post/cards/) — 카드 컴포넌트 분석
+- [Inclusive Components - Cards](https://inclusive-components.design/cards/) — 접근 가능한 카드 패턴
+- [Radix UI Card](https://ui.shadcn.com/docs/components/card) — Composable 카드 사례
+- Luke Wroblewski, "Obvious Always Wins" (2010) — 카드 콘텐츠 우선순위
+
+> **실제 사례**: Airbnb Design System의 Card는 4개 zone(Media/Title/Details/Actions)으로 구성되며, 각 zone은 독립적으로 숨김/표시 가능합니다. 특히 이미지가 없는 경우 자동으로 브랜드 컬러 그라데이션 배경을 생성하여, 빈 공간 없이 시각적 일관성을 유지합니다.
+
+> **심화 이론**: 카드의 **Click Area 전략**은 Fitts's Law를 실전에 적용한 사례입니다. 전체 카드를 클릭 가능하게 만들면 타겟 영역이 커져 사용성이 향상되지만, 다중 액션(좋아요/공유/메뉴)이 필요하면 마크업과 이벤트 위임(Event Delegation)이 복잡해집니다. 최선의 방법은 디자인 단계에서 엔지니어와 함께 클릭 영역 맵을 그려 합의하는 것입니다.
+
 ---
 
 ## 📎 Related Articles

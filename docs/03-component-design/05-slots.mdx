@@ -205,6 +205,19 @@ customElements.define('slotted-row', SlottedRow);
 -->
 ```
 
+## 참고 자료
+
+- [Web Components - Slots](https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_templates_and_slots) — 네이티브 슬롯 스펙
+- [Radix UI Slot](https://www.radix-ui.com/primitives/docs/utilities/slot) — React 슬롯 유틸리티
+- Nathan Curtis, "Slots in Design Systems" (EightShapes, 2019)
+- [Lit - Working with Slots](https://lit.dev/docs/components/shadow-dom/#slots) — Web Components 슬롯 활용
+- [Vue Slots Documentation](https://vuejs.org/guide/components/slots.html) — Vue 슬롯 패턴
+- Brad Frost, "Atomic Design" (2016) — 조합 가능한 컴포넌트 이론
+
+> **실제 사례**: Material Design 3의 ListItem 컴포넌트는 `leading`, `headline`, `supporting-text`, `trailing` 4개 슬롯을 제공하여, 아바타/아이콘/체크박스 등을 자유롭게 배치할 수 있습니다. 동일한 ListItem이 연락처 목록, 설정 메뉴, 메시지 인박스에서 완전히 다른 모습으로 재사용됩니다.
+
+> **심화 이론**: 슬롯은 **Dependency Inversion Principle**(의존성 역전 원칙)을 UI에 적용한 것입니다. 부모 컴포넌트가 자식의 구체적 타입에 의존하는 대신, 슬롯이라는 추상 인터페이스에 의존하여, 자식이 무엇이든(아이콘, 이미지, 버튼) 받아들일 수 있습니다. 이는 개방-폐쇄 원칙(OCP)도 만족하여 확장에는 열려있고 수정에는 닫혀있습니다.
+
 ---
 
 ## 📎 Related Articles

@@ -369,6 +369,33 @@ npm view @company/core-ui versions --json | jq length
 
 중앙 팀 없는 연합 모델은 실패하기 쉽습니다. 80개 이상 조직 컨설팅에서 중앙 전담 인력 없이 성공한 사례는 **0건**입니다.
 
+## 참고 자료
+
+### 핵심 문헌
+- [Nathan Curtis - "Principles of Designing Systems"](https://medium.com/eightshapes-llc/principles-of-designing-systems-294ee45dcf81) — 8가지 원칙의 원문
+- [Nathan Curtis - "Design System Tiers"](https://medium.com/eightshapes-llc/design-system-tiers-7-layers-of-design-system-7d8f1c7f6e08) — Tier 아키텍처 상세 설명
+- [Nathan Curtis - "Consolidating Design Systems"](https://medium.com/eightshapes-llc/consolidating-design-systems-7b06c95e3b9e) — 시스템 통합 4가지 옵션
+- [Style Dictionary](https://amzn.github.io/style-dictionary/) — Amazon의 디자인 토큰 파이프라인 도구
+
+### 조직 이론 & 아키텍처
+- Melvin Conway, "How Do Committees Invent?" (1968) — **Conway's Law**: 조직 구조가 시스템 아키텍처를 결정함
+- Matthew Skelton & Manuel Pais, [Team Topologies](https://teamtopologies.com/) (2019) — 팀 구조와 소프트웨어 경계 정렬
+- Eric Evans, "Domain-Driven Design" (2003) — Bounded Context와 Tier 아키텍처의 유사성
+- Martin Fowler, ["Inverse Conway Maneuver"](https://www.thoughtworks.com/radar/techniques/inverse-conway-maneuver) — 원하는 아키텍처에 맞춰 조직을 재편성
+
+### 실제 사례
+- [Atlassian Design System (ADS)](https://atlassian.design/) — ADG에서 ADS로의 통합 사례 (Option 4)
+- [Salesforce Lightning Design System](https://www.lightningdesignsystem.com/) — 다중 Tier 아키텍처 운영
+- [IBM Carbon Design System](https://carbondesignsystem.com/) — 모노레포 기반 Tier 관리
+- [Shopify Polaris](https://polaris.shopify.com/) — 커뮤니티 중심 거버넌스 모델
+- [Microsoft Fluent UI](https://developer.microsoft.com/en-us/fluentui) — 크로스 플랫폼 토큰 파이프라인
+
+### 도구 & 표준
+- [Turborepo](https://turbo.build/repo) — 모노레포 빌드 시스템
+- [Changesets](https://github.com/changesets/changesets) — 버전 관리 및 CHANGELOG 자동화
+- [Semantic Versioning 2.0.0](https://semver.org/) — 버전 관리 표준
+- [jscodeshift](https://github.com/facebook/jscodeshift) — 마이그레이션 codemod 도구
+
 ## 실무 체크리스트
 
 ### 원칙 적용

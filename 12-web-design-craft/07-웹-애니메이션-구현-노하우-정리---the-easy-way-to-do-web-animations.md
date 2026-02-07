@@ -137,17 +137,31 @@ Web Animations API + getBoundingClientRect() 활용
 
 ## 참고 자료
 
-도구:
-- https://cubic-bezier.com - 타이밍 함수 시각화
-- https://shapeshifter.design - SVG Morphing 자동 최적화
-- Chrome DevTools Performance 탭 - FPS 모니터링
+**도구:**
+- [Cubic-bezier.com](https://cubic-bezier.com/) — 타이밍 함수 시각화 및 테스트
+- [Shape Shifter](https://shapeshifter.design/) — SVG Morphing 자동 최적화
+- [Chrome DevTools Performance](https://developer.chrome.com/docs/devtools/performance/) — FPS 모니터링 및 병목 분석
+- [GSAP (GreenSock)](https://gsap.com/) — 고성능 웹 애니메이션 라이브러리
 
-CSS 속성 호환성:
-- https://caniuse.com - offset-path, backface-visibility 등
+**CSS 애니메이션:**
+- [MDN: CSS Animations](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Animations) — @keyframes, animation 속성 전체 가이드
+- [MDN: CSS Transitions](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Transitions) — transition 속성 상세 설명
+- [MDN: Web Animations API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Animations_API) — JavaScript 애니메이션 제어
+- [MDN: prefers-reduced-motion](https://developer.mozilla.org/en-US/docs/Web/CSS/@media/prefers-reduced-motion) — 접근성 미디어 쿼리
 
-영감:
-- https://www.awwwards.com - 고품질 웹 애니메이션 사례
-- CodePen - 실험적 애니메이션 탐색
+**성능 최적화:**
+- [CSS GPU Animation](https://www.smashingmagazine.com/2016/12/gpu-animation-doing-it-right/) — GPU 가속 활용법
+- [will-change Best Practices](https://developer.mozilla.org/en-US/docs/Web/CSS/will-change) — 성능 힌트 사용법
+
+**브라우저 호환성:**
+- [Can I Use](https://caniuse.com/) — offset-path, backface-visibility 등 지원 현황
+
+**영감 및 사례:**
+- [Awwwards](https://www.awwwards.com/) — 고품질 웹 애니메이션 사례
+- [CodePen](https://codepen.io/search/pens?q=animation) — 실험적 애니메이션 탐색
+
+**애니메이션 원칙:**
+- [12 Principles of Animation](https://www.creativebloq.com/advice/understand-the-12-principles-of-animation) — 디즈니의 애니메이션 기본 원칙
 
 ## 실전 워크플로우
 

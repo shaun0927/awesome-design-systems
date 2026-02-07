@@ -323,6 +323,46 @@ flowchart LR
 
 **1.0.0 이후**: 시각적 변경은 반드시 영향도를 평가하고, Breaking Change는 MAJOR 버전에 예약합니다.
 
+## 참고 자료
+
+### 핵심 문헌
+- [Nathan Curtis - "Visual Breaking Change"](https://medium.com/eightshapes-llc/visual-breaking-change-in-design-systems-1e9109fac9c4) — 시각적 변경의 Breaking 여부 판단 원칙
+- [CSS Triggers](https://csstriggers.com/) — CSS 속성별 레이아웃/페인트 영향도 (Paul Irish, Google)
+- [Web Content Accessibility Guidelines (WCAG) 2.1](https://www.w3.org/WAI/WCAG21/quickref/) — 색상 대비 기준 (AA: 4.5:1, AAA: 7:1)
+
+### Visual Regression Testing
+- [Chromatic Documentation](https://www.chromatic.com/docs/) — Storybook 기반 시각적 테스트 공식 문서
+- [Percy Documentation](https://www.browserstack.com/docs/percy) — BrowserStack Percy 가이드
+- [Playwright Visual Comparisons](https://playwright.dev/docs/test-snapshots) — 스크린샷 diff 테스트
+- [BackstopJS](https://github.com/garris/BackstopJS) — 오픈소스 시각적 회귀 테스트 도구
+
+### 접근성 & 색상
+- [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/) — 색상 대비 검사 도구
+- [axe DevTools](https://www.deque.com/axe/devtools/) — 자동 접근성 테스트 (브라우저 확장)
+- [jest-axe](https://github.com/nickcolley/jest-axe) — Jest 기반 접근성 테스트
+- [pa11y-ci](https://github.com/pa11y/pa11y-ci) — CI용 접근성 테스트 도구
+- [Eightshapes Contrast Grid](https://contrast-grid.eightshapes.com/) — 색상 조합 대비 검사 매트릭스
+
+### CSS 변경 영향도
+- Paul Irish, ["What Forces Layout / Reflow"](https://gist.github.com/paulirish/5d52fb081b3570c81e3a) — 레이아웃을 유발하는 CSS 속성 목록
+- [Rendering Performance](https://web.dev/rendering-performance/) (Google) — 렌더링 최적화 및 CSS 영향도
+- [CSS Containment](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_containment) — 스타일 변경 영향 범위 제한
+
+### 타이포그래피 & 레이아웃
+- [Modular Scale](https://www.modularscale.com/) — 타이포그래피 스케일 계산기
+- Richard Rutter, ["Web Typography"](https://book.webtypography.net/) (2017) — 웹 타이포그래피 원칙
+- Bram Stein, ["Web Font Loading Patterns"](https://www.bramstein.com/writing/web-font-loading-patterns.html) — 폰트 변경 시 FOUT/FOIT 처리
+
+### 실제 사례
+- [Material Design Color System Updates](https://m3.material.io/styles/color/overview) — Material 2 → 3 색상 마이그레이션
+- [GitHub Primer CSS Breaking Changes](https://primer.style/css/support/v16-migration) — v16 마이그레이션 가이드
+- [Bootstrap 4 → 5 Migration Guide](https://getbootstrap.com/docs/5.0/migration/) — 주요 CSS Breaking Changes
+
+### 자동화 도구
+- [Stylelint](https://stylelint.io/) — CSS 린터 (금지된 속성 검사 가능)
+- [CSS Stats](https://cssstats.com/) — CSS 변경 전후 통계 비교
+- [size-limit](https://github.com/ai/size-limit) — 번들 사이즈 변경 감지
+
 ## 실무 체크리스트
 
 - [ ] 팀과 CSS 속성별 Breaking 기준 합의 (위 표 기반)

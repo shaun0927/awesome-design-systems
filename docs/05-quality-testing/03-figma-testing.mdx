@@ -724,6 +724,25 @@ graph TD
 
 ---
 
+## 참고 자료
+
+- [Figma Component Testing (EightShapes)](https://medium.com/eightshapes-llc/testing-figma-components-4df0c8b5b9b5) — 6단계 테스트 워크플로우 원문
+- [Figma REST API](https://www.figma.com/developers/api) — 컴포넌트 속성 프로그래밍 방식 검증
+- [figma-api npm package](https://www.npmjs.com/package/figma-api) — Node.js용 Figma API 클라이언트
+- [TypeScript AST Viewer](https://ts-ast-viewer.com/) — React Props 인터페이스 파싱을 위한 AST 탐색 도구
+- [Figma Community: Component Testing Templates](https://www.figma.com/community/file/testing-checklist) — 테스트 체크리스트 템플릿
+
+### 이론적 배경
+- **3가지 테스팅 역할 모델**: Advocate (빌더 직접) / Enabler (전담 테스터) / Enforcer (교차 검토) — 팀 규모별 최적 전략
+- **Figma-Code Sync**: 디자인 의도(Design Intent)와 구현(Implementation) 간 계약(Contract) 검증 (Nathan Curtis)
+
+### 실제 사례
+- **Uber Base Design System**: Figma 컴포넌트와 React Props를 자동으로 비교하는 CI 파이프라인 운영
+- **Shopify Polaris**: 매주 금요일 "Figma Component QA Day"를 운영하여 팀 전체가 참여
+- **Adobe Spectrum**: Figma REST API로 컴포넌트 명세를 JSON으로 추출하여 자동 문서 생성
+
+---
+
 ## Related Articles
 
 import CrossRef from '@site/src/components/CrossRef';

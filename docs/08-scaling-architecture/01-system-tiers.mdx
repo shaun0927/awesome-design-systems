@@ -209,6 +209,30 @@ flowchart LR
 - **시스템팀은 매칭메이커 역할**: 여러 팀에서 유사한 요구사항(예: rich-text editor) 발견 시 연결해주고 공유 투자 유도
 - **문서화에 Tier 노출**: 사용자가 Core vs 실험적 기능을 구분할 수 있도록 문서 사이트 내비게이션/상태 표시에 Tier 정보 반영
 
+## 참고 자료
+
+### 핵심 문헌
+- [Nathan Curtis - "Design System Tiers"](https://medium.com/eightshapes-llc/design-system-tiers-7-layers-of-design-system-7d8f1c7f6e08) (Feb 2019) — Tier 아키텍처 원문
+- [Brad Frost - "Atomic Design"](https://atomicdesign.bradfrost.com/) (2016) — 컴포넌트 계층 구조 이론 (Atoms → Molecules → Organisms)
+- [Martin Fowler - "BoundedContext"](https://martinfowler.com/bliki/BoundedContext.html) — 도메인 경계와 Tier 경계의 유사성
+
+### 품질 계층화 이론
+- Michael T. Nygard, ["Release It!"](https://pragprog.com/titles/mnee2/release-it-second-edition/) (2018) — 계층별 안정성 요구사항
+- **Dependency Inversion Principle (DIP)** — 상위 Tier가 하위 Tier에 의존하지 않도록 설계
+- [The Twelve-Factor App](https://12factor.net/) — 모듈화 및 의존성 관리 원칙
+
+### 실제 사례
+- [Atlassian Design System](https://atlassian.design/) — Core + Feature-specific packages (Editor, Navigation)
+- [Salesforce Lightning Design System](https://www.lightningdesignsystem.com/) — Base → Components → Blueprints 3단계 구조
+- [IBM Carbon](https://carbondesignsystem.com/) — carbon-components (Core) + carbon-addons (Extensions)
+- [Shopify Polaris](https://polaris.shopify.com/) — 단일 패키지지만 내부적으로 stable vs experimental 분류
+
+### CI/CD & 모노레포
+- [Turborepo Documentation](https://turbo.build/repo/docs) — 모노레포 빌드 캐싱 및 병렬 실행
+- [Nx Monorepo Tools](https://nx.dev/) — 대규모 모노레포 관리 (Affected 명령어)
+- [Changesets](https://github.com/changesets/changesets) — 독립 버전 관리 도구
+- [GitHub Actions - Matrix Strategy](https://docs.github.com/en/actions/using-jobs/using-a-matrix-for-your-jobs) — Tier별 병렬 CI 설정
+
 ## 실무 체크리스트
 
 - [ ] 조직에 맞는 Tier 구조 정의 (2-3 Tier 권장)

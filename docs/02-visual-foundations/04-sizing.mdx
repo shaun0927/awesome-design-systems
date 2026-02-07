@@ -193,6 +193,19 @@ Large:  마케팅/온보딩 플로우
 4. **Mixin/Token 우선**: 개별 컴포넌트 전에 공통 툴링 구축
 5. **선택적 적용**: 모든 컴포넌트가 모든 사이즈를 가질 필요 없음
 
+## 참고 자료
+
+- Nathan Curtis, "Sizing in Design Systems" (EightShapes, 2019)
+- Nate Baldwin, "Spectrum's Adaptive Design" (Adobe, 2020) — Size vs Density 분리 전략
+- [Ant Design - Component Sizes](https://ant.design/docs/spec/layout) — 3-level size 시스템 사례
+- [Material Design - Component Density](https://m3.material.io/foundations/layout/applying-layout/compact) — Density 가이드라인
+- [Chakra UI Size Tokens](https://chakra-ui.com/docs/styled-system/theme#sizes) — 통합 사이즈 토큰
+- Brad Frost, "Atomic Design" (2016) — 컴포넌트 일관성 원칙
+
+> **실제 사례**: Adobe Spectrum은 Size(small/medium/large)와 Density(compact/regular/spacious)를 완전히 독립적인 2개 축으로 설계합니다. 데이터 집약적 대시보드에서는 `size="medium" density="compact"`로 정보량을 최대화하고, 마케팅 페이지에서는 `size="large" density="spacious"`로 여유로운 느낌을 줍니다. 두 속성이 직교하므로 9가지 조합이 가능합니다.
+
+> **심화 이론**: 고정 height 대신 min-height + flexbox를 사용하는 것은 **Intrinsic Sizing** 철학을 따릅니다. 콘텐츠가 컨테이너 크기를 결정하도록 하여, 다국어 번역이나 동적 텍스트에서도 잘리지 않고 자연스럽게 확장됩니다. 이는 반응형 디자인의 핵심 원칙입니다.
+
 ---
 *출처: Nathan Curtis (EightShapes, 2019)*
 

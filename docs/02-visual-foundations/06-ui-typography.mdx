@@ -260,6 +260,21 @@ WCAG AA 기준:
 - [ ] 동료에게 피드백 받기
 - [ ] "어디를 먼저 보게 되나요?" 질문하기
 
+## 참고 자료
+
+- [Refactoring UI](https://www.refactoringui.com/) — 타이포그래피로 UI 개선하기
+- Oliver Reichenstein, "Web Design is 95% Typography" (2006) — 타이포그래피 중요성
+- [Butterick's Practical Typography](https://practicaltypography.com/) — 웹 타이포그래피 실무 가이드
+- [Modern Fluid Typography](https://modern-fluid-typography.vercel.app/) — clamp() 기반 유동 타이포그래피
+- [Laws of UX - Law of Proximity](https://lawsofux.com/law-of-proximity/) — 타이포그래피와 간격의 관계
+- Adam Wathan & Steve Schoger, "Refactoring UI" (2018)
+
+> **실제 사례**: YouTube 인터페이스는 전체의 90%가 14px 폰트 하나만 사용하며, 굵기(weight)와 색상(color)만으로 제목/본문/메타데이터를 구분합니다. 이는 "최소 폰트 크기 시스템"의 대표적 사례로, 일관성과 성능(폰트 로딩)을 동시에 확보합니다.
+
+> **심화 이론**: HSL 색상 모델을 타이포그래피에 활용하는 것은 **명도 기반 계층(Lightness-based Hierarchy)** 전략입니다. 흰색 배경에 검은 텍스트는 이미 최대 대비이므로, 특정 요소를 강조하려면 다른 요소를 명도 60-70%로 낮춰(de-emphasize) 상대적 차이를 만듭니다. 이는 절대값이 아닌 **상대적 지각**을 이용한 기법입니다.
+
+> **심화 이론**: Line-height가 자동 마진 역할을 하는 이유는 **CSS Box Model의 Line Box** 개념 때문입니다. Line-height는 텍스트 위아래에 균등하게 분배되어 "Half-leading"을 형성하므로, 연속된 텍스트는 자연스러운 수직 간격을 가집니다. 이를 이해하면 불필요한 `margin-bottom` 추가를 피할 수 있습니다.
+
 ---
 
 ## 📎 Related Articles

@@ -980,21 +980,31 @@ AI 활용:
 
 ---
 
-## 📚 추가 학습 자료
+## 📚 참고 자료
 
 **Figma 공식**:
-- Figma Make 문서: [figma.com/make](https://figma.com/make)
-- MCP 설정 가이드: Figma Dev Mode 문서
-- Design-Driven Culture 아티클 (발표 슬라이드 QR 코드)
+- [Figma Make Documentation](https://help.figma.com/hc/en-us/articles/16686208127127) — 공식 사용 가이드
+- [Figma Dev Mode Guide](https://help.figma.com/hc/en-us/articles/15023124644247) — MCP 설정 포함
+- [Figma Variables API](https://www.figma.com/plugin-docs/api/properties/figma-variables/) — 디자인 토큰 자동화
+
+**AI 도구**:
+- [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) — Anthropic의 AI-tool 통합 표준
+- [Cursor IDE](https://cursor.sh/) — AI 네이티브 코드 에디터
+- [Anthropic Claude](https://www.anthropic.com/claude) — Figma Make/MCP의 기반 모델
 
 **디자인 시스템**:
-- shadcn/ui: [ui.shadcn.com](https://ui.shadcn.com)
-- Radix UI: [radix-ui.com](https://radix-ui.com)
-- Carbon Design System: [carbondesignsystem.com](https://carbondesignsystem.com)
+- [shadcn/ui](https://ui.shadcn.com) — Figma Make 기본 컴포넌트 라이브러리
+- [Radix UI](https://www.radix-ui.com) — 접근성 우선 UI 프리미티브
+- [Carbon Design System](https://carbondesignsystem.com) — IBM 오픈소스 디자인 시스템
+- [Material Design 3](https://m3.material.io/) — Google 디자인 시스템
+
+**프롬프트 엔지니어링**:
+- [Prompt Engineering Guide](https://www.promptingguide.ai/) — 3C 프레임워크 응용
+- [OpenAI Prompt Engineering](https://platform.openai.com/docs/guides/prompt-engineering) — 구조화된 프롬프트 작성법
 
 **커뮤니티**:
-- Into Design Systems Slack
-- Figma Community 파일 (검색: "Figma Make examples")
+- [Into Design Systems](https://www.intodesignsystems.com/) — 디자인 시스템 컨퍼런스 및 커뮤니티
+- [Figma Community](https://www.figma.com/community) — "Figma Make examples" 검색
 
 ---
 

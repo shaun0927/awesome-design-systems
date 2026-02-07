@@ -267,6 +267,25 @@ export default config;
 
 ---
 
+## 참고 자료
+
+- [Testing Library Documentation](https://testing-library.com/docs/) — 사용자 중심 테스트 철학과 구현
+- [jest-axe](https://github.com/nickcolley/jest-axe) — Jest에서 접근성 자동 검증
+- [Chromatic Visual Testing](https://www.chromatic.com/docs/) — 시각적 회귀 테스트 SaaS
+- [React Testing Best Practices (Kent C. Dodds)](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library) — 효과적인 컴포넌트 테스트 패턴
+- [Test Pyramid (Martin Fowler)](https://martinfowler.com/articles/practical-test-pyramid.html) — 테스트 전략의 이론적 기반
+
+### 이론적 배경
+- **4-Layer QA Process**: Design → Code → Visual → Functional의 단계적 품질 검증 (Nathan Curtis)
+- **Test-Driven Development**: 테스트를 먼저 작성하면 API 설계가 개선됨 (Kent Beck)
+
+### 실제 사례
+- **GitHub Primer**: 모든 컴포넌트에 80% 이상 테스트 커버리지 강제 (CI에서 차단)
+- **Shopify Polaris**: Chromatic으로 월 10만 건 이상의 시각적 회귀 테스트 실행
+- **Atlassian Design System**: Playwright로 크로스 브라우저 E2E 테스트 자동화
+
+---
+
 ## Related Articles
 
 import CrossRef from '@site/src/components/CrossRef';

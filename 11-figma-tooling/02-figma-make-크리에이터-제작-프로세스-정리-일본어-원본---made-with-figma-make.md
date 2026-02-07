@@ -252,10 +252,14 @@ Phase 4 (1주): 실제 API 연결 + 테스트
 
 ---
 
-## 📚 추가 참고 자료
+## 📚 참고 자료
 
-- **Figma Make 공식 블로그 Tips** (일본어)
-- **Figma Make 웨비나 (2024년 10월 23일)**: YouTube에서 "Figma Make 日本語" 검색
+- [Figma Make Official Documentation](https://help.figma.com/hc/en-us/articles/16686208127127) — 공식 사용 가이드
+- [Three.js Documentation](https://threejs.org/docs/) — 3D 웹 그래픽 라이브러리 (Autumn Walk 사례)
+- [WebGL Fundamentals](https://webglfundamentals.org/) — 파티클 시스템 기초 (Party Type 사례)
+- [React Documentation](https://react.dev/) — Figma Make 생성 코드의 기본 프레임워크
+- [GitHub Pages](https://pages.github.com/) — GLB 파일 호스팅 솔루션
+- [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) — Anthropic의 AI-tool 통합 프로토콜
 - **Figma Make 최신 기능**:
   - **Make for MCP**: AI 에디터(Cursor 등)로 코드 직접 전달
   - **GitHub 연동**: Figma Make → GitHub 리포지토리 푸시
@@ -265,7 +269,7 @@ Phase 4 (1주): 실제 API 연결 + 테스트
 
 ---
 
-**작성 시점**: 2026-02-05  
-**원본 이벤트**: Figma Make 캠페인 (2024년 11월)  
-**세션 길이**: 약 60분  
+**작성 시점**: 2026-02-05
+**원본 이벤트**: Figma Make 캠페인 (2024년 11월)
+**세션 길이**: 약 60분
 **발표 언어**: 일본어 (자동 생성 자막 기반 번역)

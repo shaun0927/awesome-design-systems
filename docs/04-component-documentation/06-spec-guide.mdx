@@ -288,6 +288,25 @@ const Alert: React.FC<AlertProps> = ({ closable, onClose, children }) => {
 
 ---
 
+## 참고 자료
+
+- [Figma Dev Mode](https://help.figma.com/hc/en-us/articles/15023124644247-Guide-to-Dev-Mode) — 디자인-개발 핸드오프 공식 가이드
+- [Design Tokens Format Module](https://tr.designtokens.org/format/) — W3C 표준 토큰 포맷
+- [Style Dictionary](https://amzn.github.io/style-dictionary/) — 디자인 토큰을 플랫폼별 코드로 변환
+- [Figma REST API](https://www.figma.com/developers/api) — 컴포넌트 속성 프로그래밍 방식 추출
+- [TypeScript Handbook: Interfaces](https://www.typescriptlang.org/docs/handbook/interfaces.html) — Props 타입 정의 패턴
+
+### 이론적 배경
+- **Single Source of Truth**: 명세서는 디자인-코드 간 계약(Contract)의 역할 (Martin Fowler)
+- **Design System as a Contract**: 명세는 구현 독립적이어야 함 (Nathan Curtis)
+
+### 실제 사례
+- **Shopify Polaris**: Figma 컴포넌트와 React Props가 1:1 매핑되는 네이밍 규칙 운영
+- **Uber Base Design System**: 명세서를 JSON 포맷으로 관리하여 자동 코드 생성
+- **Adobe Spectrum**: 멀티플랫폼(Web/iOS/Android) 명세를 단일 문서로 통합 관리
+
+---
+
 ## Related Articles
 
 import CrossRef from '@site/src/components/CrossRef';

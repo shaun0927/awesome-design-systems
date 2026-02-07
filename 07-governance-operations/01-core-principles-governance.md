@@ -1,128 +1,388 @@
+---
+audience: both
+---
+
 # Core Principles & Governance
 
-> Original issue: shaun0927/stocktitan-crawler#564
+import DevQuickStart from '@site/src/components/DevQuickStart';
 
-# 디자인 시스템 핵심 원칙 & 거버넌스
+<DevQuickStart
+  what="디자인 시스템 거버넌스는 코드 품질, 릴리스, 기여 규칙을 체계화하여 시스템의 지속 가능성을 보장합니다"
+  learn="8가지 핵심 원칙, Tier 아키텍처 설계, 토큰 파이프라인, 모노레포 구조, 시스템 통합 전략"
+  able="디자인 시스템의 거버넌스 모델을 설계하고 Tier별 품질 기준을 코드로 구현할 수 있습니다"
+/>
 
-## 📌 디자인 시스템 8가지 핵심 원칙 (Nathan Curtis, 2017)
+## 8가지 핵심 원칙 (Nathan Curtis, 2017)
 
-### 1. Build Buttons Once, Really Well
-**의미**: 버튼은 모든 곳에서 쓰는 원자적 컴포넌트. 각 팀이 따로 만드는 시대는 끝.
-**Etsy 사례**: 10개 제품에서 버튼 중복 제작 = 6자리 비용 → 한 번 잘 만들어서 모든 팀 비용 절감
+### 1. Systematic: 한 번 만들고, 제대로 만들기
+
+버튼은 모든 곳에서 쓰는 원자적 컴포넌트입니다. 각 팀이 따로 만드는 시대는 끝났습니다.
+
+**Etsy 사례**: 10개 제품에서 버튼 중복 제작 = 6자리 비용. 한 번 잘 만들어서 모든 팀 비용 절감.
+
+토큰 파이프라인으로 "한 번 정의, 모든 곳 적용"을 구현합니다:
+
+```json
+// tokens/colors.json - 단일 소스에서 모든 플랫폼 값 생성
+{
+  "color": {
+    "primary": {
+      "$value": "#6B47DC",
+      "$type": "color",
+      "$description": "Primary brand color"
+    },
+    "primary-hover": {
+      "$value": "#5B37CC",
+      "$type": "color"
+    }
+  }
+}
+```
+
+```javascript
+// style-dictionary.config.js
+module.exports = {
+  source: ['tokens/**/*.json'],
+  platforms: {
+    css: {
+      transformGroup: 'css',
+      buildPath: 'dist/css/',
+      files: [{
+        destination: 'variables.css',
+        format: 'css/variables',
+      }],
+    },
+    js: {
+      transformGroup: 'js',
+      buildPath: 'dist/js/',
+      files: [{
+        destination: 'tokens.js',
+        format: 'javascript/es6',
+      }],
+    },
+  },
+};
+```
+
+```css
+/* dist/css/variables.css - 자동 생성 */
+:root {
+  --color-primary: #6B47DC;
+  --color-primary-hover: #5B37CC;
+}
+```
 
 ### 2. Favor Shared Needs Over Personal Preferences
-**의미**: 잘 만든 것 ≠ 시스템에 포함되어야 하는 것
-**기준**: 통합/정규화/유지보수 비용 vs 재사용 가치 → 혼자만 쓰면 시스템에 안 넣기
+
+잘 만든 것이 시스템에 포함되어야 하는 것은 아닙니다. 통합/정규화/유지보수 비용 vs 재사용 가치를 비교하여 결정합니다.
 
 ### 3. Systems Serve Products, Not Vice Versa
-**의미**: 시스템은 제품을 대신 만들거나 명령할 권한 없음
-**원칙**: 제품이 선택권 가짐 (채택 여부, 사용 범위, 속도). 강제보다 **선택의 가치 증명**.
+
+시스템은 제품을 대신 만들거나 명령할 권한이 없습니다. 제품이 채택 여부, 사용 범위, 속도를 선택합니다. 강제보다 **선택의 가치를 증명**해야 합니다.
+
+```tsx
+// 좋은 예: 유연한 API - 제품 팀이 필요에 맞게 사용
+import { Button } from '@company/core-ui';
+
+// 시스템 컴포넌트 그대로 사용
+<Button variant="primary">Submit</Button>
+
+// 시스템 토큰만 사용하고 커스텀 컴포넌트 제작
+import { tokens } from '@company/tokens';
+<button style={{ backgroundColor: tokens.color.primary }}>
+  Custom Button
+</button>
+```
 
 ### 4. Build Community, Not Governance
-**의미**: "Big G" 거버넌스보다 "커뮤니티" 우선
-**실무**: Cross-product critique 문화, 세그먼트 가이드(접근성, 모션) → 당근 먼저, 채찍 나중
+
+"Big G" 거버넌스보다 커뮤니티를 우선합니다. Cross-product critique 문화와 세그먼트 가이드(접근성, 모션)를 통해 당근 먼저, 채찍은 나중에.
 
 ### 5. Keep the Simple Simple
-**의미**: 복잡한 문제를 해결하되, 인터페이스는 단순하게
-**레이어드 아키텍처**: 기본은 쉽게, 고급은 가능하게 → 사용자에게 복잡도 전가 최소화
+
+복잡한 문제를 해결하되, 인터페이스는 단순하게 유지합니다. 기본은 쉽게, 고급은 가능하게.
+
+```tsx
+// 단순한 사용 (대부분의 경우)
+<Button>Click me</Button>
+
+// 고급 사용 (필요한 경우만)
+<Button
+  variant="primary"
+  size="lg"
+  leftIcon={<IconSave />}
+  loading={isSubmitting}
+  loadingText="Saving..."
+  as="a"
+  href="/dashboard"
+>
+  Save Changes
+</Button>
+```
 
 ### 6. Show, Don't Tell
-**의미**: 문서화는 시각화와 도구로
-**좋은 예**: 렌더링된 variations, 복사 가능한 코드, Component explorers, Do & Don't 대비 이미지
+
+문서화는 시각화와 도구로 합니다. 렌더링된 variations, 복사 가능한 코드, Component explorers, Do & Don't 대비 이미지를 제공합니다.
 
 ### 7. Value Is Realized When Products Ship
-**의미**: 시스템 가치는 제품이 시스템 부품으로 기능을 출시할 때 실현됨
-**성공 지표**: NPM dependency 추가, adoption 측정/모니터링/리포팅
+
+시스템 가치는 제품이 시스템 부품으로 기능을 출시할 때 실현됩니다.
+
+```bash
+# 채택률 측정: 제품별 디자인 시스템 의존성 확인
+npm ls @company/core-ui --all 2>/dev/null | head -5
+
+# 버전 분포 확인
+for pkg in $(find node_modules -name 'package.json' -path '*/@company/*'); do
+  echo "$(jq -r '.name' $pkg): $(jq -r '.version' $pkg)"
+done
+```
 
 ### 8. Never Compromise Quality
-**의미**: 시스템 품질은 항상 제품 팀 기준 이상
-**원칙**: 느려도 프로세스 신뢰하고 높은 품질 달성 → 스테이크홀더가 "빨리 더 많이" 원해도 타협 금지
 
-## 🎯 디자인 시스템 Tiers (Nathan Curtis, 2019)
+시스템 품질은 항상 제품 팀 기준 이상이어야 합니다. 느려도 프로세스를 신뢰하고 높은 품질을 달성합니다.
 
-### Tier 구조
+## 디자인 시스템 Tier 아키텍처
+
+```mermaid
+graph TD
+    B["Brand Identity\n색상, 타이포, 일러스트"]
+    B --> T0["Tier 0: Brand Tokens\n(모든 시스템의 기반)"]
+    T0 --> T1["Tier 1: Core\nButton, Input, Card, Modal\n최고 품질 필수"]
+    T1 --> T2A["Tier 2: Editor Kit\nRich Text, Toolbar"]
+    T1 --> T2B["Tier 2: Navigation Kit\nTop Nav, Footer"]
+    T1 --> T2C["Tier 2: Sales UI\n영업팀 전용"]
+    T2A --> P1["Product A"]
+    T2B --> P1
+    T2B --> P2["Product B"]
+    T2C --> P3["Product C"]
+
+    style T1 fill:#51cf66,color:#fff
+    style T2A fill:#339af0,color:#fff
+    style T2B fill:#339af0,color:#fff
+    style T2C fill:#339af0,color:#fff
+```
+
+### Tier별 품질 기준을 코드로 구현
+
+```json
+// packages/core-ui/package.json (Tier 1 - Core)
+{
+  "name": "@company/core-ui",
+  "scripts": {
+    "lint": "eslint src --ext .ts,.tsx",
+    "test": "vitest run --coverage",
+    "test:a11y": "jest-axe && pa11y-ci",
+    "test:visual": "chromatic --project-token=$TOKEN",
+    "typecheck": "tsc --noEmit",
+    "build": "tsup src/index.ts --format cjs,esm --dts"
+  },
+  "quality": {
+    "tier": 1,
+    "requirements": [
+      "unit-tests",
+      "visual-regression",
+      "accessibility-audit",
+      "responsive",
+      "theming",
+      "i18n-rtl",
+      "semantic-versioning",
+      "changelog"
+    ]
+  }
+}
+```
+
+```json
+// packages/sales-ui/package.json (Tier 3 - Within Group)
+{
+  "name": "@company/sales-ui",
+  "scripts": {
+    "lint": "eslint src --ext .ts,.tsx",
+    "test": "vitest run",
+    "build": "tsup src/index.ts --format esm"
+  },
+  "quality": {
+    "tier": 3,
+    "requirements": [
+      "code-linting",
+      "browser-testing",
+      "core-accessibility",
+      "consistent-styling"
+    ]
+  }
+}
+```
+
+### Tier별 품질 기준 비교
+
+| 기준 | Tier 3 (Within) | Tier 2 (Across) | Tier 1 (Core) |
+|------|-----------------|-----------------|---------------|
+| Code Linting | 필수 | 필수 | 필수 |
+| Browser Testing | 필수 | 필수 | 필수 |
+| Core 접근성 | 필수 | 필수 | 필수 |
+| 일관된 스타일 | 필수 | 필수 | 필수 |
+| Responsive | - | 필수 | 필수 |
+| Semantic Versioning | - | 필수 | 필수 |
+| Changelog | - | 필수 | 필수 |
+| Unit/Visual Tests | - | 필수 | 필수 |
+| 커뮤니티 승인 | - | 필수 | 필수 |
+| Sizing (S/M/L) | - | - | 필수 |
+| Theming | - | - | 필수 |
+| Analytics | - | - | 필수 |
+| i18n (RTL) | - | - | 필수 |
+| Light/Dark 모드 | - | - | 필수 |
+| 종합 접근성 리뷰 | - | - | 필수 |
+
+### Scalable: 모노레포 구조 예시
 
 ```
-Tier 0 (Brand) ────────────────────┐
-Tier 1 (Core) ─────────────────┐   │ 모두에게 관련
-  └─ Button, Input, Checkbox   │   │ 최고 품질
-Tier 2 (Cross-Group Sets) ─┐   │   │
-  └─ Editor, Navigation     │   │   │ 그룹간 공유
-Tier 3 (Within-Group Sets) │   │   │ 중간 품질
-  └─ Sales-UI, Product Kit  │   │   │
-Products ───────────────────┘   └───┘ 조직 내 공유
-                                      기본 품질
+design-system/
+  packages/
+    tokens/              # @company/tokens (Tier 0)
+      src/
+        colors.json
+        typography.json
+      style-dictionary.config.js
+      package.json
+
+    core-ui/             # @company/core-ui (Tier 1)
+      src/
+        Button/
+        Card/
+        Input/
+        Modal/
+      package.json
+
+    editor-kit/          # @company/editor-kit (Tier 2)
+      src/
+        RichTextInput/
+        EditorToolbar/
+      package.json       # peerDep: @company/core-ui
+
+    navigation-kit/      # @company/nav-kit (Tier 2)
+      src/
+        TopNav/
+        Footer/
+      package.json
+
+    sales-ui/            # @company/sales-ui (Tier 3)
+      src/
+      package.json
+
+  apps/
+    docs/                # 문서 사이트
+    playground/          # 데모 환경
+
+  turbo.json
+  package.json
 ```
 
-### Tier별 기준
+## 시스템 통합 전략
 
-**Tier 1 (Core)**:
-- 모든 adopter에게 관련
-- Core 팀 중앙 관리
-- 최고 품질 필수 (접근성, 성능, 테마, i18n, RTL 등)
+여러 디자인 시스템이 조직 내에 공존할 때, 통합 방법을 선택해야 합니다.
 
-**Tier 2 (Cross-Group)**:
-- 조직 경계 넘어 공유
-- 시스템 팀이 matchmaker 역할
-- 여러 팀 공동 투자
+### 4가지 통합 옵션
 
-**Tier 3 (Within-Group)**:
-- 조직/사업부 내부 공유
-- 느슨한 통제, 빠른 납기
-- 품질은 낮지만 일관성 유지
-
-### 품질 계층화
-
-**Within Group Tier**: Linting, Browser testing, Core 접근성, 일관된 스타일링
-**Across Groups Tier (↑ 추가)**: Responsive, Semantic versioning, Changelog, Unit/Visual regression tests, 커뮤니티 승인
-**Top Core Tier (↑ 추가)**: 포괄적 접근성 리뷰, Sizing(S/M/L), Light/Dark mode, Theming, Analytics, i18n(RTL)
-
-## 🔧 통합 전략 (Nathan Curtis, 2018)
-
-### 여러 시스템 통합 4가지 옵션
-
-**Option 1: 아무것도 안 함** - 통합 의지 없거나 변화 저항 큼
-**Option 2: 양쪽 유지 + 하위 시스템 공유** - 실제론 거의 성공 못함 (장기 커밋 어려움)
-**Option 3: 양쪽 폐기 + 새로 시작** - 가장 비용 높고 시간 오래 걸림
-**Option 4: 하나 유지 + 다른 것 흡수 (권장)** - 강한 시스템 선택, 약한 시스템 기능 이관
+| 옵션 | 설명 | 비용 | 성공률 |
+|------|------|------|--------|
+| **1. 유지** | 각 시스템 독립 운영 | 낮음 | - |
+| **2. 하위 공유** | 토큰/기반만 공유 | 중간 | 낮음 |
+| **3. 새로 시작** | 모두 폐기, 처음부터 | 매우 높음 | 중간 |
+| **4. 흡수 (권장)** | 하나 유지, 나머지 기능 이관 | 높음 | 높음 |
 
 ### 통합 전 필수 단계
 
-1. **생태계 매핑**: 모든 시스템과 제품 관계 시각화
-2. **비교 & 합리화**: Visual Style, UI Components, 코드 출력물, 문서화 강점/약점 비교
-3. **통합 경로 선택**: Option 4 권장
+```mermaid
+flowchart LR
+    A["생태계 매핑\n모든 시스템/제품 관계"] --> B["비교 & 합리화\nVisual, Components, Code"]
+    B --> C["통합 경로 선택\n(Option 4 권장)"]
+    C --> D["비용 분담 합의\n팀 간 협의"]
+    D --> E["실행\n마이그레이션 codemod"]
 
-## ⚠️ 디자인 시스템 통념(Myths) 경계 (Nathan Curtis, 2024)
+    style C fill:#51cf66,color:#fff
+```
 
-1. **"100% 채택률 = 성공"** → 부분 채택도 가치 있음
-2. **"완전 연합 또는 완전 중앙집중"** → 하이브리드 모델이 현실
-3. **"여러 시스템 = 실패"** → 조직 규모와 맥락에 따라 필요할 수 있음
-4. **"기여가 확장의 지름길"** → 빠른 확장은 코어 팀의 실행력에서 나옴
-5. **"자동화가 최우선"** → 기초를 먼저 다져야 함
+```bash
+# 시스템 간 컴포넌트 비교 자동화
+npx diff-package @system-a/core @system-b/core --exports
 
-## ✅ 실무 적용 체크리스트
+# codemod로 마이그레이션 자동화
+npx jscodeshift -t transforms/system-a-to-b.ts src/**/*.tsx
+```
+
+## 통념(Myths) 바로잡기
+
+디자인 시스템에 대한 흔한 오해를 코드와 데이터로 반박합니다.
+
+### Myth 1: "디자인 시스템은 창의성을 죽인다"
+
+시스템은 기본을 자동화하여 진짜 창의적 문제에 집중하게 합니다.
+
+```tsx
+// 시스템 컴포넌트로 기본 UI를 빠르게 구축하고...
+<Card>
+  <CardHeader title="Dashboard" />
+  <CardBody>
+    {/* ...창의적인 데이터 시각화에 시간을 투자 */}
+    <CustomVisualization data={chartData} />
+  </CardBody>
+</Card>
+```
+
+### Myth 2: "한 번 만들면 끝"
+
+시스템은 지속적 진화가 필요한 살아있는 제품입니다.
+
+```bash
+# 실제 디자인 시스템의 릴리스 빈도 (예시)
+git log --oneline --since="2025-01-01" | wc -l
+# → 247 commits in 12 months
+
+npm view @company/core-ui versions --json | jq length
+# → 42 versions released
+```
+
+### Myth 3: "모든 것을 표준화해야 한다"
+
+80/20 규칙: 핵심만 표준화하고, 나머지는 유연성을 허용합니다.
+
+### Myth 4: "작은 팀에는 필요 없다"
+
+2명 이상이면 일관성 문제가 발생합니다. 규모와 관계없이 가치가 있습니다.
+
+### Myth 5: "Federated 모델이 최고"
+
+중앙 팀 없는 연합 모델은 실패하기 쉽습니다. 80개 이상 조직 컨설팅에서 중앙 전담 인력 없이 성공한 사례는 **0건**입니다.
+
+## 실무 체크리스트
 
 ### 원칙 적용
-- [ ] "Simple simple" 유지 체크
-- [ ] 문서를 시각화/도구로 전환
+- [ ] 토큰 파이프라인 구축 (JSON → Style Dictionary → CSS/JS)
+- [ ] 컴포넌트 API를 단순하게 유지 (기본 사용 vs 고급 사용 분리)
+- [ ] 채택률 측정 자동화 (npm ls, 버전 분포)
 - [ ] 거버넌스보다 커뮤니티 우선
-- [ ] 품질 타협 금지
-- [ ] 제품 출시로 가치 측정
 
 ### Tier 설계
-- [ ] Core 범위 명확히
-- [ ] Tier 2/3 기준 정의
-- [ ] 품질 criteria 계층화
-- [ ] 권한 모델 설계 (가시성 최대화, 위험 최소화)
-- [ ] 네이밍 큐레이션 프로세스
-- [ ] Tier 승격 경로 문서화
+- [ ] Core 범위 명확히 정의
+- [ ] Tier별 품질 기준 코드로 구현 (package.json scripts)
+- [ ] 승격 경로 문서화 (Tier 3 → 2 → 1)
+- [ ] 네이밍 큐레이션 프로세스 수립
 
 ### 통합 고려
 - [ ] 생태계 시각화 완료
 - [ ] 각 시스템 강점/약점 비교
 - [ ] Option 4 (Keep One) 우선 검토
-- [ ] 피인수 팀 감정 고려
-- [ ] 비용 분담 모델 합의
+- [ ] 마이그레이션 codemod 준비
 
 ---
+
+import CrossRef from '@site/src/components/CrossRef';
+
+<CrossRef related={[
+  { path: "/07-governance-operations/02-the-fallacy-of-federated-model", label: "07-02. 연합형 디자인 시스템의 오류" },
+  { path: "/08-scaling-architecture/01-design-system-tiers---maturity-levels-for-scalable-systems", label: "08-01. 디자인 시스템 Tier 상세" },
+  { path: "/09-versioning-releases/01-versioning-design-systems---communicating-change", label: "09-01. 버전 관리 전략" },
+]} />
+
 *출처: Nathan Curtis (EightShapes) - Principles of Designing Systems, Design System Tiers, Consolidating Design Systems, Design System Myths*

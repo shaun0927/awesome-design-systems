@@ -217,6 +217,19 @@ const tokens = {
 - [ ] 현재 프로젝트 토큰 개수 감사 (100개? 5000개?)
 - [ ] 멀티브랜드 여부 확인 후 ROI 계산
 
+## 참고 자료
+
+- [W3C Design Tokens Format Spec](https://tr.designtokens.org/format/) — DTCG 공식 표준 문서
+- [Tokens Studio Graph Engine](https://graph.tokens.studio/) — 노드 기반 토큰 생성 도구 (무료)
+- [Style Dictionary](https://amzn.github.io/style-dictionary/) — DTCG 호환 토큰 변환 파이프라인
+- Danny Banks, "The Future of Design Tokens" (Config, 2023)
+- [Figma Variables vs DTCG](https://www.figma.com/community/file/1253443272392087928) — 두 시스템 비교 리소스
+- Louis Chenais, "Algorithmic Token Generation" (Tokens Studio, 2024)
+
+> **실제 사례**: Tokens Studio는 Graph Engine으로 입력값 20개(브랜드 색상, 폰트, roundness 등)로 화이트라벨 디자인 시스템의 토큰 1,200개를 자동 생성합니다. 새 브랜드 추가 시 설정 파일 교체 후 빌드 한 번으로 완전히 새로운 테마가 생성됩니다.
+
+> **심화 이론**: Graph Engine의 노드 기반 아키텍처는 함수형 프로그래밍의 **Pure Functions** 개념을 시각적으로 구현한 것입니다. 각 노드는 입력 → 출력 변환만 수행하며, 부작용(side-effect)이 없어 토큰 생성 로직이 예측 가능하고 테스트 가능합니다.
+
 ---
 
 ## 📎 Related Articles

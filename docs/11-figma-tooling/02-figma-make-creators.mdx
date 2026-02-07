@@ -277,6 +277,7 @@ const progressiveStrategy = {
 ```typescript
 // scripts/glb-hosting-setup.ts
 // GitHub Pages를 통한 GLB 파일 호스팅 설정
+// npm install three @types/three
 
 interface AssetConfig {
   name: string;
@@ -450,8 +451,10 @@ function FileImporter() {
 ```typescript
 // scripts/r2-upload.ts
 // Cloudflare R2 bucket setup for production assets
+// npm install @aws-sdk/client-s3
 
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import { readFile } from 'fs/promises';
 
 const r2Client = new S3Client({
   region: 'auto',
@@ -463,7 +466,7 @@ const r2Client = new S3Client({
 });
 
 async function uploadToR2(filePath: string, key: string): Promise<string> {
-  const fileBuffer = await fs.readFile(filePath);
+  const fileBuffer = await readFile(filePath);
 
   await r2Client.send(
     new PutObjectCommand({
@@ -496,6 +499,9 @@ for (const model of models) {
 
 ```typescript
 // scripts/validate-assets.ts
+// npm install three @types/three
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+
 interface AssetValidation {
   url: string;
   corsEnabled: boolean;
@@ -525,6 +531,7 @@ async function validateAsset(url: string): Promise<AssetValidation> {
   const gltf = await loader.loadAsync(url);
   const loadTime = Date.now() - startTime;
 
+  // 유틸리티 함수 — 프로젝트에 맞게 구현 필요
   const triangleCount = countTriangles(gltf.scene);
   if (triangleCount > 100_000) issues.push('Triangle count > 100k (performance hit)');
 

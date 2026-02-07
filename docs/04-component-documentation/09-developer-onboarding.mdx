@@ -243,7 +243,7 @@ export const brandTokens = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ko">
-      <body style={brandTokens}>
+      <body style={brandTokens as React.CSSProperties}>
         {children}
       </body>
     </html>

@@ -153,6 +153,12 @@ interface TokenConflict {
   priority: 'blocking' | 'high' | 'medium' | 'low';
 }
 
+// 유틸리티 함수 — 프로젝트에 맞게 구현 필요
+function analyzeComponent(componentName: string): ComponentTokenUsage {
+  // Implementation: scan component file for token usage
+  throw new Error('Not implemented');
+}
+
 // Example analysis
 const buttonAnalysis: ComponentTokenUsage = {
   component: 'Button',
@@ -524,6 +530,30 @@ interface Change {
   before: any;
   after: any;
   impact: 'breaking' | 'major' | 'minor' | 'patch';
+}
+
+// 유틸리티 함수 — 프로젝트에 맞게 구현 필요
+async function fetchFileAtVersion(fileKey: string, versionId: string): Promise<any> {
+  // Implementation: fetch Figma file at specific version using Figma API
+  const response = await fetch(
+    `https://api.figma.com/v1/files/${fileKey}?version=${versionId}`,
+    { headers: { 'X-Figma-Token': process.env.FIGMA_TOKEN! } }
+  );
+  return response.json();
+}
+
+function calculateColorDiff(colorA: any, colorB: any): number {
+  // Implementation: calculate perceptual color difference (Delta E)
+  return Math.abs(colorA.r - colorB.r) + Math.abs(colorA.g - colorB.g) + Math.abs(colorA.b - colorB.b);
+}
+
+function countTriangles(scene: any): number {
+  // Implementation: traverse Three.js scene and count triangles
+  let count = 0;
+  scene.traverse((obj: any) => {
+    if (obj.geometry) count += obj.geometry.attributes.position.count / 3;
+  });
+  return count;
 }
 
 interface FigmaVersion {
@@ -1043,6 +1073,25 @@ function assignResponsibility(card: WCAGCard): string[] {
   }
 
   return assignments;
+}
+
+// 유틸리티 함수 — 프로젝트에 맞게 구현 필요
+function loadAllWCAGCards(): WCAGCard[] {
+  // Implementation: load all 86 WCAG 2.2 criteria as card objects
+  // Could be from JSON file, database, or hardcoded
+  return [];
+}
+
+async function runAxeCore(url: string, tags?: string[]): Promise<any[]> {
+  // Implementation: run axe-core accessibility tests
+  // npm install axe-core puppeteer
+  return [];
+}
+
+async function runLighthouse(url: string): Promise<any> {
+  // Implementation: run Lighthouse accessibility audit
+  // npm install lighthouse
+  return { audits: [] };
 }
 
 // Full workflow example

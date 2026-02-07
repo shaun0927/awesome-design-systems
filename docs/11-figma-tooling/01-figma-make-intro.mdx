@@ -259,6 +259,7 @@ interface ExtractedColor {
   usage: string;
 }
 
+// 개념 설명용 의사 코드 (실제 실행 시 라이브러리 사용 권장)
 // Color manipulation utilities (OKLCH-based for perceptual uniformity)
 function hexToOKLCH(hex: string): { l: number; c: number; h: number } {
   // Convert hex to RGB
@@ -308,24 +309,12 @@ function oklchToHex(l: number, c: number, h: number): string {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
+// 권장: CSS color-mix() 사용 (브라우저 네이티브, 계산 불필요)
 function lighten(hex: string, amount: number): string {
-  const oklch = hexToOKLCH(hex);
-  const newL = Math.min(100, oklch.l + amount * 100);
-  return oklchToHex(newL, oklch.c, oklch.h);
-}
-
-function darken(hex: string, amount: number): string {
-  const oklch = hexToOKLCH(hex);
-  const newL = Math.max(0, oklch.l - amount * 100);
-  return oklchToHex(newL, oklch.c, oklch.h);
-}
-
-// Alternative: CSS color-mix() (modern browsers)
-function lightenCSS(hex: string, amount: number): string {
   return `color-mix(in oklch, ${hex} ${(1 - amount) * 100}%, white)`;
 }
 
-function darkenCSS(hex: string, amount: number): string {
+function darken(hex: string, amount: number): string {
   return `color-mix(in oklch, ${hex} ${(1 - amount) * 100}%, black)`;
 }
 
@@ -337,7 +326,7 @@ function generateCSSVariables(colors: ExtractedColor[]): string {
 }
 
 function generateTailwindScale(baseHex: string, name: string): Record<string, string> {
-  // Generate 100-1000 scale from a base color (perceptually uniform)
+  // Generate 100-1000 scale from a base color using CSS color-mix
   return {
     [`${name}-50`]: lighten(baseHex, 0.9),
     [`${name}-100`]: lighten(baseHex, 0.8),
@@ -353,21 +342,21 @@ function generateTailwindScale(baseHex: string, name: string): Record<string, st
   };
 }
 
-// Modern CSS approach (no JS needed)
+// CSS variable output (no preprocessor needed)
 function generateCSSScaleWithColorMix(baseHex: string, name: string): string {
   return `
-/* ${name} scale using color-mix (no preprocessor needed) */
---color-${name}-50: ${lightenCSS(baseHex, 0.9)};
---color-${name}-100: ${lightenCSS(baseHex, 0.8)};
---color-${name}-200: ${lightenCSS(baseHex, 0.6)};
---color-${name}-300: ${lightenCSS(baseHex, 0.4)};
---color-${name}-400: ${lightenCSS(baseHex, 0.2)};
+/* ${name} scale using color-mix (browser-native) */
+--color-${name}-50: ${lighten(baseHex, 0.9)};
+--color-${name}-100: ${lighten(baseHex, 0.8)};
+--color-${name}-200: ${lighten(baseHex, 0.6)};
+--color-${name}-300: ${lighten(baseHex, 0.4)};
+--color-${name}-400: ${lighten(baseHex, 0.2)};
 --color-${name}-500: ${baseHex};
---color-${name}-600: ${darkenCSS(baseHex, 0.15)};
---color-${name}-700: ${darkenCSS(baseHex, 0.3)};
---color-${name}-800: ${darkenCSS(baseHex, 0.45)};
---color-${name}-900: ${darkenCSS(baseHex, 0.6)};
---color-${name}-950: ${darkenCSS(baseHex, 0.75)};
+--color-${name}-600: ${darken(baseHex, 0.15)};
+--color-${name}-700: ${darken(baseHex, 0.3)};
+--color-${name}-800: ${darken(baseHex, 0.45)};
+--color-${name}-900: ${darken(baseHex, 0.6)};
+--color-${name}-950: ${darken(baseHex, 0.75)};
   `.trim();
 }
 ```
